@@ -1,0 +1,26 @@
+name: BushelCloud
+settings:
+  LINT_MODE: ${LINT_MODE}
+packages:
+  BushelCloud:
+    path: .
+aggregateTargets:
+  Lint:
+    buildScripts:
+      - path: Scripts/lint.sh
+        name: Lint
+        basedOnDependencyAnalysis: false
+    schemes: {}
+schemes:
+  BushelCloud-Package:
+    build:
+      targets:
+        BushelCloud-Package: all
+    test:
+      gatherCoverageData: true
+      coverageTargets:
+        - BushelCloudKit
+      targets:
+        - name: BushelCloudTests
+          parallelizable: true
+          randomExecutionOrder: true

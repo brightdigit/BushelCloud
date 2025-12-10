@@ -1,6 +1,33 @@
 {
-  "originHash" : "49101adc127b15b12356a82f5e23d4330446434fff2c05a660d994bbea54b871",
+  "originHash" : "927a9fd2ebe3c6b3e0547641c1da5ec07eb19c44018ba0608501a3ca80944dcb",
   "pins" : [
+    {
+      "identity" : "bushelkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/BushelKit.git",
+      "state" : {
+        "revision" : "f811a2838e881286e45e49fdb4235716b14964aa",
+        "version" : "3.0.0-alpha.1"
+      }
+    },
+    {
+      "identity" : "felinepine",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/FelinePine.git",
+      "state" : {
+        "revision" : "7abf84e0cded44bc99fae106030e8e25e270dae0",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "felinepineswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/FelinePineSwift.git",
+      "state" : {
+        "revision" : "e0a414b8ee7ba1290e9d3b32f4c6cceff95af508",
+        "version" : "1.0.0"
+      }
+    },
     {
       "identity" : "ipswdownloads",
       "kind" : "remoteSourceControl",
@@ -20,12 +47,30 @@
       }
     },
     {
+      "identity" : "mistkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/MistKit.git",
+      "state" : {
+        "revision" : "cb27cef097314c78cf4e126aebb0efb8def56537",
+        "version" : "1.0.0-alpha.3"
+      }
+    },
+    {
       "identity" : "osver",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/brightdigit/OSVer",
       "state" : {
         "revision" : "448f170babc2f6c9897194a4b42719994639325d",
         "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "radiantkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/RadiantKit.git",
+      "state" : {
+        "revision" : "c18df553d5eec6230fc8bf91b260a0a30dca5f79",
+        "version" : "1.0.0-beta.4"
       }
     },
     {
@@ -42,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-asn1.git",
       "state" : {
-        "revision" : "40d25bbb2fc5b557a9aa8512210bded327c0f60d",
-        "version" : "1.5.0"
+        "revision" : "810496cf121e525d660cd0ea89a758740476b85f",
+        "version" : "1.5.1"
       }
     },
     {
