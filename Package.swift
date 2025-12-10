@@ -78,29 +78,48 @@ let swiftSettings: [SwiftSetting] = [
 ]
 
 let package = Package(
-    name: "Bushel",
+    name: "BushelCloud",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v14),
+        .iOS(.v17),
+        .watchOS(.v10),
+        .tvOS(.v17),
+        .visionOS(.v1)
     ],
     products: [
-        .executable(name: "bushel-images", targets: ["BushelImages"])
+        .library(name: "BushelCloudKit", targets: ["BushelCloudKit"]),
+        .executable(name: "bushel-cloud", targets: ["BushelCloudCLI"])
     ],
     dependencies: [
-        .package(name: "MistKit", path: "../.."),
+        .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.3"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
+        .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0-alpha.1"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0"),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0")
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0")
     ],
     targets: [
-        .executableTarget(
-            name: "BushelImages",
+        .target(
+            name: "BushelCloudKit",
             dependencies: [
                 .product(name: "MistKit", package: "MistKit"),
                 .product(name: "IPSWDownloads", package: "IPSWDownloads"),
                 .product(name: "SwiftSoup", package: "SwiftSoup"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "Logging", package: "swift-log")
+                .product(name: "BushelLogging", package: "BushelKit")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .executableTarget(
+            name: "BushelCloudCLI",
+            dependencies: [
+                .target(name: "BushelCloudKit"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "BushelCloudTests",
+            dependencies: [
+                .target(name: "BushelCloudKit")
             ],
             swiftSettings: swiftSettings
         )
