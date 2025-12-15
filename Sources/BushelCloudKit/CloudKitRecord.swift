@@ -1,5 +1,5 @@
 //
-//  RecordManaging+Query.swift
+//  CloudKitRecord.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -27,24 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import BushelCloudData
 public import Foundation
 public import MistKit
 
-extension RecordManaging {
-  // MARK: - Query Operations
+/// Protocol for types that can be synced to/from CloudKit
+///
+/// This protocol defines the interface for converting domain models to CloudKit records
+/// and vice versa. It provides methods for serialization, deserialization, and display
+/// formatting.
+public protocol CloudKitRecord {
+  /// The CloudKit record type name
+  static var cloudKitRecordType: String { get }
 
-  /// Query a specific DataSourceMetadata record
-  ///
-  /// **MistKit Pattern**: Query all metadata records and filter by record name
-  /// Record name format: "metadata-{sourceName}-{recordType}"
-  func queryDataSourceMetadata(source: String, recordType: String) async throws
-    -> DataSourceMetadata?
-  {
-    let targetRecordName = "metadata-\(source)-\(recordType)"
-    let results = try await query(DataSourceMetadata.self) { record in
-      record.recordName == targetRecordName
-    }
-    return results.first
-  }
+  /// Convert the model to CloudKit field values
+  func toCloudKitFields() -> [String: FieldValue]
+
+  /// Create a model instance from CloudKit record info
+  static func from(recordInfo: RecordInfo) -> Self?
+
+  /// Format a CloudKit record for display/logging
+  static func formatForDisplay(_ recordInfo: RecordInfo) -> String
 }

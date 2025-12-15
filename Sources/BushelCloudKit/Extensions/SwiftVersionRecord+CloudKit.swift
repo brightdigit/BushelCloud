@@ -1,5 +1,5 @@
 //
-//  SwiftVersionRecord.swift
+//  SwiftVersionRecord+CloudKit.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -27,45 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import BushelCloudData
 public import Foundation
 public import MistKit
-
-/// Represents a Swift compiler release bundled with Xcode
-public struct SwiftVersionRecord: Codable, Sendable {
-  /// Swift version (e.g., "5.9", "5.10", "6.0")
-  public var version: String
-
-  /// Release date
-  public var releaseDate: Date
-
-  /// Optional swift.org toolchain download
-  public var downloadURL: String?
-
-  /// Beta/snapshot indicator
-  public var isPrerelease: Bool
-
-  /// Release notes
-  public var notes: String?
-
-  public init(
-    version: String,
-    releaseDate: Date,
-    downloadURL: String? = nil,
-    isPrerelease: Bool,
-    notes: String? = nil
-  ) {
-    self.version = version
-    self.releaseDate = releaseDate
-    self.downloadURL = downloadURL
-    self.isPrerelease = isPrerelease
-    self.notes = notes
-  }
-
-  /// CloudKit record name based on version (e.g., "SwiftVersion-5.9.2")
-  public var recordName: String {
-    "SwiftVersion-\(version)"
-  }
-}
 
 // MARK: - CloudKitRecord Conformance
 

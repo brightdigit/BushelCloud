@@ -102,6 +102,14 @@ let package = Package(
             name: "BushelCloudKit",
             dependencies: [
                 .product(name: "MistKit", package: "MistKit"),
+                .product(name: "BushelLogging", package: "BushelKit"),
+                .target(name: "BushelCloudData")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .target(
+            name: "BushelCloudData",
+            dependencies: [
                 .product(name: "IPSWDownloads", package: "IPSWDownloads"),
                 .product(name: "SwiftSoup", package: "SwiftSoup"),
                 .product(name: "BushelLogging", package: "BushelKit")
@@ -112,6 +120,7 @@ let package = Package(
             name: "BushelCloudCLI",
             dependencies: [
                 .target(name: "BushelCloudKit"),
+                .target(name: "BushelCloudData"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],
             swiftSettings: swiftSettings

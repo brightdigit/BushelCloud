@@ -28,8 +28,8 @@
 //
 
 public import Foundation
-public import MistKit
 
+@available(*, deprecated, message: "This type will move to BushelKit in a future release")
 /// Metadata about when a data source was last fetched and updated
 public struct DataSourceMetadata: Codable, Sendable {
   // MARK: Lifecycle
@@ -78,64 +78,5 @@ public struct DataSourceMetadata: Codable, Sendable {
   /// CloudKit record name for this metadata entry
   public var recordName: String {
     "metadata-\(sourceName)-\(recordTypeName)"
-  }
-}
-
-// MARK: - CloudKitRecord Conformance
-
-extension DataSourceMetadata: CloudKitRecord {
-  public static var cloudKitRecordType: String { "DataSourceMetadata" }
-
-  public func toCloudKitFields() -> [String: FieldValue] {
-    var fields: [String: FieldValue] = [
-      "sourceName": .string(sourceName),
-      "recordTypeName": .string(recordTypeName),
-      "lastFetchedAt": .date(lastFetchedAt),
-      "recordCount": .int64(recordCount),
-      "fetchDurationSeconds": .double(fetchDurationSeconds),
-    ]
-
-    // Optional fields
-    if let sourceUpdatedAt {
-      fields["sourceUpdatedAt"] = .date(sourceUpdatedAt)
-    }
-
-    if let lastError {
-      fields["lastError"] = .string(lastError)
-    }
-
-    return fields
-  }
-
-  public static func from(recordInfo: RecordInfo) -> Self? {
-    guard let sourceName = recordInfo.fields["sourceName"]?.stringValue,
-      let recordTypeName = recordInfo.fields["recordTypeName"]?.stringValue,
-      let lastFetchedAt = recordInfo.fields["lastFetchedAt"]?.dateValue
-    else {
-      return nil
-    }
-
-    return DataSourceMetadata(
-      sourceName: sourceName,
-      recordTypeName: recordTypeName,
-      lastFetchedAt: lastFetchedAt,
-      sourceUpdatedAt: recordInfo.fields["sourceUpdatedAt"]?.dateValue,
-      recordCount: recordInfo.fields["recordCount"]?.intValue ?? 0,
-      fetchDurationSeconds: recordInfo.fields["fetchDurationSeconds"]?.doubleValue ?? 0,
-      lastError: recordInfo.fields["lastError"]?.stringValue
-    )
-  }
-
-  public static func formatForDisplay(_ recordInfo: RecordInfo) -> String {
-    let sourceName = recordInfo.fields["sourceName"]?.stringValue ?? "Unknown"
-    let recordTypeName = recordInfo.fields["recordTypeName"]?.stringValue ?? "Unknown"
-    let lastFetchedAt = recordInfo.fields["lastFetchedAt"]?.dateValue
-    let recordCount = recordInfo.fields["recordCount"]?.intValue ?? 0
-
-    let dateStr = lastFetchedAt.map { FormattingHelpers.formatDateTime($0) } ?? "Unknown"
-
-    var output = "\n  \(sourceName) → \(recordTypeName)\n"
-    output += "    Last fetched: \(dateStr) | Records: \(recordCount)"
-    return output
   }
 }

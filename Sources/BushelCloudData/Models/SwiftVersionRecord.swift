@@ -1,5 +1,5 @@
 //
-//  RecordManaging+Query.swift
+//  SwiftVersionRecord.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -27,24 +27,42 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import BushelCloudData
 public import Foundation
-public import MistKit
 
-extension RecordManaging {
-  // MARK: - Query Operations
+@available(*, deprecated, message: "This type will move to BushelKit in a future release")
+/// Represents a Swift compiler release bundled with Xcode
+public struct SwiftVersionRecord: Codable, Sendable {
+  /// Swift version (e.g., "5.9", "5.10", "6.0")
+  public var version: String
 
-  /// Query a specific DataSourceMetadata record
-  ///
-  /// **MistKit Pattern**: Query all metadata records and filter by record name
-  /// Record name format: "metadata-{sourceName}-{recordType}"
-  func queryDataSourceMetadata(source: String, recordType: String) async throws
-    -> DataSourceMetadata?
-  {
-    let targetRecordName = "metadata-\(source)-\(recordType)"
-    let results = try await query(DataSourceMetadata.self) { record in
-      record.recordName == targetRecordName
-    }
-    return results.first
+  /// Release date
+  public var releaseDate: Date
+
+  /// Optional swift.org toolchain download
+  public var downloadURL: String?
+
+  /// Beta/snapshot indicator
+  public var isPrerelease: Bool
+
+  /// Release notes
+  public var notes: String?
+
+  public init(
+    version: String,
+    releaseDate: Date,
+    downloadURL: String? = nil,
+    isPrerelease: Bool,
+    notes: String? = nil
+  ) {
+    self.version = version
+    self.releaseDate = releaseDate
+    self.downloadURL = downloadURL
+    self.isPrerelease = isPrerelease
+    self.notes = notes
+  }
+
+  /// CloudKit record name based on version (e.g., "SwiftVersion-5.9.2")
+  public var recordName: String {
+    "SwiftVersion-\(version)"
   }
 }

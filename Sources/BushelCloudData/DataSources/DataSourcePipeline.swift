@@ -28,8 +28,8 @@
 //
 
 public import Foundation
-import MistKit
 
+@available(*, deprecated, message: "This type will move to BushelKit in a future release")
 /// Orchestrates fetching data from all sources with deduplication and relationship resolution
 public struct DataSourcePipeline: Sendable {
   // MARK: - Configuration
@@ -67,16 +67,13 @@ public struct DataSourcePipeline: Sendable {
 
   // MARK: - Dependencies
 
-  let cloudKitService: BushelCloudKitService?
   let configuration: FetchConfiguration
 
   // MARK: - Initialization
 
   public init(
-    cloudKitService: BushelCloudKitService? = nil,
     configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
   ) {
-    self.cloudKitService = cloudKitService
     self.configuration = configuration
   }
 
@@ -147,32 +144,9 @@ public struct DataSourcePipeline: Sendable {
     // If force flag is set, always fetch
     guard !force else { return (true, nil) }
 
-    // If no CloudKit service, can't check metadata - fetch
-    guard let cloudKit = cloudKitService else { return (true, nil) }
-
-    // Try to fetch metadata from CloudKit
-    do {
-      let metadata = try await cloudKit.queryDataSourceMetadata(
-        source: source,
-        recordType: recordType
-      )
-
-      // If no metadata exists, this is first fetch - allow it
-      guard let existingMetadata = metadata else { return (true, nil) }
-
-      // Check configuration to see if enough time has passed
-      let shouldFetch = configuration.shouldFetch(
-        source: source,
-        lastFetchedAt: existingMetadata.lastFetchedAt,
-        force: force
-      )
-
-      return (shouldFetch, existingMetadata)
-    } catch {
-      // If metadata query fails, allow fetch but log warning
-      print("   ⚠️  Failed to query metadata for \(source): \(error)")
-      return (true, nil)
-    }
+    // No CloudKit service in BushelCloudData - always fetch
+    // CloudKit metadata checking will be re-added in Phase 4
+    return (true, nil)
   }
 
   /// Wrap a fetch operation with metadata tracking
@@ -216,47 +190,15 @@ public struct DataSourcePipeline: Sendable {
       let results = try await fetcher()
       recordCount = results.count
 
-      // Update metadata on success
-      if let cloudKit = cloudKitService {
-        let metadata = DataSourceMetadata(
-          sourceName: source,
-          recordTypeName: recordType,
-          lastFetchedAt: startTime,
-          sourceUpdatedAt: existingMetadata?.sourceUpdatedAt,
-          recordCount: recordCount,
-          fetchDurationSeconds: Date().timeIntervalSince(startTime),
-          lastError: nil
-        )
-
-        do {
-          try await cloudKit.sync([metadata])
-        } catch {
-          print("   ⚠️  Failed to update metadata for \(source): \(error)")
-        }
-      }
+      // Metadata sync disabled in BushelCloudData (no CloudKit dependency)
+      // Will be re-enabled in Phase 4 when using BushelKit
 
       return results
     } catch {
       fetchError = error
 
-      // Update metadata on error
-      if let cloudKit = cloudKitService {
-        let metadata = DataSourceMetadata(
-          sourceName: source,
-          recordTypeName: recordType,
-          lastFetchedAt: startTime,
-          sourceUpdatedAt: existingMetadata?.sourceUpdatedAt,
-          recordCount: 0,
-          fetchDurationSeconds: Date().timeIntervalSince(startTime),
-          lastError: error.localizedDescription
-        )
-
-        do {
-          try await cloudKit.sync([metadata])
-        } catch {
-          print("   ⚠️  Failed to update metadata for \(source): \(error)")
-        }
-      }
+      // Metadata sync disabled in BushelCloudData (no CloudKit dependency)
+      // Will be re-enabled in Phase 4 when using BushelKit
 
       throw error
     }
