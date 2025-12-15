@@ -9,6 +9,7 @@
 import Foundation
 import Testing
 
+@testable import BushelCloudData
 @testable import BushelCloudKit
 
 @Suite("FetchConfiguration Logic")

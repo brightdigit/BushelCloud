@@ -29,6 +29,7 @@
 
 public import Foundation
 
+@testable public import BushelCloudData
 @testable public import BushelCloudKit
 
 /// Centralized test data fixtures for all record types

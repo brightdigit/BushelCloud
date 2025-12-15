@@ -29,6 +29,7 @@
 
 import Foundation
 
+@testable import BushelCloudData
 @testable import BushelCloudKit
 
 // MARK: - Mock Errors

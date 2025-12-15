@@ -30,6 +30,7 @@
 import Foundation
 import MistKit
 
+@testable import BushelCloudData
 @testable import BushelCloudKit
 
 // MARK: - Mock CloudKit Errors

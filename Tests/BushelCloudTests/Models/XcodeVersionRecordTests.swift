@@ -9,6 +9,7 @@
 import MistKit
 import Testing
 
+@testable import BushelCloudData
 @testable import BushelCloudKit
 
 @Suite("XcodeVersionRecord CloudKit Mapping")
