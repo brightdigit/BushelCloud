@@ -418,7 +418,7 @@ All types are moving to BushelKit:
 Update your Package.swift:
 \`\`\`swift
 dependencies: [
-    .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.1.0")
+    .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0")
 ]
 
 .target(
@@ -565,7 +565,7 @@ git commit -m "feat: add models, fetchers, and utilities from BushelCloud
 
 These types were previously in BushelCloud's BushelCloudData target (now deprecated)"
 
-git tag v3.1.0-alpha.1
+git tag v3.0.0-alpha.2
 git push origin main --tags
 ```
 
@@ -580,7 +580,7 @@ git push origin main --tags
 
 dependencies: [
     .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.3"),
-    .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.1.0-alpha.1"), // UPDATED
+    .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0-alpha.2"), // UPDATED
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
     // Remove IPSWDownloads and SwiftSoup - now transitive via BushelKit
 ]
@@ -789,7 +789,7 @@ BushelCloud demonstrates CloudKit integration patterns using BushelKit:
 - **CLI** (BushelCloudCLI): Command-line interface
 
 Dependencies:
-- BushelKit 3.1+ (models, fetchers, utilities)
+- BushelKit 3.0+ (models, fetchers, utilities)
 - MistKit 1.0+ (CloudKit Web Services)
 ```
 
@@ -797,7 +797,7 @@ Dependencies:
 ```markdown
 ## Dependencies
 
-- **BushelKit** (3.1.0-alpha.1+) - Provides:
+- **BushelKit** (3.0.0-alpha.2+) - Provides:
   - BushelFoundation: Core models (RestoreImageRecord, XcodeVersionRecord, SwiftVersionRecord)
   - BushelHub: Data fetchers and pipeline
   - BushelUtilities: Formatting and console utilities
@@ -885,7 +885,7 @@ See BushelCloud for complete working examples.
 
 - [ ] **Phase 1:** BushelCloudData target exists, all tests pass, deprecation warnings appear
 - [ ] **Phase 2:** Migration guide created, comprehensive deprecation messages added
-- [ ] **Phase 3:** BushelKit 3.1.0-alpha.1 tagged with models/fetchers/utilities
+- [ ] **Phase 3:** BushelKit 3.0.0-alpha.2 tagged with models/fetchers/utilities
 - [ ] **Phase 4:** BushelCloud uses BushelKit modules, all CLI commands work
 - [ ] **Phase 5:** BushelCloudData removed, final structure clean, all tests pass
 - [ ] **Documentation:** All docs updated to reflect new architecture
@@ -898,7 +898,7 @@ See BushelCloud for complete working examples.
 |-------|----------|-----------|
 | Phase 1 | Week 1 | BushelCloudData target created, code isolated |
 | Phase 2 | Week 2 | Deprecation warnings added |
-| Phase 3 | Weeks 3-4 | Code migrated to BushelKit, v3.1.0-alpha.1 tagged |
+| Phase 3 | Weeks 3-4 | Code migrated to BushelKit, v3.0.0-alpha.2 tagged |
 | Phase 4 | Weeks 5-6 | BushelCloud updated to use BushelKit |
 | Phase 5 | Week 7 | BushelCloudData removed, final cleanup |
 
