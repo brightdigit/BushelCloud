@@ -76,7 +76,6 @@ public struct SyncEngine: Sendable {
     )
     self.cloudKitService = service
     self.pipeline = DataSourcePipeline(
-      cloudKitService: service,
       configuration: configuration
     )
   }

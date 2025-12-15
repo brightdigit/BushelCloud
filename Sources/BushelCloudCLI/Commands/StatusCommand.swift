@@ -28,6 +28,7 @@
 //
 
 import ArgumentParser
+import BushelCloudData
 import BushelCloudKit
 import Foundation
 internal import MistKit
