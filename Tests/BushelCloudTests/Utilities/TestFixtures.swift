@@ -31,6 +31,7 @@ public import Foundation
 
 @testable public import BushelCloudData
 @testable public import BushelCloudKit
+public import BushelFoundation
 
 /// Centralized test data fixtures for all record types
 public enum TestFixtures: Sendable {

@@ -78,7 +78,7 @@ struct ExportCommand: AsyncParsableCommand {
 
   mutating func run() async throws {
     // Enable verbose console output if requested
-    BushelCloudKit.BushelUtilities.ConsoleOutput.isVerbose = verbose
+    ConsoleOutput.isVerbose = verbose
 
     // Get Server-to-Server credentials from environment if not provided
     let resolvedKeyID =

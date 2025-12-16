@@ -11,6 +11,7 @@ import Testing
 
 @testable import BushelCloudData
 @testable import BushelCloudKit
+import BushelFoundation
 
 @Suite("DataSourceMetadata CloudKit Mapping")
 struct DataSourceMetadataTests {
