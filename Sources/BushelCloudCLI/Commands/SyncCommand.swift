@@ -101,7 +101,7 @@ struct SyncCommand: AsyncParsableCommand {
 
   mutating func run() async throws {
     // Enable verbose console output if requested
-    ConsoleOutput.isVerbose = verbose
+    BushelCloudKit.BushelUtilities.ConsoleOutput.isVerbose = verbose
 
     // Get Server-to-Server credentials from environment if not provided
     let resolvedKeyID =
