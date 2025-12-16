@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 import BushelFoundation
+import Foundation
 import SwiftSoup
 
 #if canImport(FoundationNetworking)

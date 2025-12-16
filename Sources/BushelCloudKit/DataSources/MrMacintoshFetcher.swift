@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import BushelFoundation
 public import BushelLogging
 import Foundation
-import BushelFoundation
 import Logging
 import SwiftSoup
 

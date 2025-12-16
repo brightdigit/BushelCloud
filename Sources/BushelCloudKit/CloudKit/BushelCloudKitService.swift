@@ -48,7 +48,7 @@ public import MistKit
 /// This pattern allows command-line tools and servers to access CloudKit without user authentication.
 public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCollection {
   public typealias RecordTypeSetType = RecordTypeSet
-  
+
   private let service: CloudKitService
 
   // MARK: - CloudKitRecordCollection

@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 import BushelFoundation
+import Foundation
 
 /// Fetcher for macOS restore images using TheAppleWiki.com
 @available(

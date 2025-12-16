@@ -28,8 +28,8 @@
 //
 
 public import BushelFoundation
-public import BushelUtilities
 public import BushelLogging
+public import BushelUtilities
 public import Foundation
 import Logging
 public import MistKit
@@ -91,7 +91,7 @@ public struct SyncEngine: Sendable {
     Self.logger.info("Sync started")
 
     if options.dryRun {
-    BushelUtilities.ConsoleOutput.info("DRY RUN MODE - No changes will be made to CloudKit")
+      BushelUtilities.ConsoleOutput.info("DRY RUN MODE - No changes will be made to CloudKit")
       Self.logger.info("Sync running in dry-run mode")
     }
 

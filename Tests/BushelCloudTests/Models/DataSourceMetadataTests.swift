@@ -6,12 +6,11 @@
 //  Copyright © 2025 BrightDigit.
 //
 
+import BushelFoundation
 import MistKit
 import Testing
 
 @testable import BushelCloudKit
-@testable import BushelFoundation
-import BushelFoundation
 
 @Suite("DataSourceMetadata CloudKit Mapping")
 struct DataSourceMetadataTests {

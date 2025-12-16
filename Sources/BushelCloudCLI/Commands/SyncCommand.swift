@@ -28,9 +28,9 @@
 //
 
 import ArgumentParser
+import BushelCloudKit
 import BushelFoundation
 import BushelUtilities
-import BushelCloudKit
 import Foundation
 
 struct SyncCommand: AsyncParsableCommand {

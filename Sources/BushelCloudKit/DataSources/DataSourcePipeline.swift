@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
 public import BushelFoundation
 public import BushelLogging
+public import Foundation
 
 /// Orchestrates fetching data from all sources with deduplication and relationship resolution
 public struct DataSourcePipeline: Sendable {

@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 import BushelFoundation
+import Foundation
 import IPSWDownloads
 import OpenAPIURLSession
 import OSVer
