@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import BushelFoundation
 public import BushelLogging
 import Foundation
 

@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import BushelFoundation
 import Foundation
 
 #if canImport(FoundationNetworking)
