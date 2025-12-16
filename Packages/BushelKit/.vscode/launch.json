@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:BushelKit}",
+            "name": "Debug bushel",
+            "program": "${workspaceFolder:BushelKit}/.build/debug/bushel",
+            "preLaunchTask": "swift: Build Debug bushel"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:BushelKit}",
+            "name": "Release bushel",
+            "program": "${workspaceFolder:BushelKit}/.build/release/bushel",
+            "preLaunchTask": "swift: Build Release bushel"
+        }
+    ]
+}
