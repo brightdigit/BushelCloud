@@ -92,8 +92,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.3"),
+        .package(path: "Packages/BushelKit"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
-        .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0-alpha.1"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0")
     ],
@@ -103,6 +103,8 @@ let package = Package(
             dependencies: [
                 .product(name: "MistKit", package: "MistKit"),
                 .product(name: "BushelLogging", package: "BushelKit"),
+                .product(name: "BushelFoundation", package: "BushelKit"),
+                .product(name: "BushelUtilities", package: "BushelKit"),
                 .target(name: "BushelCloudData")
             ],
             swiftSettings: swiftSettings
@@ -112,7 +114,8 @@ let package = Package(
             dependencies: [
                 .product(name: "IPSWDownloads", package: "IPSWDownloads"),
                 .product(name: "SwiftSoup", package: "SwiftSoup"),
-                .product(name: "BushelLogging", package: "BushelKit")
+                .product(name: "BushelLogging", package: "BushelKit"),
+                .product(name: "BushelFoundation", package: "BushelKit")
             ],
             swiftSettings: swiftSettings
         ),
@@ -120,7 +123,6 @@ let package = Package(
             name: "BushelCloudCLI",
             dependencies: [
                 .target(name: "BushelCloudKit"),
-                .target(name: "BushelCloudData"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],
             swiftSettings: swiftSettings
