@@ -30,6 +30,7 @@
 public import BushelFoundation
 public import BushelLogging
 import Foundation
+import Logging
 
 #if canImport(FelinePineSwift)
   import FelinePineSwift

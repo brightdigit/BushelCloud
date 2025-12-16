@@ -34,7 +34,7 @@ public import MistKit
 
 // MARK: - CloudKitRecord Conformance
 
-extension XcodeVersionRecord: CloudKitRecord {
+extension XcodeVersionRecord: @retroactive CloudKitRecord {
   public static var cloudKitRecordType: String { "XcodeVersion" }
 
   public func toCloudKitFields() -> [String: FieldValue] {

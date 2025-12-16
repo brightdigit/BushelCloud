@@ -28,8 +28,8 @@
 //
 
 public import BushelFoundation
-public import BushelLogging
-public import Foundation
+import BushelLogging
+import Foundation
 
 /// Orchestrates fetching data from all sources with deduplication and relationship resolution
 public struct DataSourcePipeline: Sendable {
@@ -182,22 +182,14 @@ public struct DataSourcePipeline: Sendable {
       return []
     }
 
-    // Perform the fetch with timing
-    let startTime = Date()
-    var fetchError: Error?
-    var recordCount = 0
-
     do {
       let results = try await fetcher()
-      recordCount = results.count
 
       // Metadata sync disabled in BushelCloudData (no CloudKit dependency)
       // Will be re-enabled in Phase 4 when using BushelKit
 
       return results
     } catch {
-      fetchError = error
-
       // Metadata sync disabled in BushelCloudData (no CloudKit dependency)
       // Will be re-enabled in Phase 4 when using BushelKit
 

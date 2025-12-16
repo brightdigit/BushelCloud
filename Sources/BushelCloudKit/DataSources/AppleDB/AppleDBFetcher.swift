@@ -30,6 +30,7 @@
 public import BushelFoundation
 public import BushelLogging
 import Foundation
+import Logging
 
 #if canImport(FelinePineSwift)
   import FelinePineSwift
@@ -197,7 +198,7 @@ extension AppleDBFetcher {
   enum FetchError: LocalizedError {
     case invalidURL
     case noDataFound
-    case decodingFailed(Error)
+    case decodingFailed(any Error)
 
     var errorDescription: String? {
       switch self {
