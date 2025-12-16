@@ -29,9 +29,8 @@
 
 import Foundation
 
-@testable import BushelCloudData
 @testable import BushelCloudKit
-import BushelFoundation
+@testable import BushelFoundation
 // MARK: - Mock Errors
 
 enum MockFetcherError: Error, Sendable {

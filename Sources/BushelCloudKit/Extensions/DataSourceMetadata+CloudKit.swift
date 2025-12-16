@@ -37,8 +37,6 @@ public import MistKit
 extension DataSourceMetadata: CloudKitRecord {
   public static var cloudKitRecordType: String { "DataSourceMetadata" }
 
-  public var recordName: String { "DataSourceMetadata-\(sourceName)-\(recordTypeName)" }
-
   public func toCloudKitFields() -> [String: FieldValue] {
     var fields: [String: FieldValue] = [
       "sourceName": .string(sourceName),

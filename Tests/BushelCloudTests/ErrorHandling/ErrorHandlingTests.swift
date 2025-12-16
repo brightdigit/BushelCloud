@@ -31,7 +31,6 @@ import Foundation
 import MistKit
 import Testing
 
-@testable import BushelCloudData
 @testable import BushelCloudKit
 
 // MARK: - Network Error Handling Tests

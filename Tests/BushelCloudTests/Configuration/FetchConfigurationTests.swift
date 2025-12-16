@@ -9,8 +9,8 @@
 import Foundation
 import Testing
 
-@testable import BushelCloudData
 @testable import BushelCloudKit
+@testable import BushelFoundation
 
 @Suite("FetchConfiguration Logic")
 struct FetchConfigurationTests {

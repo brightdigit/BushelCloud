@@ -1,5 +1,4 @@
 //
-public import BushelFoundation
 //  IPSWFetcher.swift
 //  BushelCloud
 //
@@ -29,6 +28,7 @@ public import BushelFoundation
 //
 
 import Foundation
+import BushelFoundation
 import IPSWDownloads
 import OpenAPIURLSession
 import OSVer

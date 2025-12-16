@@ -105,17 +105,8 @@ let package = Package(
                 .product(name: "BushelLogging", package: "BushelKit"),
                 .product(name: "BushelFoundation", package: "BushelKit"),
                 .product(name: "BushelUtilities", package: "BushelKit"),
-                .target(name: "BushelCloudData")
-            ],
-            swiftSettings: swiftSettings
-        ),
-        .target(
-            name: "BushelCloudData",
-            dependencies: [
                 .product(name: "IPSWDownloads", package: "IPSWDownloads"),
-                .product(name: "SwiftSoup", package: "SwiftSoup"),
-                .product(name: "BushelLogging", package: "BushelKit"),
-                .product(name: "BushelFoundation", package: "BushelKit")
+                .product(name: "SwiftSoup", package: "SwiftSoup")
             ],
             swiftSettings: swiftSettings
         ),

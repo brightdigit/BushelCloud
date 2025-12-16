@@ -1,5 +1,4 @@
 //
-public import BushelFoundation
 //  MrMacintoshFetcher.swift
 //  BushelCloud
 //
@@ -30,6 +29,7 @@ public import BushelFoundation
 
 public import BushelLogging
 import Foundation
+import BushelFoundation
 import Logging
 import SwiftSoup
 

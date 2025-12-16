@@ -37,8 +37,6 @@ public import MistKit
 extension SwiftVersionRecord: CloudKitRecord {
   public static var cloudKitRecordType: String { "SwiftVersion" }
 
-  public var recordName: String { "SwiftVersion-\(version)" }
-
   public func toCloudKitFields() -> [String: FieldValue] {
     var fields: [String: FieldValue] = [
       "version": .string(version),

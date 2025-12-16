@@ -29,8 +29,8 @@
 
 public import Foundation
 public import BushelFoundation
+public import BushelLogging
 
-@available(*, deprecated, message: "This type will move to BushelKit in a future release")
 /// Orchestrates fetching data from all sources with deduplication and relationship resolution
 public struct DataSourcePipeline: Sendable {
   // MARK: - Configuration

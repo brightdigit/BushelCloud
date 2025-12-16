@@ -30,8 +30,8 @@
 import Foundation
 import Testing
 
-@testable import BushelCloudData
 @testable import BushelCloudKit
+@testable import BushelFoundation
 
 // MARK: - Suite 1: RestoreImage Deduplication Tests
 

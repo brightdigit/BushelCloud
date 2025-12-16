@@ -37,8 +37,6 @@ public import MistKit
 extension RestoreImageRecord: CloudKitRecord {
   public static var cloudKitRecordType: String { "RestoreImage" }
 
-  public var recordName: String { "RestoreImage-\(buildNumber)" }
-
   public func toCloudKitFields() -> [String: FieldValue] {
     var fields: [String: FieldValue] = [
       "version": .string(version),

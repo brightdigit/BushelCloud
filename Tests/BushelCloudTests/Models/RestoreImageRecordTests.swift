@@ -31,8 +31,8 @@ import Foundation
 import MistKit
 import Testing
 
-@testable import BushelCloudData
 @testable import BushelCloudKit
+@testable import BushelFoundation
 
 @Suite("RestoreImageRecord CloudKit Mapping")
 struct RestoreImageRecordTests {

@@ -30,8 +30,8 @@
 import Foundation
 import MistKit
 import Testing
+import BushelFoundation
 
-@testable import BushelCloudData
 @testable import BushelCloudKit
 
 // MARK: - Mock CloudKit Service Tests

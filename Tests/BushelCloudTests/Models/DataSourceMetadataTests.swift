@@ -9,8 +9,8 @@
 import MistKit
 import Testing
 
-@testable import BushelCloudData
 @testable import BushelCloudKit
+@testable import BushelFoundation
 import BushelFoundation
 
 @Suite("DataSourceMetadata CloudKit Mapping")

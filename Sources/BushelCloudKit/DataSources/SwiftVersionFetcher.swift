@@ -1,5 +1,4 @@
 //
-public import BushelFoundation
 //  SwiftVersionFetcher.swift
 //  BushelCloud
 //
@@ -29,6 +28,7 @@ public import BushelFoundation
 //
 
 import Foundation
+import BushelFoundation
 import SwiftSoup
 
 #if canImport(FoundationNetworking)
