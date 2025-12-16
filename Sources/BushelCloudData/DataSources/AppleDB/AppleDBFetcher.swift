@@ -1,4 +1,5 @@
 //
+public import BushelFoundation
 //  AppleDBFetcher.swift
 //  BushelCloud
 //

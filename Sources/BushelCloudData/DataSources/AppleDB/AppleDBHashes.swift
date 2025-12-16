@@ -1,4 +1,5 @@
 //
+public import BushelFoundation
 //  AppleDBHashes.swift
 //  BushelCloud
 //

@@ -1,4 +1,5 @@
 //
+public import BushelFoundation
 //  MrMacintoshFetcher.swift
 //  BushelCloud
 //

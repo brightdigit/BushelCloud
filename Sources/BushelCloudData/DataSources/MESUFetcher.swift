@@ -1,4 +1,5 @@
 //
+public import BushelFoundation
 //  MESUFetcher.swift
 //  BushelCloud
 //

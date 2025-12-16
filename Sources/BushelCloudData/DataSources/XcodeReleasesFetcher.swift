@@ -1,4 +1,5 @@
 //
+public import BushelFoundation
 //  XcodeReleasesFetcher.swift
 //  BushelCloud
 //

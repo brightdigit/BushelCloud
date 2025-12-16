@@ -28,6 +28,7 @@
 //
 
 import Foundation
+public import BushelFoundation
 
 /// Fetcher for macOS restore images using TheAppleWiki.com
 @available(
