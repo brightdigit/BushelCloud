@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import BushelCloudData
+public import BushelFoundation
 public import Foundation
 public import MistKit
 

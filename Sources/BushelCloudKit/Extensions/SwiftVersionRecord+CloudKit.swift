@@ -27,7 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import BushelCloudData
+public import BushelFoundation
+public import BushelUtilities
 public import Foundation
 public import MistKit
 
@@ -35,6 +36,8 @@ public import MistKit
 
 extension SwiftVersionRecord: CloudKitRecord {
   public static var cloudKitRecordType: String { "SwiftVersion" }
+
+  public var recordName: String { "SwiftVersion-\(version)" }
 
   public func toCloudKitFields() -> [String: FieldValue] {
     var fields: [String: FieldValue] = [
