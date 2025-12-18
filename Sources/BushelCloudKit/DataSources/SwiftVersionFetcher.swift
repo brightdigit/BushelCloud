@@ -88,7 +88,7 @@ struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
       SwiftVersionRecord(
         version: entry.swiftVersion,
         releaseDate: entry.date,
-        downloadURL: "https://swift.org/download/",  // Generic download page
+        downloadURL: URL(string: "https://swift.org/download/"),  // Generic download page
         isPrerelease: entry.swiftVersion.contains("beta")
           || entry.swiftVersion.contains("snapshot"),
         notes: "Bundled with Xcode \(entry.xcodeVersion)"

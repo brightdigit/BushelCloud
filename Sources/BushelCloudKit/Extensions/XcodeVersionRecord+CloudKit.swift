@@ -47,7 +47,7 @@ extension XcodeVersionRecord: @retroactive CloudKitRecord {
 
     // Optional fields
     if let downloadURL {
-      fields["downloadURL"] = .string(downloadURL)
+      fields["downloadURL"] = FieldValue(url: downloadURL)
     }
 
     if let fileSize {
@@ -93,7 +93,7 @@ extension XcodeVersionRecord: @retroactive CloudKitRecord {
       version: version,
       buildNumber: buildNumber,
       releaseDate: releaseDate,
-      downloadURL: recordInfo.fields["downloadURL"]?.stringValue,
+      downloadURL: recordInfo.fields["downloadURL"]?.urlValue,
       fileSize: recordInfo.fields["fileSize"]?.intValue,
       isPrerelease: recordInfo.fields["isPrerelease"]?.boolValue ?? false,
       minimumMacOS: recordInfo.fields["minimumMacOS"]?.referenceValue?.recordName,

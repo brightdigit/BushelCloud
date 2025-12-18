@@ -28,6 +28,7 @@
 //
 
 public import BushelFoundation
+import BushelUtilities
 import Foundation
 
 #if canImport(FoundationNetworking)
@@ -60,7 +61,7 @@ public struct MESUFetcher: DataSourceFetcher, Sendable {
     }
 
     // Fetch Last-Modified header to know when MESU was last updated
-    let lastModified = await HTTPHeaderHelpers.fetchLastModified(from: url)
+    let lastModified = await URLSession.shared.fetchLastModified(from: url)
 
     let (data, _) = try await URLSession.shared.data(from: url)
 
@@ -95,11 +96,15 @@ public struct MESUFetcher: DataSourceFetcher, Sendable {
       let firmwareSHA1 = restoreDict["FirmwareSHA1"] as? String ?? ""
 
       // Return the first restore image found (typically the latest)
+      guard let downloadURL = URL(string: firmwareURL) else {
+        continue  // Skip if URL is invalid
+      }
+
       return RestoreImageRecord(
         version: productVersion,
         buildNumber: buildVersion,
         releaseDate: Date(),  // MESU doesn't provide release date, use current date
-        downloadURL: firmwareURL,
+        downloadURL: downloadURL,
         fileSize: 0,  // Not provided by MESU
         sha256Hash: "",  // MESU only provides SHA1
         sha1Hash: firmwareSHA1,

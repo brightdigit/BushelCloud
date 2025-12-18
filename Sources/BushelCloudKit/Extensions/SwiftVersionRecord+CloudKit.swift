@@ -46,7 +46,7 @@ extension SwiftVersionRecord: @retroactive CloudKitRecord {
 
     // Optional fields
     if let downloadURL {
-      fields["downloadURL"] = .string(downloadURL)
+      fields["downloadURL"] = FieldValue(url: downloadURL)
     }
 
     if let notes {
@@ -66,7 +66,7 @@ extension SwiftVersionRecord: @retroactive CloudKitRecord {
     return SwiftVersionRecord(
       version: version,
       releaseDate: releaseDate,
-      downloadURL: recordInfo.fields["downloadURL"]?.stringValue,
+      downloadURL: recordInfo.fields["downloadURL"]?.urlValue,
       isPrerelease: recordInfo.fields["isPrerelease"]?.boolValue ?? false,
       notes: recordInfo.fields["notes"]?.stringValue
     )

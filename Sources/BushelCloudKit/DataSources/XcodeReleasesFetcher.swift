@@ -174,11 +174,17 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
         notesField += "|NOTES_URL:\(notesURL)"
       }
 
+      // Convert download URL string to URL if available
+      let downloadURL: URL? = {
+        guard let urlString = release.links?.download?.url else { return nil }
+        return URL(string: urlString)
+      }()
+
       return XcodeVersionRecord(
         version: release.version.number,
         buildNumber: release.version.build,
         releaseDate: release.date.toDate,
-        downloadURL: release.links?.download?.url,
+        downloadURL: downloadURL,
         fileSize: nil,  // Not provided by API
         isPrerelease: release.version.release.isPrerelease,
         minimumMacOS: nil,  // Will be resolved in DataSourcePipeline

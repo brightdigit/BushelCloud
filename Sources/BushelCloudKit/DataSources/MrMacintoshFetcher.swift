@@ -100,8 +100,9 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
       // Expected columns: Download Link | Version | Date | [Optional: Signed Status]
       // Extract filename and URL from first cell
       guard let linkElement = try cells[0].select("a").first(),
-        let downloadURL = try? linkElement.attr("href"),
-        !downloadURL.isEmpty
+        let downloadURLString = try? linkElement.attr("href"),
+        !downloadURLString.isEmpty,
+        let downloadURL = URL(string: downloadURLString)
       else {
         return nil
       }

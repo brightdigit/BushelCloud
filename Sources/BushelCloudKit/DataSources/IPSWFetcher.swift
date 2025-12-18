@@ -28,6 +28,7 @@
 //
 
 import BushelFoundation
+import BushelUtilities
 import Foundation
 import IPSWDownloads
 import OpenAPIURLSession
@@ -40,7 +41,7 @@ struct IPSWFetcher: DataSourceFetcher, Sendable {
   func fetch() async throws -> [RestoreImageRecord] {
     // Fetch Last-Modified header to know when ipsw.me data was updated
     let ipswURL = URL(string: "https://api.ipsw.me/v4/device/VirtualMac2,1?type=ipsw")!
-    let lastModified = await HTTPHeaderHelpers.fetchLastModified(from: ipswURL)
+    let lastModified = await URLSession.shared.fetchLastModified(from: ipswURL)
 
     // Create IPSWDownloads client with URLSession transport
     let client = IPSWDownloads(
@@ -58,7 +59,7 @@ struct IPSWFetcher: DataSourceFetcher, Sendable {
         version: firmware.version.description,  // OSVer -> String
         buildNumber: firmware.buildid,
         releaseDate: firmware.releasedate,
-        downloadURL: firmware.url.absoluteString,
+        downloadURL: firmware.url,
         fileSize: firmware.filesize,
         sha256Hash: "",  // Not provided by ipsw.me; backfilled from AppleDB during merge
         sha1Hash: firmware.sha1sum?.hexString ?? "",

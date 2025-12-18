@@ -167,7 +167,7 @@ struct RestoreImageRecordTests {
       version: "14.0",
       buildNumber: "23A344",
       releaseDate: Date(),
-      downloadURL: "https://example.com/image.ipsw",
+      downloadURL: URL(string: "https://example.com/image.ipsw")!,
       fileSize: 10_000_000_000,
       sha256Hash: "hash256",
       sha1Hash: "hash1",

@@ -29,6 +29,7 @@
 
 public import BushelFoundation
 public import BushelLogging
+import BushelUtilities
 import Foundation
 import Logging
 
@@ -105,7 +106,7 @@ public struct AppleDBFetcher: DataSourceFetcher, Sendable {
       )
       // Fallback to HTTP Last-Modified header
       let appleDBURL = URL(string: "https://api.appledb.dev/ios/macOS/main.json")!
-      return await HTTPHeaderHelpers.fetchLastModified(from: appleDBURL)
+      return await URLSession.shared.fetchLastModified(from: appleDBURL)
     }
   }
 
@@ -170,11 +171,19 @@ public struct AppleDBFetcher: DataSourceFetcher, Sendable {
       return nil
     }
 
+    // Convert link.url String to URL
+    guard let downloadURL = URL(string: link.url) else {
+      Self.logger.debug(
+        "Invalid download URL for build \(build): \(link.url)"
+      )
+      return nil
+    }
+
     return RestoreImageRecord(
       version: entry.version,
       buildNumber: build,
       releaseDate: releaseDate ?? Date(),  // Fallback to current date
-      downloadURL: link.url,
+      downloadURL: downloadURL,
       fileSize: ipswSource.size ?? 0,
       sha256Hash: ipswSource.hashes?.sha2_256 ?? "",
       sha1Hash: ipswSource.hashes?.sha1 ?? "",

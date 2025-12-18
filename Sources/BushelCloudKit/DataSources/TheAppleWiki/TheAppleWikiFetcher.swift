@@ -28,6 +28,7 @@
 //
 
 import BushelFoundation
+import BushelUtilities
 import Foundation
 
 /// Fetcher for macOS restore images using TheAppleWiki.com
@@ -41,7 +42,7 @@ internal struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
     // Fetch Last-Modified header from TheAppleWiki API
     let apiURL = URL(
       string: "https://theapplewiki.com/api.php?action=parse&page=Firmware/Mac&format=json")!
-    let lastModified = await HTTPHeaderHelpers.fetchLastModified(from: apiURL)
+    let lastModified = await URLSession.shared.fetchLastModified(from: apiURL)
 
     let parser = IPSWParser()
 
@@ -55,7 +56,7 @@ internal struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
       .filter { $0.isValid }
       .compactMap { version -> RestoreImageRecord? in
         // Skip if we can't get essential data
-        guard let downloadURL = version.url?.absoluteString,
+        guard let downloadURL = version.url,
           let fileSize = version.fileSizeInBytes
         else {
           return nil
