@@ -57,7 +57,8 @@ public enum TestFixtures: Sendable {
     version: "15.0 Beta 3",
     buildNumber: "24A5264n",
     releaseDate: Date(timeIntervalSince1970: 1_720_000_000),  // Jul 3, 2024
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2024/macos/24A5264n/RestoreImage.ipsw")!,
+    downloadURL: URL(
+      string: "https://updates.cdn-apple.com/2024/macos/24A5264n/RestoreImage.ipsw")!,
     fileSize: 14_000_000_000,
     sha256Hash: "xyz789uvw012345xyzvuwxyz789012345xyzvuwxyz789012345xyzvuwxyz789",
     sha1Hash: "uvw0123456789abcdef0123456789abcdef01",
@@ -91,7 +92,8 @@ public enum TestFixtures: Sendable {
     version: "15.1",
     buildNumber: "15C65",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),  // Dec 12, 2023
-    downloadURL: URL(string: "https://download.developer.apple.com/Developer_Tools/Xcode_15.1/Xcode_15.1.xip"),
+    downloadURL: URL(
+      string: "https://download.developer.apple.com/Developer_Tools/Xcode_15.1/Xcode_15.1.xip"),
     fileSize: 8_000_000_000,
     isPrerelease: false,
     minimumMacOS: "RestoreImage-23C71",
@@ -134,7 +136,8 @@ public enum TestFixtures: Sendable {
   public static let swift5_9_2 = SwiftVersionRecord(
     version: "5.9.2",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),  // Dec 12, 2023
-    downloadURL: URL(string: "https://download.swift.org/swift-5.9.2-release/xcode/swift-5.9.2-RELEASE-osx.pkg"),
+    downloadURL: URL(
+      string: "https://download.swift.org/swift-5.9.2-release/xcode/swift-5.9.2-RELEASE-osx.pkg"),
     isPrerelease: false,
     notes: "Stable Swift release bundled with Xcode 15.1"
   )

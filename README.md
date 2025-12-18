@@ -97,6 +97,25 @@ BushelCloud/
     └── ExportCommand.swift
 ```
 
+### BushelKit Integration
+
+BushelCloud uses [BushelKit](https://github.com/brightdigit/BushelKit) as its modular foundation, providing:
+
+**Core Modules:**
+- **BushelFoundation** - Domain models (RestoreImageRecord, XcodeVersionRecord, SwiftVersionRecord)
+- **BushelUtilities** - Formatting helpers, JSON decoding, console output
+- **BushelLogging** - Unified logging abstractions
+
+**Current Integration:**
+- Git subrepo at `Packages/BushelKit/` for rapid development
+- Local path dependency during migration phase
+
+**Future:**
+- After BushelKit v2.0 stable release → versioned remote dependency
+- BushelKit will support VM management features
+
+**Documentation:** [BushelKit Docs](https://docs.getbushel.app/docc)
+
 ## Features Demonstrated
 
 ### MistKit Capabilities

@@ -6,9 +6,10 @@
 //
 
 import Foundation
-@testable import BushelCloudKit
 import MistKit
 import Testing
+
+@testable import BushelCloudKit
 
 struct FieldValueURLTests {
   // MARK: - URL → FieldValue Conversion Tests
@@ -92,7 +93,7 @@ struct FieldValueURLTests {
     let malformedURL = malformedFieldValue.urlValue
 
     // This might still parse, so let's use a truly invalid one
-    #expect(true) // URL parsing is lenient, document this behavior
+    #expect(true)  // URL parsing is lenient, document this behavior
   }
 
   @Test("Extract nil from empty string")
@@ -130,7 +131,10 @@ struct FieldValueURLTests {
 
   @Test("Round-trip complex URL through FieldValue")
   func testRoundTripComplexURLThroughFieldValue() throws {
-    let originalURL = URL(string: "https://updates.cdn-apple.com/2024/restore/macOS/052-49876-20241103-B6C6AA6A-D39E-4F6C-B43C-15C3B8A4CB1A/UniversalMac_15.1.1_24B91_Restore.ipsw")!
+    let originalURL = URL(
+      string:
+        "https://updates.cdn-apple.com/2024/restore/macOS/052-49876-20241103-B6C6AA6A-D39E-4F6C-B43C-15C3B8A4CB1A/UniversalMac_15.1.1_24B91_Restore.ipsw"
+    )!
     let fieldValue = FieldValue(url: originalURL)
     let extractedURL = fieldValue.urlValue
 
