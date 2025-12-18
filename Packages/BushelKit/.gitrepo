@@ -7,6 +7,6 @@
 	remote = git@github.com:brightdigit/BushelKit.git
 	branch = bushelcloud
 	commit = d0695b222517c8f4d318845666fccfa47322469b
-	parent = 798eb8d515fc537f8ab4657117be28c02ed13174
+	parent = de433f71e6cdab1679ba93c78ca15e14548134a1
 	method = merge
 	cmdver = 0.4.9
