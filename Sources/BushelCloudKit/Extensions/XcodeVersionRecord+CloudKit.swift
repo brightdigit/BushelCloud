@@ -109,8 +109,8 @@ extension XcodeVersionRecord: @retroactive CloudKitRecord {
     let releaseDate = recordInfo.fields["releaseDate"]?.dateValue
     let size = recordInfo.fields["fileSize"]?.intValue ?? 0
 
-    let dateStr = releaseDate.map { FormattingHelpers.formatDate($0) } ?? "Unknown"
-    let sizeStr = FormattingHelpers.formatFileSize(size)
+    let dateStr = releaseDate.map { $0.formatted(Formatters.dateFormat) } ?? "Unknown"
+    let sizeStr = size.formatted(Formatters.fileSizeFormat)
 
     var output = "\n  \(version) (Build \(build))\n"
     output += "    Released: \(dateStr) | Size: \(sizeStr)"
