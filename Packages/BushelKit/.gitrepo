@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:brightdigit/BushelKit.git
 	branch = bushelcloud
-	commit = eb5bb24f5e9d32d2253d4cb1643cc196c33c2597
-	parent = acab0c1036701de51ecddab329d770deb3571d65
+	commit = 696887262fc5e06e3bcedfe405484a98da122a08
+	parent = 991a95ad08ed63128a8980be767f7c5c6d2687e8
 	method = merge
 	cmdver = 0.4.9
