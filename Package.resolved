@@ -1,6 +1,15 @@
 {
-  "originHash" : "54cf6554743a450733acefcaca358e877f7e0a94389d164deaa2e37d840aecf9",
+  "originHash" : "04acde4c17f17bdb120b8781084dd744a1d1fa5869defe4284b55350d4b2c435",
   "pins" : [
+    {
+      "identity" : "bushelkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/BushelKit.git",
+      "state" : {
+        "branch" : "v3.0.0-alpha.2",
+        "revision" : "226ee7aa995f1fdc440b43c4ae04bf7f204b4bbb"
+      }
+    },
     {
       "identity" : "felinepine",
       "kind" : "remoteSourceControl",
@@ -67,10 +76,10 @@
     {
       "identity" : "swift-argument-parser",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "location" : "https://github.com/apple/swift-argument-parser",
       "state" : {
-        "revision" : "cdd0ef3755280949551dc26dee5de9ddeda89f54",
-        "version" : "1.6.2"
+        "revision" : "c5d11a805e765f52ba34ec7284bd4fcd6ba68615",
+        "version" : "1.7.0"
       }
     },
     {
@@ -123,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
-        "revision" : "ce592ae52f982c847a4efc0dd881cc9eb32d29f2",
-        "version" : "1.6.4"
+        "revision" : "bc386b95f2a16ccd0150a8235e7c69eab2b866ca",
+        "version" : "1.8.0"
       }
     },
     {
@@ -132,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-openapi-runtime",
       "state" : {
-        "revision" : "7722cf8eac05c1f1b5b05895b04cfcc29576d9be",
-        "version" : "1.8.3"
+        "revision" : "7cdf33371bf89b23b9cf4fd3ce8d3c825c28fbe8",
+        "version" : "1.9.0"
       }
     },
     {
@@ -150,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/scinfu/SwiftSoup.git",
       "state" : {
-        "revision" : "4206bc7b8bd9a4ff8e9511211e1b4bff979ef9c4",
-        "version" : "2.11.1"
+        "revision" : "d86f244ed497d48012782e2f59c985a55e77b3f5",
+        "version" : "2.11.3"
       }
     }
   ],
