@@ -83,7 +83,7 @@ extension DataSourceMetadata: CloudKitRecord {
     let lastFetchedAt = recordInfo.fields["lastFetchedAt"]?.dateValue
     let recordCount = recordInfo.fields["recordCount"]?.intValue ?? 0
 
-    let dateStr = lastFetchedAt.map { $0.formatted(Formatters.dateTimeFormat) } ?? "Unknown"
+    let dateStr = lastFetchedAt.map { Formatters.dateTimeFormat.format($0) } ?? "Unknown"
 
     var output = "\n  \(sourceName) → \(recordTypeName)\n"
     output += "    Last fetched: \(dateStr) | Records: \(recordCount)"

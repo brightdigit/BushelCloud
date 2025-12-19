@@ -76,7 +76,7 @@ extension SwiftVersionRecord: @retroactive CloudKitRecord {
     let version = recordInfo.fields["version"]?.stringValue ?? "Unknown"
     let releaseDate = recordInfo.fields["releaseDate"]?.dateValue
 
-    let dateStr = releaseDate.map { $0.formatted(Formatters.dateFormat) } ?? "Unknown"
+    let dateStr = releaseDate.map { Formatters.dateFormat.format($0) } ?? "Unknown"
 
     var output = "\n  Swift \(version)\n"
     output += "    Released: \(dateStr)"

@@ -104,7 +104,7 @@ extension RestoreImageRecord: @retroactive CloudKitRecord {
 
     let signedStr = signed ? "✅ Signed" : "❌ Unsigned"
     let prereleaseStr = prerelease ? "[Beta/RC]" : ""
-    let sizeStr = size.formatted(Formatters.fileSizeFormat)
+    let sizeStr = Formatters.fileSizeFormat.format(Int64(size))
 
     var output = "    \(build) \(prereleaseStr)\n"
     output += "      \(signedStr) | Size: \(sizeStr) | Source: \(source)"
