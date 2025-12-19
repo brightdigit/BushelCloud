@@ -31,6 +31,10 @@ import BushelFoundation
 import BushelUtilities
 import Foundation
 
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
+
 /// Fetcher for macOS restore images using TheAppleWiki.com
 @available(
   *, deprecated, message: "Use AppleDBFetcher instead for more reliable and up-to-date data"
@@ -42,7 +46,13 @@ internal struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
     // Fetch Last-Modified header from TheAppleWiki API
     let apiURL = URL(
       string: "https://theapplewiki.com/api.php?action=parse&page=Firmware/Mac&format=json")!
-    let lastModified = await URLSession.shared.fetchLastModified(from: apiURL)
+
+    let lastModified: Date
+    #if canImport(FoundationNetworking)
+      // Use FoundationNetworking.URLSession directly on Apple platforms
+      let URLSession = FoundationNetworking.URLSession.self
+    #endif
+    lastModified = await URLSession.shared.fetchLastModified(from: apiURL) ?? Date()
 
     let parser = IPSWParser()
 
