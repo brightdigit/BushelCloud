@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import BushelFoundation
 public import BushelLogging
 import Foundation
 import Logging
@@ -40,8 +41,11 @@ import Logging
 #endif
 
 /// Fetcher for Xcode releases from xcodereleases.com JSON API
-struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
-  typealias Record = [XcodeVersionRecord]
+public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
+  public typealias Record = [XcodeVersionRecord]
+
+  public init() {}
+
   // MARK: - API Models
 
   private struct XcodeRelease: Codable {
@@ -127,7 +131,7 @@ struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
   // MARK: - Public API
 
   /// Fetch all Xcode releases from xcodereleases.com
-  func fetch() async throws -> [XcodeVersionRecord] {
+  public func fetch() async throws -> [XcodeVersionRecord] {
     let url = URL(string: "https://xcodereleases.com/data.json")!
     let (data, _) = try await URLSession.shared.data(from: url)
     let releases = try JSONDecoder().decode([XcodeRelease].self, from: data)
@@ -170,11 +174,17 @@ struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
         notesField += "|NOTES_URL:\(notesURL)"
       }
 
+      // Convert download URL string to URL if available
+      let downloadURL: URL? = {
+        guard let urlString = release.links?.download?.url else { return nil }
+        return URL(string: urlString)
+      }()
+
       return XcodeVersionRecord(
         version: release.version.number,
         buildNumber: release.version.build,
         releaseDate: release.date.toDate,
-        downloadURL: release.links?.download?.url,
+        downloadURL: downloadURL,
         fileSize: nil,  // Not provided by API
         isPrerelease: release.version.release.isPrerelease,
         minimumMacOS: nil,  // Will be resolved in DataSourcePipeline
@@ -188,5 +198,5 @@ struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
 
 // MARK: - Loggable Conformance
 extension XcodeReleasesFetcher: Loggable {
-  static let loggingCategory: BushelLogging.Category = .hub
+  public static let loggingCategory: BushelLogging.Category = .hub
 }

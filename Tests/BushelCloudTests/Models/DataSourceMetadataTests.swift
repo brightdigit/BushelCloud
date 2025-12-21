@@ -6,6 +6,7 @@
 //  Copyright © 2025 BrightDigit.
 //
 
+import BushelFoundation
 import MistKit
 import Testing
 

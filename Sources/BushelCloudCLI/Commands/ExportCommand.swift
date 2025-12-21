@@ -29,6 +29,7 @@
 
 import ArgumentParser
 import BushelCloudKit
+import BushelFoundation
 import Foundation
 import MistKit
 

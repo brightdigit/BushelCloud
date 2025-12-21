@@ -27,6 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import BushelFoundation
+import BushelUtilities
 import Foundation
 
 #if canImport(FoundationNetworking)
@@ -35,8 +37,8 @@ import Foundation
 
 /// Fetcher for Apple MESU (Mobile Equipment Software Update) manifest
 /// Used for freshness detection of the latest signed restore image
-struct MESUFetcher: DataSourceFetcher, Sendable {
-  typealias Record = RestoreImageRecord?
+public struct MESUFetcher: DataSourceFetcher, Sendable {
+  public typealias Record = RestoreImageRecord?
   // MARK: - Internal Models
 
   fileprivate struct RestoreInfo: Codable {
@@ -46,10 +48,12 @@ struct MESUFetcher: DataSourceFetcher, Sendable {
     let FirmwareSHA1: String?
   }
 
+  public init() {}
+
   // MARK: - Public API
 
   /// Fetch the latest signed restore image from Apple's MESU service
-  func fetch() async throws -> RestoreImageRecord? {
+  public func fetch() async throws -> RestoreImageRecord? {
     let urlString =
       "https://mesu.apple.com/assets/macos/com_apple_macOSIPSW/com_apple_macOSIPSW.xml"
     guard let url = URL(string: urlString) else {
@@ -57,7 +61,7 @@ struct MESUFetcher: DataSourceFetcher, Sendable {
     }
 
     // Fetch Last-Modified header to know when MESU was last updated
-    let lastModified = await HTTPHeaderHelpers.fetchLastModified(from: url)
+    let lastModified = await URLSession.shared.fetchLastModified(from: url)
 
     let (data, _) = try await URLSession.shared.data(from: url)
 
@@ -92,11 +96,15 @@ struct MESUFetcher: DataSourceFetcher, Sendable {
       let firmwareSHA1 = restoreDict["FirmwareSHA1"] as? String ?? ""
 
       // Return the first restore image found (typically the latest)
+      guard let downloadURL = URL(string: firmwareURL) else {
+        continue  // Skip if URL is invalid
+      }
+
       return RestoreImageRecord(
         version: productVersion,
         buildNumber: buildVersion,
         releaseDate: Date(),  // MESU doesn't provide release date, use current date
-        downloadURL: firmwareURL,
+        downloadURL: downloadURL,
         fileSize: 0,  // Not provided by MESU
         sha256Hash: "",  // MESU only provides SHA1
         sha1Hash: firmwareSHA1,

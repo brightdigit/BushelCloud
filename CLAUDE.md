@@ -54,6 +54,32 @@ export CLOUDKIT_CONTAINER_ID="iCloud.com.yourcompany.Bushel"  # Optional, has de
 
 ## Architecture
 
+### Modular Architecture with BushelKit
+
+Starting with v0.0.1, BushelCloud uses **BushelKit** as a modular foundation:
+
+**BushelKit** (`Packages/BushelKit/`):
+- `BushelFoundation` - Core domain models (RestoreImageRecord, XcodeVersionRecord, SwiftVersionRecord)
+- `BushelUtilities` - Shared utilities (FormattingHelpers, JSONDecoder extensions)
+- `BushelLogging` - Logging abstractions
+
+**BushelCloudKit** (`Sources/BushelCloudKit/`):
+- Extends BushelKit models with CloudKit integration
+- `Extensions/*+CloudKit.swift` - CloudKitRecord protocol conformance
+- `DataSources/` - API fetchers (IPSW, AppleDB, MESU, etc.)
+- `CloudKit/` - SyncEngine and service layer
+
+**Dependency Flow**:
+```
+BushelCloudCLI → BushelCloudKit → BushelFoundation → BushelUtilities → MistKit
+```
+
+**Why This Architecture**:
+- Domain models reusable across projects (BushelKit can evolve independently)
+- CloudKit logic isolated to extensions (clean separation)
+- Shared utilities promote consistency
+- Testing each layer independently
+
 ### Core Data Flow
 
 The application follows a pipeline architecture:
@@ -81,11 +107,18 @@ External Data Sources → DataSourcePipeline → CloudKitService → CloudKit
 - `DataSourcePipeline.swift` - Coordinates fetching from all sources with metadata tracking
 - Individual fetchers: `IPSWFetcher`, `AppleDBFetcher`, `MESUFetcher`, `XcodeReleasesFetcher`, etc.
 
-**Models** (`Sources/BushelCloud/Models/`):
-- `RestoreImageRecord` - macOS restore images (IPSW files for virtualization)
-- `XcodeVersionRecord` - Xcode releases with references to RestoreImage and SwiftVersion
+**Models** (`Packages/BushelKit/Sources/BushelFoundation/`):
+- `RestoreImageRecord` - macOS restore images (uses `URL` and `Int` types)
+- `XcodeVersionRecord` - Xcode releases with CKReference relationships
 - `SwiftVersionRecord` - Swift compiler versions
-- `DataSourceMetadata` - Tracks fetch timestamps and throttling
+- `DataSourceMetadata` - Fetch metadata with timestamp tracking
+
+**CloudKit Extensions** (`Sources/BushelCloudKit/Extensions/`):
+- `RestoreImageRecord+CloudKit.swift` - Implements CloudKitRecord protocol
+- `XcodeVersionRecord+CloudKit.swift` - Handles CKReference serialization
+- `SwiftVersionRecord+CloudKit.swift` - Basic CloudKit mapping
+- `DataSourceMetadata+CloudKit.swift` - Metadata sync record
+- `FieldValue+URL.swift` - URL ↔ STRING conversion
 
 **Commands** (`Sources/BushelCloud/Commands/`):
 - CLI commands using swift-argument-parser
@@ -122,6 +155,59 @@ The project uses structured logging with `BushelLogger` (wrapping `os.Logger`):
 - **Verbose logs** (`--verbose`): MistKit API calls, batch details
 - **Subsystems**: `.sync`, `.cloudKit`, `.dataSource`
 
+## Git Subrepo Development
+
+BushelKit is embedded as a git subrepo for rapid development during the migration phase.
+
+### Configuration
+- **Remote:** `git@github.com:brightdigit/BushelKit.git`
+- **Branch:** `bushelcloud`
+- **Location:** `Packages/BushelKit/`
+
+### Making Changes to BushelKit
+
+```bash
+# 1. Edit files in Packages/BushelKit/
+vim Packages/BushelKit/Sources/BushelFoundation/RestoreImageRecord.swift
+
+# 2. Commit changes in BushelCloud repository
+git add Packages/BushelKit/
+git commit -m "Update BushelKit: add field documentation"
+
+# 3. Push changes to BushelKit repository
+git subrepo push Packages/BushelKit
+```
+
+### Pulling Updates from BushelKit
+
+```bash
+git subrepo pull Packages/BushelKit
+```
+
+### When to Switch to Remote Dependency
+
+| Development Stage | Approach | Package.swift |
+|-------------------|----------|---------------|
+| Now (active migration) | Git subrepo (local path) | `.package(path: "Packages/BushelKit")` |
+| After BushelKit v2.0 stable | Remote dependency | `.package(url: "https://github.com/brightdigit/BushelKit.git", from: "2.0.0")` |
+
+**Benefits of Subrepo Now:**
+- Edit BushelKit and BushelCloud together
+- Test integration immediately
+- No version coordination overhead
+
+**Migration to Remote:**
+1. Tag stable BushelKit version
+2. Update `Package.swift` to use URL dependency
+3. Remove `Packages/BushelKit/` directory
+4. Use standard SPM workflow
+
+### Best Practices
+- Commit BushelKit changes separately from BushelCloud changes
+- Push to subrepo after each logical change
+- Pull before starting new work
+- Test both repositories after changes
+
 ## Development Essentials
 
 ### Swift 6 Configuration
@@ -134,6 +220,61 @@ The project uses strict Swift 6 concurrency checking (see `Package.swift:10-78`)
 - **All types are `Sendable`**
 
 **When adding code**: Ensure all new types conform to `Sendable` and use `async/await` patterns consistently.
+
+### Type Design Decisions
+
+#### Int vs Int64 for File Sizes
+
+**Decision:** All models use `Int` for byte counts (fileSize fields)
+
+**Rationale:**
+- All supported platforms are 64-bit (macOS 14+, iOS 17+, watchOS 10+)
+- On 64-bit systems: `Int` == `Int64` (same size and range)
+- Swift convention: use `Int` for counts, sizes, and indices
+- CloudKit automatically converts via `.int64(fileSize)`
+
+**Safety Analysis:**
+- Largest image file: ~15 GB
+- `Int.max` on 64-bit: 9,223,372,036,854,775,807 bytes (~9 exabytes)
+- **No overflow risk** for any realistic file size
+
+**CloudKit Integration:**
+```swift
+// Write to CloudKit
+fields["fileSize"] = .int64(record.fileSize)  // Auto-converts Int → Int64
+
+// Read from CloudKit
+let size: Int? = recordInfo.fields["fileSize"]?.intValue  // Returns Int
+```
+
+#### URL Type for Download Links
+
+**Decision:** Models use `URL` (not `String`) for download links
+
+**Benefits:**
+- Type safety at compile time
+- URL component access (scheme, host, path, query)
+- Automatic validation on creation
+- Custom `FieldValue(url:)` extension handles CloudKit STRING conversion
+
+**CloudKit Integration:**
+```swift
+// Extension: Sources/BushelCloudKit/Extensions/FieldValue+URL.swift
+public extension FieldValue {
+  init(url: URL) {
+    self = .string(url.absoluteString)
+  }
+
+  var urlValue: URL? {
+    if case .string(let value) = self {
+      return URL(string: value)
+    }
+    return nil
+  }
+}
+```
+
+**Tests:** See `Tests/BushelCloudTests/Extensions/FieldValueURLTests.swift` (13 test methods)
 
 ### CloudKitRecord Protocol
 

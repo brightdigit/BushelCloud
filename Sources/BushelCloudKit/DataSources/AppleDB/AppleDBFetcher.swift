@@ -27,7 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import BushelFoundation
 public import BushelLogging
+import BushelUtilities
 import Foundation
 import Logging
 
@@ -40,12 +42,14 @@ import Logging
 #endif
 
 /// Fetcher for macOS restore images using AppleDB API
-struct AppleDBFetcher: DataSourceFetcher, Sendable {
-  typealias Record = [RestoreImageRecord]
+public struct AppleDBFetcher: DataSourceFetcher, Sendable {
+  public typealias Record = [RestoreImageRecord]
   private let deviceIdentifier = "VirtualMac2,1"
 
+  public init() {}
+
   /// Fetch all VirtualMac2,1 restore images from AppleDB
-  func fetch() async throws -> [RestoreImageRecord] {
+  public func fetch() async throws -> [RestoreImageRecord] {
     // Fetch when macOS data was last updated using GitHub API
     let sourceUpdatedAt = await Self.fetchGitHubLastCommitDate()
 
@@ -102,7 +106,7 @@ struct AppleDBFetcher: DataSourceFetcher, Sendable {
       )
       // Fallback to HTTP Last-Modified header
       let appleDBURL = URL(string: "https://api.appledb.dev/ios/macOS/main.json")!
-      return await HTTPHeaderHelpers.fetchLastModified(from: appleDBURL)
+      return await URLSession.shared.fetchLastModified(from: appleDBURL)
     }
   }
 
@@ -167,11 +171,19 @@ struct AppleDBFetcher: DataSourceFetcher, Sendable {
       return nil
     }
 
+    // Convert link.url String to URL
+    guard let downloadURL = URL(string: link.url) else {
+      Self.logger.debug(
+        "Invalid download URL for build \(build): \(link.url)"
+      )
+      return nil
+    }
+
     return RestoreImageRecord(
       version: entry.version,
       buildNumber: build,
       releaseDate: releaseDate ?? Date(),  // Fallback to current date
-      downloadURL: link.url,
+      downloadURL: downloadURL,
       fileSize: ipswSource.size ?? 0,
       sha256Hash: ipswSource.hashes?.sha2_256 ?? "",
       sha1Hash: ipswSource.hashes?.sha1 ?? "",
@@ -186,7 +198,7 @@ struct AppleDBFetcher: DataSourceFetcher, Sendable {
 
 // MARK: - Loggable Conformance
 extension AppleDBFetcher: Loggable {
-  static let loggingCategory: BushelLogging.Category = .hub
+  public static let loggingCategory: BushelLogging.Category = .hub
 }
 
 // MARK: - Error Types
@@ -195,7 +207,7 @@ extension AppleDBFetcher {
   enum FetchError: LocalizedError {
     case invalidURL
     case noDataFound
-    case decodingFailed(Error)
+    case decodingFailed(any Error)
 
     var errorDescription: String? {
       switch self {

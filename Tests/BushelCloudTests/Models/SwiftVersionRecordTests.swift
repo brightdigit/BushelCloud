@@ -10,6 +10,7 @@ import MistKit
 import Testing
 
 @testable import BushelCloudKit
+@testable import BushelFoundation
 
 @Suite("SwiftVersionRecord CloudKit Mapping")
 struct SwiftVersionRecordTests {
