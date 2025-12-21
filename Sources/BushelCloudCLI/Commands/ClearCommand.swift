@@ -29,6 +29,8 @@
 
 import ArgumentParser
 import BushelCloudKit
+import BushelFoundation
+import BushelUtilities
 import Foundation
 
 struct ClearCommand: AsyncParsableCommand {
@@ -69,7 +71,7 @@ struct ClearCommand: AsyncParsableCommand {
 
   mutating func run() async throws {
     // Enable verbose console output if requested
-    ConsoleOutput.isVerbose = verbose
+    BushelUtilities.ConsoleOutput.isVerbose = verbose
 
     // Get Server-to-Server credentials from environment if not provided
     let resolvedKeyID =

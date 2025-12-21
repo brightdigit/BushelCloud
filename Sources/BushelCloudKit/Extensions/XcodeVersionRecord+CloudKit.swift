@@ -1,5 +1,5 @@
 //
-//  SwiftVersionRecord.swift
+//  XcodeVersionRecord+CloudKit.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -27,61 +27,51 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import BushelFoundation
+public import BushelUtilities
 public import Foundation
 public import MistKit
 
-/// Represents a Swift compiler release bundled with Xcode
-public struct SwiftVersionRecord: Codable, Sendable {
-  /// Swift version (e.g., "5.9", "5.10", "6.0")
-  public var version: String
-
-  /// Release date
-  public var releaseDate: Date
-
-  /// Optional swift.org toolchain download
-  public var downloadURL: String?
-
-  /// Beta/snapshot indicator
-  public var isPrerelease: Bool
-
-  /// Release notes
-  public var notes: String?
-
-  public init(
-    version: String,
-    releaseDate: Date,
-    downloadURL: String? = nil,
-    isPrerelease: Bool,
-    notes: String? = nil
-  ) {
-    self.version = version
-    self.releaseDate = releaseDate
-    self.downloadURL = downloadURL
-    self.isPrerelease = isPrerelease
-    self.notes = notes
-  }
-
-  /// CloudKit record name based on version (e.g., "SwiftVersion-5.9.2")
-  public var recordName: String {
-    "SwiftVersion-\(version)"
-  }
-}
-
 // MARK: - CloudKitRecord Conformance
 
-extension SwiftVersionRecord: CloudKitRecord {
-  public static var cloudKitRecordType: String { "SwiftVersion" }
+extension XcodeVersionRecord: @retroactive CloudKitRecord {
+  public static var cloudKitRecordType: String { "XcodeVersion" }
 
   public func toCloudKitFields() -> [String: FieldValue] {
     var fields: [String: FieldValue] = [
       "version": .string(version),
+      "buildNumber": .string(buildNumber),
       "releaseDate": .date(releaseDate),
       "isPrerelease": FieldValue(booleanValue: isPrerelease),
     ]
 
     // Optional fields
     if let downloadURL {
-      fields["downloadURL"] = .string(downloadURL)
+      fields["downloadURL"] = FieldValue(url: downloadURL)
+    }
+
+    if let fileSize {
+      fields["fileSize"] = .int64(fileSize)
+    }
+
+    if let minimumMacOS {
+      fields["minimumMacOS"] = .reference(
+        FieldValue.Reference(
+          recordName: minimumMacOS,
+          action: nil
+        ))
+    }
+
+    if let includedSwiftVersion {
+      fields["includedSwiftVersion"] = .reference(
+        FieldValue.Reference(
+          recordName: includedSwiftVersion,
+          action: nil
+        ))
+    }
+
+    if let sdkVersions {
+      fields["sdkVersions"] = .string(sdkVersions)
     }
 
     if let notes {
@@ -93,28 +83,37 @@ extension SwiftVersionRecord: CloudKitRecord {
 
   public static func from(recordInfo: RecordInfo) -> Self? {
     guard let version = recordInfo.fields["version"]?.stringValue,
+      let buildNumber = recordInfo.fields["buildNumber"]?.stringValue,
       let releaseDate = recordInfo.fields["releaseDate"]?.dateValue
     else {
       return nil
     }
 
-    return SwiftVersionRecord(
+    return XcodeVersionRecord(
       version: version,
+      buildNumber: buildNumber,
       releaseDate: releaseDate,
-      downloadURL: recordInfo.fields["downloadURL"]?.stringValue,
+      downloadURL: recordInfo.fields["downloadURL"]?.urlValue,
+      fileSize: recordInfo.fields["fileSize"]?.intValue,
       isPrerelease: recordInfo.fields["isPrerelease"]?.boolValue ?? false,
+      minimumMacOS: recordInfo.fields["minimumMacOS"]?.referenceValue?.recordName,
+      includedSwiftVersion: recordInfo.fields["includedSwiftVersion"]?.referenceValue?.recordName,
+      sdkVersions: recordInfo.fields["sdkVersions"]?.stringValue,
       notes: recordInfo.fields["notes"]?.stringValue
     )
   }
 
   public static func formatForDisplay(_ recordInfo: RecordInfo) -> String {
     let version = recordInfo.fields["version"]?.stringValue ?? "Unknown"
+    let build = recordInfo.fields["buildNumber"]?.stringValue ?? "Unknown"
     let releaseDate = recordInfo.fields["releaseDate"]?.dateValue
+    let size = recordInfo.fields["fileSize"]?.intValue ?? 0
 
-    let dateStr = releaseDate.map { FormattingHelpers.formatDate($0) } ?? "Unknown"
+    let dateStr = releaseDate.map { Formatters.dateFormat.format($0) } ?? "Unknown"
+    let sizeStr = Formatters.fileSizeFormat.format(Int64(size))
 
-    var output = "\n  Swift \(version)\n"
-    output += "    Released: \(dateStr)"
+    var output = "\n  \(version) (Build \(build))\n"
+    output += "    Released: \(dateStr) | Size: \(sizeStr)"
     return output
   }
 }

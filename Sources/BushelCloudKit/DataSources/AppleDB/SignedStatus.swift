@@ -36,7 +36,7 @@ enum SignedStatus: Codable {
   case all(Bool)  // true = all devices signed
   case none  // Empty array = not signed
 
-  init(from decoder: Decoder) throws {
+  init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
 
     // Try decoding as array first
@@ -57,7 +57,7 @@ enum SignedStatus: Codable {
     }
   }
 
-  func encode(to encoder: Encoder) throws {
+  func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     switch self {
     case .devices(let devices):

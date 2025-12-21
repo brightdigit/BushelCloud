@@ -27,7 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import BushelFoundation
 public import BushelLogging
+public import BushelUtilities
 public import Foundation
 import Logging
 public import MistKit
@@ -75,7 +77,6 @@ public struct SyncEngine: Sendable {
     )
     self.cloudKitService = service
     self.pipeline = DataSourcePipeline(
-      cloudKitService: service,
       configuration: configuration
     )
   }
@@ -85,12 +86,12 @@ public struct SyncEngine: Sendable {
   /// Execute full sync from all data sources to CloudKit
   public func sync(options: SyncOptions = SyncOptions()) async throws -> SyncResult {
     print("\n" + String(repeating: "=", count: 60))
-    ConsoleOutput.info("Starting Bushel CloudKit Sync")
+    BushelUtilities.ConsoleOutput.info("Starting Bushel CloudKit Sync")
     print(String(repeating: "=", count: 60))
     Self.logger.info("Sync started")
 
     if options.dryRun {
-      ConsoleOutput.info("DRY RUN MODE - No changes will be made to CloudKit")
+      BushelUtilities.ConsoleOutput.info("DRY RUN MODE - No changes will be made to CloudKit")
       Self.logger.info("Sync running in dry-run mode")
     }
 
@@ -162,7 +163,7 @@ public struct SyncEngine: Sendable {
     }
 
     print("\n" + String(repeating: "=", count: 60))
-    ConsoleOutput.success("Sync completed successfully!")
+    BushelUtilities.ConsoleOutput.success("Sync completed successfully!")
     print(String(repeating: "=", count: 60))
     Self.logger.info("Sync completed successfully")
 
@@ -172,14 +173,14 @@ public struct SyncEngine: Sendable {
   /// Delete all records from CloudKit
   public func clear() async throws {
     print("\n" + String(repeating: "=", count: 60))
-    ConsoleOutput.info("Clearing all CloudKit data")
+    BushelUtilities.ConsoleOutput.info("Clearing all CloudKit data")
     print(String(repeating: "=", count: 60))
     Self.logger.info("Clearing all CloudKit records")
 
     try await cloudKitService.deleteAllRecords()
 
     print("\n" + String(repeating: "=", count: 60))
-    ConsoleOutput.success("Clear completed successfully!")
+    BushelUtilities.ConsoleOutput.success("Clear completed successfully!")
     print(String(repeating: "=", count: 60))
     Self.logger.info("Clear completed successfully")
   }
@@ -187,7 +188,7 @@ public struct SyncEngine: Sendable {
   /// Export all records from CloudKit to a structured format
   public func export() async throws -> ExportResult {
     print("\n" + String(repeating: "=", count: 60))
-    ConsoleOutput.info("Exporting data from CloudKit")
+    BushelUtilities.ConsoleOutput.info("Exporting data from CloudKit")
     print(String(repeating: "=", count: 60))
     Self.logger.info("Exporting CloudKit data")
 

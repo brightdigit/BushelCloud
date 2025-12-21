@@ -1,5 +1,5 @@
 //
-//  RestoreImageRecord.swift
+//  RestoreImageRecord+CloudKit.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -27,84 +27,14 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import BushelFoundation
+public import BushelUtilities
 public import Foundation
 public import MistKit
 
-/// Represents a macOS IPSW restore image for Apple Virtualization framework
-public struct RestoreImageRecord: Codable, Sendable {
-  /// macOS version (e.g., "14.2.1", "15.0 Beta 3")
-  public var version: String
-
-  /// Build identifier (e.g., "23C71", "24A5264n")
-  public var buildNumber: String
-
-  /// Official release date
-  public var releaseDate: Date
-
-  /// Direct IPSW download link
-  public var downloadURL: String
-
-  /// File size in bytes
-  public var fileSize: Int
-
-  /// SHA-256 checksum for integrity verification
-  public var sha256Hash: String
-
-  /// SHA-1 hash (from MESU/ipsw.me for compatibility)
-  public var sha1Hash: String
-
-  /// Whether Apple still signs this restore image (nil if unknown)
-  public var isSigned: Bool?
-
-  /// Beta/RC release indicator
-  public var isPrerelease: Bool
-
-  /// Data source: "ipsw.me", "mrmacintosh.com", "mesu.apple.com"
-  public var source: String
-
-  /// Additional metadata or release notes
-  public var notes: String?
-
-  /// When the source last updated this record (nil if unknown)
-  public var sourceUpdatedAt: Date?
-
-  public init(
-    version: String,
-    buildNumber: String,
-    releaseDate: Date,
-    downloadURL: String,
-    fileSize: Int,
-    sha256Hash: String,
-    sha1Hash: String,
-    isSigned: Bool? = nil,
-    isPrerelease: Bool,
-    source: String,
-    notes: String? = nil,
-    sourceUpdatedAt: Date? = nil
-  ) {
-    self.version = version
-    self.buildNumber = buildNumber
-    self.releaseDate = releaseDate
-    self.downloadURL = downloadURL
-    self.fileSize = fileSize
-    self.sha256Hash = sha256Hash
-    self.sha1Hash = sha1Hash
-    self.isSigned = isSigned
-    self.isPrerelease = isPrerelease
-    self.source = source
-    self.notes = notes
-    self.sourceUpdatedAt = sourceUpdatedAt
-  }
-
-  /// CloudKit record name based on build number (e.g., "RestoreImage-23C71")
-  public var recordName: String {
-    "RestoreImage-\(buildNumber)"
-  }
-}
-
 // MARK: - CloudKitRecord Conformance
 
-extension RestoreImageRecord: CloudKitRecord {
+extension RestoreImageRecord: @retroactive CloudKitRecord {
   public static var cloudKitRecordType: String { "RestoreImage" }
 
   public func toCloudKitFields() -> [String: FieldValue] {
@@ -112,7 +42,7 @@ extension RestoreImageRecord: CloudKitRecord {
       "version": .string(version),
       "buildNumber": .string(buildNumber),
       "releaseDate": .date(releaseDate),
-      "downloadURL": .string(downloadURL),
+      "downloadURL": FieldValue(url: downloadURL),
       "fileSize": .int64(fileSize),
       "sha256Hash": .string(sha256Hash),
       "sha1Hash": .string(sha1Hash),
@@ -140,7 +70,7 @@ extension RestoreImageRecord: CloudKitRecord {
     guard let version = recordInfo.fields["version"]?.stringValue,
       let buildNumber = recordInfo.fields["buildNumber"]?.stringValue,
       let releaseDate = recordInfo.fields["releaseDate"]?.dateValue,
-      let downloadURL = recordInfo.fields["downloadURL"]?.stringValue,
+      let downloadURL = recordInfo.fields["downloadURL"]?.urlValue,
       let fileSize = recordInfo.fields["fileSize"]?.intValue,
       let sha256Hash = recordInfo.fields["sha256Hash"]?.stringValue,
       let sha1Hash = recordInfo.fields["sha1Hash"]?.stringValue,
@@ -174,7 +104,7 @@ extension RestoreImageRecord: CloudKitRecord {
 
     let signedStr = signed ? "✅ Signed" : "❌ Unsigned"
     let prereleaseStr = prerelease ? "[Beta/RC]" : ""
-    let sizeStr = FormattingHelpers.formatFileSize(size)
+    let sizeStr = Formatters.fileSizeFormat.format(Int64(size))
 
     var output = "    \(build) \(prereleaseStr)\n"
     output += "      \(signedStr) | Size: \(sizeStr) | Source: \(source)"

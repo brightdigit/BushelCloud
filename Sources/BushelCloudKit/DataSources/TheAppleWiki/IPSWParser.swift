@@ -37,7 +37,7 @@ import Foundation
 
 enum TheAppleWikiError: LocalizedError {
   case invalidURL(String)
-  case networkError(underlying: Error)
+  case networkError(underlying: any Error)
   case parsingError(String)
   case noDataFound
 

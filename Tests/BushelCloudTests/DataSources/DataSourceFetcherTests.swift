@@ -31,6 +31,7 @@ import Foundation
 import Testing
 
 @testable import BushelCloudKit
+@testable import BushelFoundation
 
 // MARK: - Mock IPSW Fetcher Tests
 
