@@ -25,7 +25,7 @@ jobs:
         run: |
           sed -i 's|\.package(path: "\.\./BushelKit")|.package(url: "https://github.com/brightdigit/BushelKit.git", branch: "v3.0.0-alpha.2-bushel-subrepo")|g' Package.swift
           rm Package.resolved
-      - uses: brightdigit/swift-build@v1.3.3
+      - uses: brightdigit/swift-build@v1.4.1
         with:
           skip-package-resolved: true
       - uses: sersoft-gmbh/swift-coverage-action@v4
@@ -54,7 +54,7 @@ jobs:
   #           build: 6.2-RELEASE
   #   steps:
   #     - uses: actions/checkout@v4
-  #     - uses: brightdigit/swift-build@v1.3.3
+  #     - uses: brightdigit/swift-build@v1.4.1
   #       with:
   #         windows-swift-version: ${{ matrix.swift.version }}
   #         windows-swift-build: ${{ matrix.swift.build }}
@@ -126,7 +126,7 @@ jobs:
           sed -i '' 's|\.package(path: "\.\./BushelKit")|.package(url: "https://github.com/brightdigit/BushelKit.git", branch: "v3.0.0-alpha.2-bushel-subrepo")|g' Package.swift
           rm Package.resolved
       - name: Build and Test
-        uses: brightdigit/swift-build@v1.3.3
+        uses: brightdigit/swift-build@v1.4.1
         with:
           scheme: ${{ env.PACKAGE_NAME }}-Package
           type: ${{ matrix.type }}
