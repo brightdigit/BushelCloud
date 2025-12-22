@@ -1,0 +1,164 @@
+//
+//  VirtualBuddyFetcher.swift
+//  BushelCloud
+//
+//  Created by Leo Dion.
+//  Copyright © 2025 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+import BushelFoundation
+import BushelUtilities
+import BushelVirtualBuddy
+import Foundation
+import OSVer
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
+
+/// Fetcher for enriching restore images with VirtualBuddy TSS signing status
+struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
+  typealias Record = [RestoreImageRecord]
+
+  private let apiKey: String
+  private let decoder: JSONDecoder
+  private let urlSession: URLSession
+
+  /// Failable initializer that reads API key from environment variable
+  init?() {
+    guard let key = ProcessInfo.processInfo.environment["VIRTUALBUDDY_API_KEY"], !key.isEmpty else {
+      return nil
+    }
+    self.apiKey = key
+    self.decoder = JSONDecoder()
+    #if canImport(FoundationNetworking)
+      self.urlSession = FoundationNetworking.URLSession.shared
+    #else
+      self.urlSession = URLSession.shared
+    #endif
+  }
+
+  /// Explicit initializer with API key
+  init(apiKey: String, decoder: JSONDecoder = JSONDecoder(), urlSession: URLSession = .shared) {
+    self.apiKey = apiKey
+    self.decoder = decoder
+    #if canImport(FoundationNetworking)
+      self.urlSession = FoundationNetworking.URLSession.shared
+    #else
+      self.urlSession = urlSession
+    #endif
+  }
+
+  /// DataSourceFetcher protocol requirement - returns empty for enrichment fetchers
+  func fetch() async throws -> [RestoreImageRecord] {
+    return []
+  }
+
+  /// Enrich existing restore images with VirtualBuddy TSS signing status
+  func fetch(existingImages: [RestoreImageRecord]) async throws -> [RestoreImageRecord] {
+    var enrichedImages: [RestoreImageRecord] = []
+
+    for image in existingImages {
+      // Skip file URLs (VirtualBuddy API doesn't support them)
+      guard image.downloadURL.scheme != "file" else {
+        enrichedImages.append(image)
+        continue
+      }
+
+      do {
+        let response = try await checkSigningStatus(for: image.downloadURL)
+
+        // Validate build number matches
+        guard response.build == image.buildNumber else {
+          print(
+            "   ⚠️  VirtualBuddy build mismatch: expected \(image.buildNumber), got \(response.build)"
+          )
+          enrichedImages.append(image)
+          continue
+        }
+
+        // Create enriched record with VirtualBuddy data
+        var enriched = image
+        enriched.isSigned = response.isSigned
+        enriched.source = "tss.virtualbuddy.app"
+        enriched.sourceUpdatedAt = Date()  // Real-time TSS check
+        enriched.notes = response.message  // TSS status message
+
+        enrichedImages.append(enriched)
+      } catch {
+        print("   ⚠️  VirtualBuddy error for \(image.buildNumber): \(error)")
+        enrichedImages.append(image)  // Keep original on error
+      }
+    }
+
+    return enrichedImages
+  }
+
+  /// Check signing status for an IPSW URL using VirtualBuddy TSS API
+  private func checkSigningStatus(for ipswURL: URL) async throws -> VirtualBuddySig {
+    // Build endpoint URL with API key and IPSW URL
+    var components = URLComponents(string: "https://tss.virtualbuddy.app/v1/status")!
+    components.queryItems = [
+      URLQueryItem(name: "apiKey", value: apiKey),
+      URLQueryItem(name: "ipsw", value: ipswURL.absoluteString)
+    ]
+
+    guard let endpointURL = components.url else {
+      throw VirtualBuddyFetcherError.invalidURL
+    }
+
+    // Fetch data from API
+    let data: Data
+    let response: URLResponse
+    do {
+      #if canImport(FoundationNetworking)
+        (data, response) = try await urlSession.data(from: endpointURL)
+      #else
+        (data, response) = try await urlSession.data(from: endpointURL)
+      #endif
+    } catch {
+      throw VirtualBuddyFetcherError.networkError(error)
+    }
+
+    // Check HTTP status
+    if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+      throw VirtualBuddyFetcherError.httpError(httpResponse.statusCode)
+    }
+
+    // Decode response
+    do {
+      return try decoder.decode(VirtualBuddySig.self, from: data)
+    } catch {
+      throw VirtualBuddyFetcherError.decodingError(error)
+    }
+  }
+}
+
+/// Errors that can occur during VirtualBuddy fetching
+enum VirtualBuddyFetcherError: Error {
+  case invalidURL
+  case networkError(Error)
+  case httpError(Int)
+  case decodingError(Error)
+}

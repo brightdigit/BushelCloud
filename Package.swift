@@ -105,6 +105,7 @@ let package = Package(
                 .product(name: "BushelLogging", package: "BushelKit"),
                 .product(name: "BushelFoundation", package: "BushelKit"),
                 .product(name: "BushelUtilities", package: "BushelKit"),
+                .product(name: "BushelVirtualBuddy", package: "BushelKit"),
                 .product(name: "IPSWDownloads", package: "IPSWDownloads"),
                 .product(name: "SwiftSoup", package: "SwiftSoup")
             ],
