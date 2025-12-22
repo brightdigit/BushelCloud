@@ -64,17 +64,50 @@ public struct SyncEngine: Sendable {
 
   // MARK: - Initialization
 
+  /// Initialize sync engine with CloudKit credentials
+  ///
+  /// **Flexible Authentication**: Supports both file-based and environment variable-based PEM content:
+  /// - Provide `pemString` for CI/CD environments (GitHub Actions, etc.)
+  /// - Provide `privateKeyPath` for local development
+  ///
+  /// **Environment Separation**: Use separate keys for development and production:
+  /// - Development: Safe for testing, free API calls, can clear data freely
+  /// - Production: Real user data, requires careful key management
+  ///
+  /// - Parameters:
+  ///   - containerIdentifier: CloudKit container ID
+  ///   - keyID: Server-to-Server Key ID
+  ///   - privateKeyPath: Path to .pem file (use if pemString not provided)
+  ///   - pemString: PEM content as string (use for CI/CD, takes priority over privateKeyPath)
+  ///   - environment: CloudKit environment (.development or .production, defaults to .development)
+  ///   - configuration: Fetch configuration for data sources
+  /// - Throws: Error if authentication credentials are invalid or missing
   public init(
     containerIdentifier: String,
     keyID: String,
-    privateKeyPath: String,
+    privateKeyPath: String = "",
+    pemString: String = "",
+    environment: CloudKitService.Environment = .development,
     configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
   ) throws {
-    let service = try BushelCloudKitService(
-      containerIdentifier: containerIdentifier,
-      keyID: keyID,
-      privateKeyPath: privateKeyPath
-    )
+    // Prefer PEM string if provided (CI/CD pattern), fall back to file path (local development)
+    let service: BushelCloudKitService
+    if !pemString.isEmpty {
+      service = try BushelCloudKitService(
+        containerIdentifier: containerIdentifier,
+        keyID: keyID,
+        pemString: pemString,
+        environment: environment
+      )
+    } else {
+      service = try BushelCloudKitService(
+        containerIdentifier: containerIdentifier,
+        keyID: keyID,
+        privateKeyPath: privateKeyPath,
+        environment: environment
+      )
+    }
+
     self.cloudKitService = service
     self.pipeline = DataSourcePipeline(
       configuration: configuration

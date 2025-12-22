@@ -74,8 +74,14 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   ///   - containerIdentifier: CloudKit container ID (e.g., "iCloud.com.company.App")
   ///   - keyID: Server-to-Server Key ID from CloudKit Dashboard
   ///   - privateKeyPath: Path to the private key .pem file
+  ///   - environment: CloudKit environment (.development or .production, defaults to .development)
   /// - Throws: Error if the private key file cannot be read or is invalid
-  public init(containerIdentifier: String, keyID: String, privateKeyPath: String) throws {
+  public init(
+    containerIdentifier: String,
+    keyID: String,
+    privateKeyPath: String,
+    environment: CloudKitService.Environment = .development
+  ) throws {
     // Read PEM file from disk
     guard FileManager.default.fileExists(atPath: privateKeyPath) else {
       throw BushelCloudKitError.privateKeyFileNotFound(path: privateKeyPath)
@@ -97,7 +103,38 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     self.service = try CloudKitService(
       containerIdentifier: containerIdentifier,
       tokenManager: tokenManager,
-      environment: .development,
+      environment: environment,
+      database: .public
+    )
+  }
+
+  /// Initialize CloudKit service with Server-to-Server authentication using PEM string
+  ///
+  /// **CI/CD Pattern**: This initializer accepts PEM content directly from environment variables,
+  /// eliminating the need for temporary file creation in GitHub Actions or other CI/CD environments.
+  ///
+  /// - Parameters:
+  ///   - containerIdentifier: CloudKit container ID (e.g., "iCloud.com.company.App")
+  ///   - keyID: Server-to-Server Key ID from CloudKit Dashboard
+  ///   - pemString: PEM file content as string (including headers/footers)
+  ///   - environment: CloudKit environment (.development or .production, defaults to .development)
+  /// - Throws: Error if PEM string is invalid or authentication fails
+  public init(
+    containerIdentifier: String,
+    keyID: String,
+    pemString: String,
+    environment: CloudKitService.Environment = .development
+  ) throws {
+    // Create Server-to-Server authentication manager directly from PEM string
+    let tokenManager = try ServerToServerAuthManager(
+      keyID: keyID,
+      pemString: pemString
+    )
+
+    self.service = try CloudKitService(
+      containerIdentifier: containerIdentifier,
+      tokenManager: tokenManager,
+      environment: environment,
       database: .public
     )
   }

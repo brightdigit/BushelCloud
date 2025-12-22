@@ -1,0 +1,66 @@
+name: Scheduled CloudKit Sync
+
+on:
+  # Run every 12 hours (00:00 and 12:00 UTC)
+  schedule:
+    - cron: '0 */12 * * *'
+
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+# Prevent concurrent sync runs
+concurrency:
+  group: cloudkit-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Sync to CloudKit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read  # Read repository code
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Swift 6.2
+        uses: swiftlang/swift-action@v2
+        with:
+          swift-version: '6.2'
+
+      - name: Verify Swift version
+        run: |
+          swift --version
+          swift package --version
+
+      - name: Cache Swift build
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-swift-build-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-swift-build-
+
+      - name: Build bushel-cloud executable
+        run: swift build -c release
+
+      - name: Run CloudKit sync
+        env:
+          CLOUDKIT_KEY_ID: ${{ secrets.CLOUDKIT_KEY_ID }}
+          CLOUDKIT_PRIVATE_KEY: ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
+          CLOUDKIT_ENVIRONMENT: development
+          CLOUDKIT_CONTAINER_ID: iCloud.com.brightdigit.Bushel
+        run: |
+          echo "Starting CloudKit sync..."
+          echo "Container: $CLOUDKIT_CONTAINER_ID"
+          echo "Environment: $CLOUDKIT_ENVIRONMENT"
+
+          # Run sync with verbose logging
+          # Note: Same key works for both development and production
+          # Change CLOUDKIT_ENVIRONMENT to 'production' when ready
+          .build/x86_64-unknown-linux-gnu/release/bushel-cloud sync \
+            --verbose \
+            --container-identifier "$CLOUDKIT_CONTAINER_ID"
