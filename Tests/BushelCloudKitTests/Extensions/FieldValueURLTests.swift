@@ -84,16 +84,22 @@ struct FieldValueURLTests {
 
   @Test("Extract nil from invalid URL string")
   func testExtractNilFromInvalidURLString() throws {
+    // URL(string:) is lenient - even "not a valid url" parses successfully
+    // as a relative URL with no scheme. Test actual parsing behavior:
     let fieldValue: FieldValue = .string("not a valid url")
     let url = fieldValue.urlValue
 
-    // URL(string:) actually creates a URL for "not a valid url" with no scheme
-    // So we need a truly malformed URL
+    // This actually succeeds - URL is lenient and creates a relative URL
+    #expect(url != nil)
+    #expect(url?.scheme == nil)  // No scheme for this "URL"
+
+    // Test a URL with invalid characters
     let malformedFieldValue: FieldValue = .string("ht!tp://invalid")
     let malformedURL = malformedFieldValue.urlValue
 
-    // This might still parse, so let's use a truly invalid one
-    #expect(true)  // URL parsing is lenient, document this behavior
+    // URLs with certain invalid characters DO fail to parse
+    // This demonstrates that URL(string:) has some limits
+    #expect(malformedURL == nil)
   }
 
   @Test("Extract nil from empty string")

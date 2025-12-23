@@ -125,7 +125,12 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
 
       // Get date from third cell
       let dateStr = try cells[2].text()
-      let releaseDate = parseDate(from: dateStr) ?? Date()
+      guard let releaseDate = parseDate(from: dateStr) else {
+        Self.logger.warning(
+          "Failed to parse date '\(dateStr)' for build \(buildNumber), skipping record"
+        )
+        return nil
+      }
 
       // Check if signed (4th column if present)
       let isSigned: Bool? =

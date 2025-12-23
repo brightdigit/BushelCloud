@@ -82,8 +82,14 @@ find "$directory" -type f -name "*.swift" | while read -r file; do
   fi
 
   # Create the header with the current filename
-  filename=$(basename "$file")
-  header=$(printf "$header_template" "$filename" "$package" "$creator" "$year" "$company")
+  # Escape % characters in user-provided values to prevent format specifier injection
+  filename=$(basename "$file" | sed 's/%/%%/g')
+  package_safe=$(printf '%s' "$package" | sed 's/%/%%/g')
+  creator_safe=$(printf '%s' "$creator" | sed 's/%/%%/g')
+  year_safe=$(printf '%s' "$year" | sed 's/%/%%/g')
+  company_safe=$(printf '%s' "$company" | sed 's/%/%%/g')
+
+  header=$(printf "$header_template" "$filename" "$package_safe" "$creator_safe" "$year_safe" "$company_safe")
 
   # Remove all consecutive lines at the beginning which start with "// ", contain only whitespace, or only "//"
   awk '

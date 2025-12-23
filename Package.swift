@@ -120,7 +120,7 @@ let package = Package(
             swiftSettings: swiftSettings
         ),
         .testTarget(
-            name: "BushelCloudTests",
+            name: "BushelCloudKitTests",
             dependencies: [
                 .target(name: "BushelCloudKit")
             ],

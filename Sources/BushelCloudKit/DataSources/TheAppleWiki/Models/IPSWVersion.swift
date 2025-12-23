@@ -66,11 +66,6 @@ struct IPSWVersion: Codable, Sendable {
     return Int(size * multiplier)
   }
 
-  /// Detect if this is a VirtualMac device
-  var isVirtualMac: Bool {
-    deviceModel.contains("VirtualMac")
-  }
-
   /// Detect if this is a prerelease version (beta, RC, etc.)
   var isPrerelease: Bool {
     let lowercased = version.lowercased()

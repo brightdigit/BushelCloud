@@ -141,8 +141,8 @@ public struct DataSourcePipeline: Sendable {
 
   /// Check if a source should be fetched based on throttling rules
   private func shouldFetch(
-    source: String,
-    recordType: String,
+    source _: String,
+    recordType _: String,
     force: Bool
   ) async -> (shouldFetch: Bool, metadata: DataSourceMetadata?) {
     // If force flag is set, always fetch
