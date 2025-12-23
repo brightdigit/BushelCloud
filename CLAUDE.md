@@ -52,6 +52,12 @@ export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
 export CLOUDKIT_CONTAINER_ID="iCloud.com.yourcompany.Bushel"  # Optional, has default
 ```
 
+Optional for VirtualBuddy TSS signing status:
+
+```bash
+export VIRTUALBUDDY_API_KEY="your-virtualbuddy-api-key"  # Get from https://tss.virtualbuddy.app/
+```
+
 ## Architecture
 
 ### Modular Architecture with BushelKit
