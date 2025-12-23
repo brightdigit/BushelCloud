@@ -92,7 +92,6 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
       }
 
       processedCount += 1
-      print("   🔍 VirtualBuddy: \(image.buildNumber) (\(processedCount)/\(totalCount))")
 
       do {
         let response = try await checkSigningStatus(for: image.downloadURL)
@@ -100,7 +99,7 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
         // Validate build number matches
         guard response.build == image.buildNumber else {
           print(
-            "   ⚠️  VirtualBuddy build mismatch: expected \(image.buildNumber), got \(response.build)"
+            "   ⚠️  VirtualBuddy: \(image.buildNumber) - build mismatch: expected \(image.buildNumber), got \(response.build) (\(processedCount)/\(totalCount))"
           )
           enrichedImages.append(image)
           continue
@@ -113,17 +112,22 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
         enriched.sourceUpdatedAt = Date()  // Real-time TSS check
         enriched.notes = response.message  // TSS status message
 
+        // Show result with signing status
+        let statusEmoji = response.isSigned ? "✅" : "❌"
+        let statusText = response.isSigned ? "signed" : "unsigned"
+        print("   \(statusEmoji) VirtualBuddy: \(image.buildNumber) - \(statusText) (\(processedCount)/\(totalCount))")
+
         enrichedImages.append(enriched)
       } catch {
-        print("   ⚠️  VirtualBuddy error for \(image.buildNumber): \(error)")
+        print("   ⚠️  VirtualBuddy: \(image.buildNumber) - error: \(error) (\(processedCount)/\(totalCount))")
         enrichedImages.append(image)  // Keep original on error
       }
 
       // Add random delay between requests to respect rate limit (2 req/5 sec)
       // Only delay if there are more images to process
       if processedCount < totalCount {
-        let randomDelay = Double.random(in: 2.5...5.0)
-        try await Task.sleep(for: .seconds(randomDelay))
+        let randomDelay = Double.random(in: 2.5...3.5)
+        try await Task.sleep(for: .seconds(randomDelay), tolerance: .seconds(1))
       }
     }
 

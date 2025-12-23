@@ -182,14 +182,14 @@ GET https://tss.virtualbuddy.app/v1/status?apiKey=<key>&ipsw=<IPSW URL>
 **Rate Limits & Caching**:
 - **Rate limit**: 2 requests per 5 seconds
 - **Server-side CDN cache**: 12 hours (to avoid Apple TSS rate limiting)
-- **Client-side implementation**: Random delays of 2.5-5.0 seconds between requests
+- **Client-side implementation**: Random delays of 2.5-3.5 seconds with 1-second tolerance between requests
 
 **Implementation Details**:
 - **File**: `Sources/BushelCloudKit/DataSources/VirtualBuddyFetcher.swift`
 - **Integration**: Enriches RestoreImageRecord with real-time signing status after other data sources
 - **Error handling**: HTTP 429 errors are logged; original record preserved on any error
 - **Progress tracking**: Shows "X/Y images checked" during sync
-- **Performance**: ~3-4 minutes for 50 images (acceptable for 8-16 hour sync schedules)
+- **Performance**: ~2.5-4 minutes for 50 images (acceptable for 8-16 hour sync schedules)
 
 **Deduplication Priority**:
 - VirtualBuddy is an **authoritative source** for `isSigned` status (along with MESU)
