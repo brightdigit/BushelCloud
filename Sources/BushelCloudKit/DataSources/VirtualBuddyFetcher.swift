@@ -41,7 +41,8 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
   typealias Record = [RestoreImageRecord]
 
   /// Base URL components for VirtualBuddy TSS API endpoint
-  private static let baseURLComponents = URLComponents(string: "https://tss.virtualbuddy.app/v1/status")!
+  private static let baseURLComponents = URLComponents(
+    string: "https://tss.virtualbuddy.app/v1/status")!
 
   private let apiKey: String
   private let decoder: JSONDecoder
@@ -52,29 +53,19 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
     guard let key = ProcessInfo.processInfo.environment["VIRTUALBUDDY_API_KEY"], !key.isEmpty else {
       return nil
     }
-    self.apiKey = key
-    self.decoder = JSONDecoder()
-    #if canImport(FoundationNetworking)
-      self.urlSession = FoundationNetworking.URLSession.shared
-    #else
-      self.urlSession = URLSession.shared
-    #endif
+    self.init(apiKey: key)
   }
 
   /// Explicit initializer with API key
   init(apiKey: String, decoder: JSONDecoder = JSONDecoder(), urlSession: URLSession = .shared) {
     self.apiKey = apiKey
     self.decoder = decoder
-    #if canImport(FoundationNetworking)
-      self.urlSession = FoundationNetworking.URLSession.shared
-    #else
-      self.urlSession = urlSession
-    #endif
+    self.urlSession = urlSession
   }
 
   /// DataSourceFetcher protocol requirement - returns empty for enrichment fetchers
   func fetch() async throws -> [RestoreImageRecord] {
-    return []
+    []
   }
 
   /// Enrich existing restore images with VirtualBuddy TSS signing status
@@ -117,11 +108,15 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
         // Show result with signing status
         let statusEmoji = response.isSigned ? "✅" : "❌"
         let statusText = response.isSigned ? "signed" : "unsigned"
-        print("   \(statusEmoji) VirtualBuddy: \(image.buildNumber) - \(statusText) (\(processedCount)/\(totalCount))")
+        print(
+          "   \(statusEmoji) VirtualBuddy: \(image.buildNumber) - \(statusText) (\(processedCount)/\(totalCount))"
+        )
 
         enrichedImages.append(enriched)
       } catch {
-        print("   ⚠️  VirtualBuddy: \(image.buildNumber) - error: \(error) (\(processedCount)/\(totalCount))")
+        print(
+          "   ⚠️  VirtualBuddy: \(image.buildNumber) - error: \(error) (\(processedCount)/\(totalCount))"
+        )
         enrichedImages.append(image)  // Keep original on error
       }
 
@@ -142,7 +137,7 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
     var components = Self.baseURLComponents
     components.queryItems = [
       URLQueryItem(name: "apiKey", value: apiKey),
-      URLQueryItem(name: "ipsw", value: ipswURL.absoluteString)
+      URLQueryItem(name: "ipsw", value: ipswURL.absoluteString),
     ]
 
     guard let endpointURL = components.url else {
@@ -153,11 +148,7 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
     let data: Data
     let response: URLResponse
     do {
-      #if canImport(FoundationNetworking)
-        (data, response) = try await urlSession.data(from: endpointURL)
-      #else
-        (data, response) = try await urlSession.data(from: endpointURL)
-      #endif
+      (data, response) = try await urlSession.data(from: endpointURL)
     } catch {
       throw VirtualBuddyFetcherError.networkError(error)
     }

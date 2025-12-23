@@ -47,12 +47,12 @@ internal struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
     let apiURL = URL(
       string: "https://theapplewiki.com/api.php?action=parse&page=Firmware/Mac&format=json")!
 
-    let lastModified: Date
+    let lastModified: Date?
     #if canImport(FoundationNetworking)
       // Use FoundationNetworking.URLSession directly on Apple platforms
       let URLSession = FoundationNetworking.URLSession.self
     #endif
-    lastModified = await URLSession.shared.fetchLastModified(from: apiURL) ?? Date()
+    lastModified = await URLSession.shared.fetchLastModified(from: apiURL)
 
     let parser = IPSWParser()
 
