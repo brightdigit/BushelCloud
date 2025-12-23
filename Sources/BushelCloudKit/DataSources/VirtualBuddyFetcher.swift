@@ -40,6 +40,9 @@ import Foundation
 struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
   typealias Record = [RestoreImageRecord]
 
+  /// Base URL components for VirtualBuddy TSS API endpoint
+  private static let baseURLComponents = URLComponents(string: "https://tss.virtualbuddy.app/v1/status")!
+
   private let apiKey: String
   private let decoder: JSONDecoder
   private let urlSession: URLSession
@@ -136,7 +139,7 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
   /// Check signing status for an IPSW URL using VirtualBuddy TSS API
   private func checkSigningStatus(for ipswURL: URL) async throws -> VirtualBuddySig {
     // Build endpoint URL with API key and IPSW URL
-    var components = URLComponents(string: "https://tss.virtualbuddy.app/v1/status")!
+    var components = Self.baseURLComponents
     components.queryItems = [
       URLQueryItem(name: "apiKey", value: apiKey),
       URLQueryItem(name: "ipsw", value: ipswURL.absoluteString)
