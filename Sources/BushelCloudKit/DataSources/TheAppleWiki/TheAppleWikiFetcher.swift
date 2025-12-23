@@ -41,18 +41,29 @@ import Foundation
 )
 internal struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
   internal typealias Record = [RestoreImageRecord]
+  /// Static base URL for TheAppleWiki API
+  private static let wikiAPIURL: URL = {
+    guard
+      let url = URL(
+        string: "https://theapplewiki.com/api.php?action=parse&page=Firmware/Mac&format=json"
+      )
+    else {
+      fatalError("Invalid static URL for TheAppleWiki API - this should never happen")
+    }
+    return url
+  }()
+
   /// Fetch all macOS restore images from TheAppleWiki
   internal func fetch() async throws -> [RestoreImageRecord] {
     // Fetch Last-Modified header from TheAppleWiki API
-    let apiURL = URL(
-      string: "https://theapplewiki.com/api.php?action=parse&page=Firmware/Mac&format=json")!
+    let apiURL = Self.wikiAPIURL
 
-    let lastModified: Date
+    let lastModified: Date?
     #if canImport(FoundationNetworking)
       // Use FoundationNetworking.URLSession directly on Apple platforms
       let URLSession = FoundationNetworking.URLSession.self
     #endif
-    lastModified = await URLSession.shared.fetchLastModified(from: apiURL) ?? Date()
+    lastModified = await URLSession.shared.fetchLastModified(from: apiURL)
 
     let parser = IPSWParser()
 

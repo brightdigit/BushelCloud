@@ -39,14 +39,6 @@ import Foundation
 /// Used for freshness detection of the latest signed restore image
 public struct MESUFetcher: DataSourceFetcher, Sendable {
   public typealias Record = RestoreImageRecord?
-  // MARK: - Internal Models
-
-  fileprivate struct RestoreInfo: Codable {
-    let BuildVersion: String
-    let ProductVersion: String
-    let FirmwareURL: String
-    let FirmwareSHA1: String?
-  }
 
   public init() {}
 

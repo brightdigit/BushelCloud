@@ -187,6 +187,9 @@ Run with `--verbose` to see educational explanations of what's happening:
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
 export CLOUDKIT_KEY_FILE="./path/to/private-key.pem"
 
+# Optional: Enable VirtualBuddy TSS signing status
+export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
+
 # Sync with verbose logging to learn how MistKit works
 .build/debug/bushel-cloud sync --verbose
 
@@ -484,6 +487,9 @@ bushel-cloud sync \
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
 export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
 
+# Optional: VirtualBuddy TSS signing status (get from https://tss.virtualbuddy.app/)
+export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
+
 # Then simply run
 bushel-cloud sync
 ```
@@ -629,6 +635,7 @@ Bushel fetches data from multiple external sources including:
 - **swift.org** - Swift compiler versions
 - **Apple MESU** - Official restore image metadata
 - **Mr. Macintosh** - Community-maintained release archive
+- **VirtualBuddy TSS API** (optional) - Real-time TSS signing status verification (requires API key from [tss.virtualbuddy.app](https://tss.virtualbuddy.app/))
 
 The `sync` command fetches from all sources, deduplicates records, and uploads to CloudKit.
 

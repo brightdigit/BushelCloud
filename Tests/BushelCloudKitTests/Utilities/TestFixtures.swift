@@ -443,4 +443,54 @@ public enum TestFixtures: Sendable {
     isPrerelease: false,
     notes: nil
   )
+
+  // MARK: - VirtualBuddy API Response Fixtures
+
+  /// VirtualBuddy API response for a signed macOS build
+  public static let virtualBuddySignedResponse = """
+    {
+      "uuid": "67919BEC-F793-4544-A5E6-152EE435DCA6",
+      "version": "15.0",
+      "build": "24A5327a",
+      "code": 0,
+      "message": "SUCCESS",
+      "isSigned": true
+    }
+    """
+
+  /// VirtualBuddy API response for an unsigned macOS build
+  public static let virtualBuddyUnsignedResponse = """
+    {
+      "uuid": "02A12F2F-CE0E-4FBF-8155-884B8D9FD5CB",
+      "version": "15.1",
+      "build": "24B5024e",
+      "code": 94,
+      "message": "This device isn't eligible for the requested build.",
+      "isSigned": false
+    }
+    """
+
+  /// VirtualBuddy API response for Sonoma 14.2.1 (signed)
+  public static let virtualBuddySonoma14_2_1Response = """
+    {
+      "uuid": "A1B2C3D4-E5F6-7890-1234-567890ABCDEF",
+      "version": "14.2.1",
+      "build": "23C71",
+      "code": 0,
+      "message": "SUCCESS",
+      "isSigned": true
+    }
+    """
+
+  /// VirtualBuddy API response with build number mismatch
+  public static let virtualBuddyBuildMismatchResponse = """
+    {
+      "uuid": "MISMATCH-UUID-1234-5678-9ABC-DEF123456789",
+      "version": "15.0",
+      "build": "WRONG_BUILD",
+      "code": 0,
+      "message": "SUCCESS",
+      "isSigned": true
+    }
+    """
 }

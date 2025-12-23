@@ -198,7 +198,7 @@ public struct SyncEngine: Sendable {
 
     print("\n📥 Fetching RestoreImage records...")
     Self.logger.debug(
-      "Querying CloudKit for recordType: 'RestoreImage' with limit: 1000"
+      "Querying CloudKit for recordType: 'RestoreImage' with limit: 200"
     )
     let restoreImages = try await cloudKitService.queryRecords(recordType: "RestoreImage")
     Self.logger.debug(
@@ -207,7 +207,7 @@ public struct SyncEngine: Sendable {
 
     print("📥 Fetching XcodeVersion records...")
     Self.logger.debug(
-      "Querying CloudKit for recordType: 'XcodeVersion' with limit: 1000"
+      "Querying CloudKit for recordType: 'XcodeVersion' with limit: 200"
     )
     let xcodeVersions = try await cloudKitService.queryRecords(recordType: "XcodeVersion")
     Self.logger.debug(
@@ -216,7 +216,7 @@ public struct SyncEngine: Sendable {
 
     print("📥 Fetching SwiftVersion records...")
     Self.logger.debug(
-      "Querying CloudKit for recordType: 'SwiftVersion' with limit: 1000"
+      "Querying CloudKit for recordType: 'SwiftVersion' with limit: 200"
     )
     let swiftVersions = try await cloudKitService.queryRecords(recordType: "SwiftVersion")
     Self.logger.debug(

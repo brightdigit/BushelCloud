@@ -1,5 +1,5 @@
 {
-  "name": "Swift 6.2 Nightly",
+  "name": "Swift 6.3 Nightly Development Container",
   "image": "swiftlang/swift:nightly-6.3-noble",
   "features": {
       "ghcr.io/devcontainers/features/common-utils:2": {

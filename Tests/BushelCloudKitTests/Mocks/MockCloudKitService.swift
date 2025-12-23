@@ -30,8 +30,6 @@
 import Foundation
 import MistKit
 
-@testable import BushelCloudKit
-
 // MARK: - Mock CloudKit Errors
 
 enum MockCloudKitError: Error, Sendable {
@@ -59,7 +57,6 @@ actor MockCloudKitService: RecordManaging {
   var shouldFailModify: Bool = false
   var queryError: (any Error)?
   var modifyError: (any Error)?
-  var simulatePartialFailure: Bool = false
 
   // MARK: - Inspection Methods
 

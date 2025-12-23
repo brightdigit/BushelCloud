@@ -91,7 +91,7 @@ let package = Package(
         .executable(name: "bushel-cloud", targets: ["BushelCloudCLI"])
     ],
     dependencies: [
-        .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.3"),        
+        .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.3"),
         .package(url: "https://github.com/brightdigit/BushelKit.git", branch: "v3.0.0-alpha.2"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0"),
@@ -105,6 +105,7 @@ let package = Package(
                 .product(name: "BushelLogging", package: "BushelKit"),
                 .product(name: "BushelFoundation", package: "BushelKit"),
                 .product(name: "BushelUtilities", package: "BushelKit"),
+                .product(name: "BushelVirtualBuddy", package: "BushelKit"),
                 .product(name: "IPSWDownloads", package: "IPSWDownloads"),
                 .product(name: "SwiftSoup", package: "SwiftSoup")
             ],
@@ -119,7 +120,7 @@ let package = Package(
             swiftSettings: swiftSettings
         ),
         .testTarget(
-            name: "BushelCloudTests",
+            name: "BushelCloudKitTests",
             dependencies: [
                 .target(name: "BushelCloudKit")
             ],
