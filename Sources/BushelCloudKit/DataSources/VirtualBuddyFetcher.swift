@@ -79,12 +79,20 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
   func fetch(existingImages: [RestoreImageRecord]) async throws -> [RestoreImageRecord] {
     var enrichedImages: [RestoreImageRecord] = []
 
+    // Count images that need VirtualBuddy checking (non-file URLs)
+    let imagesToCheck = existingImages.filter { $0.downloadURL.scheme != "file" }
+    let totalCount = imagesToCheck.count
+    var processedCount = 0
+
     for image in existingImages {
       // Skip file URLs (VirtualBuddy API doesn't support them)
       guard image.downloadURL.scheme != "file" else {
         enrichedImages.append(image)
         continue
       }
+
+      processedCount += 1
+      print("   🔍 VirtualBuddy: \(image.buildNumber) (\(processedCount)/\(totalCount))")
 
       do {
         let response = try await checkSigningStatus(for: image.downloadURL)
@@ -109,6 +117,13 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
       } catch {
         print("   ⚠️  VirtualBuddy error for \(image.buildNumber): \(error)")
         enrichedImages.append(image)  // Keep original on error
+      }
+
+      // Add random delay between requests to respect rate limit (2 req/5 sec)
+      // Only delay if there are more images to process
+      if processedCount < totalCount {
+        let randomDelay = Double.random(in: 2.5...5.0)
+        try await Task.sleep(for: .seconds(randomDelay))
       }
     }
 
