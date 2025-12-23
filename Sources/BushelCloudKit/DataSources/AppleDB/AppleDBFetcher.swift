@@ -185,7 +185,7 @@ public struct AppleDBFetcher: DataSourceFetcher, Sendable {
       releaseDate: releaseDate ?? Date(),  // Fallback to current date
       downloadURL: downloadURL,
       fileSize: ipswSource.size ?? 0,
-      sha256Hash: ipswSource.hashes?.sha2_256 ?? "",
+      sha256Hash: ipswSource.hashes?.sha2256 ?? "",
       sha1Hash: ipswSource.hashes?.sha1 ?? "",
       isSigned: isSigned,
       isPrerelease: isPrerelease,
@@ -199,25 +199,4 @@ public struct AppleDBFetcher: DataSourceFetcher, Sendable {
 // MARK: - Loggable Conformance
 extension AppleDBFetcher: Loggable {
   public static let loggingCategory: BushelLogging.Category = .hub
-}
-
-// MARK: - Error Types
-
-extension AppleDBFetcher {
-  enum FetchError: LocalizedError {
-    case invalidURL
-    case noDataFound
-    case decodingFailed(any Error)
-
-    var errorDescription: String? {
-      switch self {
-      case .invalidURL:
-        return "Invalid AppleDB URL"
-      case .noDataFound:
-        return "No data found from AppleDB"
-      case .decodingFailed(let error):
-        return "Failed to decode AppleDB response: \(error.localizedDescription)"
-      }
-    }
-  }
 }

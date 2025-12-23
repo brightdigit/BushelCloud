@@ -11,16 +11,3 @@ aggregateTargets:
         name: Lint
         basedOnDependencyAnalysis: false
     schemes: {}
-schemes:
-  BushelCloud-Package:
-    build:
-      targets:
-        BushelCloud-Package: all
-    test:
-      gatherCoverageData: true
-      coverageTargets:
-        - BushelCloudKit
-      targets:
-        - name: BushelCloudTests
-          parallelizable: true
-          randomExecutionOrder: true

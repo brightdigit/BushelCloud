@@ -42,6 +42,7 @@ public struct DataSourcePipeline: Sendable {
     public var includeBetaReleases: Bool = true
     public var includeAppleDB: Bool = true
     public var includeTheAppleWiki: Bool = true
+    public var includeVirtualBuddy: Bool = true
     public var force: Bool = false
     public var specificSource: String?
 
@@ -52,6 +53,7 @@ public struct DataSourcePipeline: Sendable {
       includeBetaReleases: Bool = true,
       includeAppleDB: Bool = true,
       includeTheAppleWiki: Bool = true,
+      includeVirtualBuddy: Bool = true,
       force: Bool = false,
       specificSource: String? = nil
     ) {
@@ -61,6 +63,7 @@ public struct DataSourcePipeline: Sendable {
       self.includeBetaReleases = includeBetaReleases
       self.includeAppleDB = includeAppleDB
       self.includeTheAppleWiki = includeTheAppleWiki
+      self.includeVirtualBuddy = includeVirtualBuddy
       self.force = force
       self.specificSource = specificSource
     }
@@ -138,8 +141,8 @@ public struct DataSourcePipeline: Sendable {
 
   /// Check if a source should be fetched based on throttling rules
   private func shouldFetch(
-    source: String,
-    recordType: String,
+    source _: String,
+    recordType _: String,
     force: Bool
   ) async -> (shouldFetch: Bool, metadata: DataSourceMetadata?) {
     // If force flag is set, always fetch
@@ -306,6 +309,21 @@ public struct DataSourcePipeline: Sendable {
       }
     }
 
+    // Enrich with VirtualBuddy TSS signing status
+    if options.includeVirtualBuddy, let fetcher = VirtualBuddyFetcher() {
+      do {
+        let enrichableCount = allImages.filter { $0.downloadURL.scheme != "file" }.count
+        let enrichedImages = try await fetcher.fetch(existingImages: allImages)
+        allImages = enrichedImages
+        print("   ✓ VirtualBuddy: Enriched \(enrichableCount) images with signing status")
+      } catch {
+        print("   ⚠️  VirtualBuddy failed: \(error)")
+        // Don't throw - continue with original data
+      }
+    } else if options.includeVirtualBuddy {
+      print("   ⚠️  VirtualBuddy: No API key found (set VIRTUALBUDDY_API_KEY)")
+    }
+
     // Deduplicate by build number (keep first occurrence)
     let preDedupeCount = allImages.count
     let deduped = deduplicateRestoreImages(allImages)
@@ -397,14 +415,17 @@ public struct DataSourcePipeline: Sendable {
     }
 
     // Merge isSigned with priority rules:
-    // 1. MESU is always authoritative (Apple's real-time signing status)
-    // 2. For non-MESU sources, prefer the most recently updated
+    // 1. MESU or VirtualBuddy are always authoritative (Apple's real-time signing status)
+    // 2. For other sources, prefer the most recently updated
     // 3. If both have same update time (or both nil) and disagree, prefer false
 
-    if first.source == "mesu.apple.com" && first.isSigned != nil {
-      merged.isSigned = first.isSigned  // MESU first is authoritative
-    } else if second.source == "mesu.apple.com" && second.isSigned != nil {
-      merged.isSigned = second.isSigned  // MESU second is authoritative
+    // Define authoritative sources for signing status
+    let authoritativeSources: Set<String> = ["mesu.apple.com", "tss.virtualbuddy.app"]
+
+    if authoritativeSources.contains(first.source) && first.isSigned != nil {
+      merged.isSigned = first.isSigned  // First is authoritative (MESU or VirtualBuddy)
+    } else if authoritativeSources.contains(second.source) && second.isSigned != nil {
+      merged.isSigned = second.isSigned  // Second is authoritative (MESU or VirtualBuddy)
     } else {
       // Neither is MESU, compare update timestamps
       let firstUpdated = first.sourceUpdatedAt

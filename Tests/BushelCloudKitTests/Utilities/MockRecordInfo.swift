@@ -55,22 +55,25 @@ public enum MockRecordInfo: Sendable {
   /// Creates a RecordInfo with an error for testing error handling
   ///
   /// - Parameters:
-  ///   - recordType: CloudKit record type
+  ///   - recordType: CloudKit record type (will be set to "Unknown" to mark as error)
   ///   - recordName: CloudKit record name
-  ///   - errorCode: Server error code
-  ///   - reason: Error reason message
-  /// - Returns: A RecordInfo marked as an error
+  ///   - errorCode: Server error code (stored in fields for test verification)
+  ///   - reason: Error reason message (stored in fields for test verification)
+  /// - Returns: A RecordInfo marked as an error (isError == true)
   public static func createError(
-    recordType: String,
+    recordType _: String,
     recordName: String,
     errorCode: String,
     reason: String
   ) -> RecordInfo {
     RecordInfo(
       recordName: recordName,
-      recordType: recordType,
+      recordType: "Unknown",  // Marks this as an error (isError will be true)
       recordChangeTag: nil,
-      fields: [:]
+      fields: [
+        "serverErrorCode": .string(errorCode),
+        "reason": .string(reason),
+      ]
     )
   }
 }

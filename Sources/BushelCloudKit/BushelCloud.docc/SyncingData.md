@@ -63,13 +63,14 @@ bushel-cloud sync --dry-run --verbose
 
 ## Data Sources
 
-BushelCloud fetches from six external sources:
+BushelCloud fetches from seven external sources:
 
 | Source | Data Type | Priority |
 |--------|-----------|----------|
 | **IPSW.me** | Restore images | Standard |
 | **AppleDB.dev** | Restore images | Backfills SHA-256 |
 | **MESU** | Restore images | Authoritative for signing |
+| **VirtualBuddy** | Restore images | Authoritative for signing |
 | **Mr. Macintosh** | Restore images | Historical data |
 | **XcodeReleases.com** | Xcode versions | Primary |
 | **swift.org** | Swift versions | Official releases |
@@ -82,7 +83,7 @@ Multiple sources provide overlapping data. BushelCloud merges records using thes
 
 **Restore Images**:
 - **Unique Key**: Build number (e.g., "23C71")
-- **MESU Priority**: Signing status from MESU overrides other sources
+- **Authoritative Sources**: Signing status from MESU and VirtualBuddy overrides other sources
 - **AppleDB Backfill**: SHA-256 hashes filled from AppleDB when missing
 - **Timestamp Wins**: Most recent `sourceUpdatedAt` wins for conflicts
 

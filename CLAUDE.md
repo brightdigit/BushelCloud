@@ -48,8 +48,14 @@ Required for CloudKit operations:
 
 ```bash
 export CLOUDKIT_KEY_ID="your-key-id"
-export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
+export CLOUDKIT_PRIVATE_KEY_PATH="$HOME/.cloudkit/bushel-private-key.pem"
 export CLOUDKIT_CONTAINER_ID="iCloud.com.yourcompany.Bushel"  # Optional, has default
+```
+
+Optional for VirtualBuddy TSS signing status:
+
+```bash
+export VIRTUALBUDDY_API_KEY="your-virtualbuddy-api-key"  # Get from https://tss.virtualbuddy.app/
 ```
 
 ## Architecture
@@ -147,6 +153,72 @@ Multiple sources provide overlapping data. The pipeline deduplicates using:
 - **Merge Priority**: MESU for signing status, AppleDB for hashes, most recent `sourceUpdatedAt` wins
 
 See `.claude/implementation-patterns.md` for detailed deduplication logic and code examples.
+
+### VirtualBuddy TSS API Integration
+
+**Purpose**: VirtualBuddy provides real-time TSS (Tatsu Signing Status) verification for macOS restore images for virtual machines.
+
+**API Endpoint**:
+```
+GET https://tss.virtualbuddy.app/v1/status?apiKey=<key>&ipsw=<IPSW URL>
+```
+
+**Board Config**: Checks `VMA2MACOSAP` (macOS virtual machines)
+
+**Key Response Fields**:
+- `isSigned` (boolean) - true if Apple is signing the build, false otherwise
+- `uuid` - Request tracking ID for debugging
+- `version` - macOS version (e.g., "15.0")
+- `build` - Build number (e.g., "24A5327a")
+- `code` - Status code (0 = SUCCESS, 94 = not eligible)
+- `message` - Human-readable status message
+
+**HTTP Status Codes**:
+- `200` - Success (returned regardless of signing status)
+- `400` - Bad request (invalid IPSW URL)
+- `429` - Rate limit exceeded
+- `500` - Internal server error
+
+**Rate Limits & Caching**:
+- **Rate limit**: 2 requests per 5 seconds
+- **Server-side CDN cache**: 12 hours (to avoid Apple TSS rate limiting)
+- **Client-side implementation**: Random delays of 2.5-3.5 seconds with 1-second tolerance between requests
+
+**Implementation Details**:
+- **File**: `Sources/BushelCloudKit/DataSources/VirtualBuddyFetcher.swift`
+- **Integration**: Enriches RestoreImageRecord with real-time signing status after other data sources
+- **Error handling**: HTTP 429 errors are logged; original record preserved on any error
+- **Progress tracking**: Shows "X/Y images checked" during sync
+- **Performance**: ~2.5-4 minutes for 50 images (acceptable for 8-16 hour sync schedules)
+
+**Deduplication Priority**:
+- VirtualBuddy is an **authoritative source** for `isSigned` status (along with MESU)
+- Takes precedence over other sources when merging duplicate records
+- See `DataSourcePipeline.swift:429-447` for merge logic
+
+**Example Response (Signed)**:
+```json
+{
+  "uuid": "67919BEC-F793-4544-A5E6-152EE435DCA6",
+  "version": "15.0",
+  "build": "24A5327a",
+  "code": 0,
+  "message": "SUCCESS",
+  "isSigned": true
+}
+```
+
+**Example Response (Unsigned)**:
+```json
+{
+  "uuid": "02A12F2F-CE0E-4FBF-8155-884B8D9FD5CB",
+  "version": "15.1",
+  "build": "24B5024e",
+  "code": 94,
+  "message": "This device isn't eligible for the requested build.",
+  "isSigned": false
+}
+```
 
 ### Logging
 
@@ -419,7 +491,7 @@ The project requires three record types in the public database:
 
 **Critical Schema Rules**:
 1. Always start schema files with `DEFINE SCHEMA`
-2. Never include system fields (`___recordID`, etc.) - CloudKit adds them automatically
+2. System fields (`___recordID`, `___createdTimestamp`, etc.) can be included in `.ckdb` schema files but are auto-generated when creating records via API
 3. Grant permissions to **both** `_creator` AND `_icloud` for S2S auth
 4. Use `INT64` for booleans (0 = false, 1 = true)
 
@@ -469,7 +541,7 @@ open Package.swift
    - Add environment variables:
      - `CLOUDKIT_CONTAINER_ID`: `iCloud.com.brightdigit.Bushel`
      - `CLOUDKIT_KEY_ID`: Your key ID
-     - `CLOUDKIT_KEY_FILE`: `$HOME/.cloudkit/bushel-private-key.pem`
+     - `CLOUDKIT_PRIVATE_KEY_PATH`: `$HOME/.cloudkit/bushel-private-key.pem`
    - Add arguments for testing:
      - `sync --verbose` or `export --output ./export.json --verbose`
 3. **Run → Options tab**:
@@ -496,7 +568,7 @@ open Package.swift
 | Issue | Solution |
 |-------|----------|
 | "Cannot find container" | Verify `CLOUDKIT_CONTAINER_ID` is correct |
-| "Authentication failed" | Check `CLOUDKIT_KEY_ID` and `CLOUDKIT_KEY_FILE` |
+| "Authentication failed" | Check `CLOUDKIT_KEY_ID` and `CLOUDKIT_PRIVATE_KEY_PATH` |
 | "Module 'MistKit' not found" | Reset package cache or rebuild |
 | "Cannot find type 'RecordOperation'" | Clean build folder (Cmd+Shift+K) and rebuild |
 
