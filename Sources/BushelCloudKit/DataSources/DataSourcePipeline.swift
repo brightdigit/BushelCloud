@@ -312,9 +312,10 @@ public struct DataSourcePipeline: Sendable {
     // Enrich with VirtualBuddy TSS signing status
     if options.includeVirtualBuddy, let fetcher = VirtualBuddyFetcher() {
       do {
+        let enrichableCount = allImages.filter { $0.downloadURL.scheme != "file" }.count
         let enrichedImages = try await fetcher.fetch(existingImages: allImages)
         allImages = enrichedImages
-        print("   ✓ VirtualBuddy: Enriched \(allImages.count) images with signing status")
+        print("   ✓ VirtualBuddy: Enriched \(enrichableCount) images with signing status")
       } catch {
         print("   ⚠️  VirtualBuddy failed: \(error)")
         // Don't throw - continue with original data

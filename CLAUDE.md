@@ -48,7 +48,7 @@ Required for CloudKit operations:
 
 ```bash
 export CLOUDKIT_KEY_ID="your-key-id"
-export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
+export CLOUDKIT_PRIVATE_KEY_PATH="$HOME/.cloudkit/bushel-private-key.pem"
 export CLOUDKIT_CONTAINER_ID="iCloud.com.yourcompany.Bushel"  # Optional, has default
 ```
 
@@ -491,7 +491,7 @@ The project requires three record types in the public database:
 
 **Critical Schema Rules**:
 1. Always start schema files with `DEFINE SCHEMA`
-2. Never include system fields (`___recordID`, etc.) - CloudKit adds them automatically
+2. System fields (`___recordID`, `___createdTimestamp`, etc.) can be included in `.ckdb` schema files but are auto-generated when creating records via API
 3. Grant permissions to **both** `_creator` AND `_icloud` for S2S auth
 4. Use `INT64` for booleans (0 = false, 1 = true)
 
@@ -541,7 +541,7 @@ open Package.swift
    - Add environment variables:
      - `CLOUDKIT_CONTAINER_ID`: `iCloud.com.brightdigit.Bushel`
      - `CLOUDKIT_KEY_ID`: Your key ID
-     - `CLOUDKIT_KEY_FILE`: `$HOME/.cloudkit/bushel-private-key.pem`
+     - `CLOUDKIT_PRIVATE_KEY_PATH`: `$HOME/.cloudkit/bushel-private-key.pem`
    - Add arguments for testing:
      - `sync --verbose` or `export --output ./export.json --verbose`
 3. **Run → Options tab**:
@@ -568,7 +568,7 @@ open Package.swift
 | Issue | Solution |
 |-------|----------|
 | "Cannot find container" | Verify `CLOUDKIT_CONTAINER_ID` is correct |
-| "Authentication failed" | Check `CLOUDKIT_KEY_ID` and `CLOUDKIT_KEY_FILE` |
+| "Authentication failed" | Check `CLOUDKIT_KEY_ID` and `CLOUDKIT_PRIVATE_KEY_PATH` |
 | "Module 'MistKit' not found" | Reset package cache or rebuild |
 | "Cannot find type 'RecordOperation'" | Clean build folder (Cmd+Shift+K) and rebuild |
 

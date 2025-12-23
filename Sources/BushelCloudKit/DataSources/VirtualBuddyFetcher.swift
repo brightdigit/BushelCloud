@@ -31,7 +31,6 @@ import BushelFoundation
 import BushelUtilities
 import BushelVirtualBuddy
 import Foundation
-import OSVer
 
 #if canImport(FoundationNetworking)
   import FoundationNetworking

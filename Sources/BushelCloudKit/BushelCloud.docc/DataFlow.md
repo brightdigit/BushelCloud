@@ -18,6 +18,7 @@ The ``DataSourcePipeline`` fetches data from multiple external sources in parall
 4. **swift.org** - Swift compiler releases
 5. **MESU** - Apple's official software update metadata
 6. **Mr. Macintosh** - Community-maintained release archive
+7. **VirtualBuddy** - Real-time TSS signing status verification
 
 Each fetcher returns domain-specific records implementing the ``CloudKitRecord`` protocol.
 
@@ -30,7 +31,7 @@ Data transformation includes:
 - **Field Mapping**: Convert Swift types to CloudKit `FieldValue` types
 
 Key deduplication rules:
-- MESU is authoritative for signing status
+- MESU and VirtualBuddy are authoritative for signing status
 - AppleDB backfills missing SHA-256 hashes
 - Most recent `sourceUpdatedAt` timestamp wins
 
