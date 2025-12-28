@@ -55,7 +55,7 @@ enum ClearCommand {
 
       guard let response = readLine(), response.lowercased() == "yes" else {
         print("\n❌ Operation cancelled")
-        throw ExitCode.failure
+        Foundation.exit(1)
       }
     }
 
@@ -72,7 +72,7 @@ enum ClearCommand {
       print("\n✅ All records have been deleted from CloudKit")
     } catch {
       printError(error)
-      throw ExitCode.failure
+      Foundation.exit(1)
     }
   }
 

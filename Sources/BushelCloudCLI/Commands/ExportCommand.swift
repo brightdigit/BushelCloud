@@ -63,7 +63,7 @@ enum ExportCommand {
       }
     } catch {
       printError(error)
-      throw ExitCode.failure
+      Foundation.exit(1)
     }
   }
 

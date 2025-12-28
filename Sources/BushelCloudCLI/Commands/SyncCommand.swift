@@ -42,28 +42,6 @@ enum SyncCommand {
     // Enable verbose console output if requested
     BushelUtilities.ConsoleOutput.isVerbose = config.sync?.verbose ?? false
 
-    // Validate CloudKit credentials
-    guard !config.cloudKit.keyID.isEmpty && !config.cloudKit.privateKeyPath.isEmpty else {
-      print("❌ Error: CloudKit Server-to-Server Key credentials are required")
-      print("")
-      print("   Provide via command-line flags:")
-      print("     --cloudkit-key-id YOUR_KEY_ID --cloudkit-private-key-path ./private-key.pem")
-      print("")
-      print("   Or set environment variables:")
-      print("     export CLOUDKIT_KEY_ID=\"YOUR_KEY_ID\"")
-      print("     export CLOUDKIT_PRIVATE_KEY_PATH=\"./private-key.pem\"")
-      print("")
-      print("   Get your Server-to-Server Key from:")
-      print("   https://icloud.developer.apple.com/dashboard/")
-      print("   Navigate to: API Access → Server-to-Server Keys")
-      print("")
-      print("   Important:")
-      print("   • Download and save the private key .pem file securely")
-      print("   • Never commit .pem files to version control!")
-      print("")
-      throw ExitCode.failure
-    }
-
     // Build sync options from configuration
     let options = buildSyncOptions(from: config.sync)
 
@@ -84,7 +62,7 @@ enum SyncCommand {
       printSuccess(result)
     } catch {
       printError(error)
-      throw ExitCode.failure
+      Foundation.exit(1)
     }
   }
 
@@ -148,10 +126,4 @@ enum SyncCommand {
     print("   • Ensure the CloudKit container exists")
     print("   • Verify external data sources are accessible")
   }
-}
-
-// MARK: - Exit Code
-
-struct ExitCode: Error {
-  static let failure = ExitCode()
 }
