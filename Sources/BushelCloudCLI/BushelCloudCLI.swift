@@ -27,27 +27,35 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
+import Foundation
 
 @main
-internal struct BushelCloudCLI: AsyncParsableCommand {
-  internal static let configuration = CommandConfiguration(
-    commandName: "bushel-cloud",
-    abstract: "CloudKit version history tool for Bushel virtualization",
-    discussion: """
-      A command-line tool demonstrating MistKit's CloudKit Web Services capabilities.
+internal struct BushelCloudCLI {
+  internal static func main() async throws {
+    let args = Array(CommandLine.arguments.dropFirst())
+    let command = args.first ?? "sync"
 
-      Manages macOS restore images, Xcode versions, and Swift compiler versions
-      in CloudKit for use with Bushel's virtualization workflow.
-      """,
-    version: "1.0.0",
-    subcommands: [
-      SyncCommand.self,
-      StatusCommand.self,
-      ListCommand.self,
-      ExportCommand.self,
-      ClearCommand.self,
-    ],
-    defaultSubcommand: SyncCommand.self
-  )
+    switch command {
+    case "sync":
+      try await SyncCommand.run(args: args)
+    case "status":
+      try await StatusCommand.run(args: args)
+    case "list":
+      try await ListCommand.run(args: args)
+    case "export":
+      try await ExportCommand.run(args: args)
+    case "clear":
+      try await ClearCommand.run(args: args)
+    default:
+      print("Error: Unknown command '\(command)'")
+      print("")
+      print("Available commands:")
+      print("  sync    - Sync data to CloudKit")
+      print("  status  - Show CloudKit data source status")
+      print("  list    - List CloudKit records")
+      print("  export  - Export CloudKit data to JSON")
+      print("  clear   - Clear all CloudKit records")
+      Foundation.exit(1)
+    }
+  }
 }

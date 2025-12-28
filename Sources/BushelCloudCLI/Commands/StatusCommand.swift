@@ -27,77 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
 import BushelCloudKit
 import BushelFoundation
 import Foundation
 internal import MistKit
 
-struct StatusCommand: AsyncParsableCommand {
-  static let configuration = CommandConfiguration(
-    commandName: "status",
-    abstract: "Show data source fetch status and metadata",
-    discussion: """
-      Displays information about when each data source was last fetched,
-      when the source was last updated, record counts, and next eligible fetch time.
-
-      This command queries CloudKit for DataSourceMetadata records to show
-      the current state of all data sources.
-      """
-  )
-
-  // MARK: - Required Options
-
-  @Option(name: .shortAndLong, help: "CloudKit container identifier")
-  var containerIdentifier: String = "iCloud.com.brightdigit.Bushel"
-
-  @Option(name: .long, help: "Server-to-Server Key ID (or set CLOUDKIT_KEY_ID)")
-  var keyID: String = ""
-
-  @Option(name: .long, help: "Path to private key .pem file (or set CLOUDKIT_PRIVATE_KEY_PATH)")
-  var keyFile: String = ""
-
-  // MARK: - Display Options
-
-  @Flag(name: .long, help: "Show only sources with errors")
-  var errorsOnly: Bool = false
-
-  @Flag(name: .long, help: "Show detailed timing information")
-  var detailed: Bool = false
-
-  // MARK: - Execution
-
-  mutating func run() async throws {
-    // Get Server-to-Server credentials from environment if not provided
-    let resolvedKeyID =
-      keyID.isEmpty ? ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"] ?? "" : keyID
-
-    let resolvedKeyFile =
-      keyFile.isEmpty
-      ? ProcessInfo.processInfo.environment["CLOUDKIT_PRIVATE_KEY_PATH"] ?? "" : keyFile
-
-    guard !resolvedKeyID.isEmpty, !resolvedKeyFile.isEmpty else {
-      print("❌ Error: CloudKit Server-to-Server Key credentials are required")
-      print("")
-      print("   Provide via command-line flags:")
-      print("     --key-id YOUR_KEY_ID --key-file ./private-key.pem")
-      print("")
-      print("   Or set environment variables:")
-      print("     export CLOUDKIT_KEY_ID=\"YOUR_KEY_ID\"")
-      print("     export CLOUDKIT_PRIVATE_KEY_PATH=\"./private-key.pem\"")
-      print("")
-      throw ExitCode.failure
-    }
+enum StatusCommand {
+  static func run(args: [String]) async throws {
+    // Load configuration using Swift Configuration
+    let loader = ConfigurationLoader()
+    let rawConfig = try await loader.loadConfiguration()
+    let config = try rawConfig.validated()
 
     // Create CloudKit service
     let cloudKitService = try BushelCloudKitService(
-      containerIdentifier: containerIdentifier,
-      keyID: resolvedKeyID,
-      privateKeyPath: resolvedKeyFile
+      containerIdentifier: config.cloudKit.containerID,
+      keyID: config.cloudKit.keyID,
+      privateKeyPath: config.cloudKit.privateKeyPath
     )
 
     // Load configuration to show intervals
-    let configuration = FetchConfiguration.loadFromEnvironment()
+    let configuration = config.fetch ?? FetchConfiguration.loadFromEnvironment()
 
     // Fetch all metadata records
     print("\n📊 Data Source Status")
@@ -106,11 +56,12 @@ struct StatusCommand: AsyncParsableCommand {
     let allMetadata = try await fetchAllMetadata(cloudKitService: cloudKitService)
 
     if allMetadata.isEmpty {
-      print("\n   No metadata records found. Run 'bushel-images sync' to populate metadata.")
+      print("\n   No metadata records found. Run 'bushel-cloud sync' to populate metadata.")
       return
     }
 
     // Filter if needed
+    let errorsOnly = config.status?.errorsOnly ?? false
     let metadata = errorsOnly ? allMetadata.filter { $0.lastError != nil } : allMetadata
 
     if metadata.isEmpty, errorsOnly {
@@ -119,6 +70,7 @@ struct StatusCommand: AsyncParsableCommand {
     }
 
     // Display metadata
+    let detailed = config.status?.detailed ?? false
     for meta in metadata.sorted(by: {
       $0.recordTypeName < $1.recordTypeName
         || ($0.recordTypeName == $1.recordTypeName && $0.sourceName < $1.sourceName)
@@ -131,7 +83,7 @@ struct StatusCommand: AsyncParsableCommand {
 
   // MARK: - Private Helpers
 
-  private func fetchAllMetadata(cloudKitService: BushelCloudKitService) async throws
+  private static func fetchAllMetadata(cloudKitService: BushelCloudKitService) async throws
     -> [DataSourceMetadata]
   {
     let records = try await cloudKitService.queryRecords(recordType: "DataSourceMetadata")
@@ -167,7 +119,7 @@ struct StatusCommand: AsyncParsableCommand {
     return metadataList
   }
 
-  private func printMetadata(
+  private static func printMetadata(
     _ metadata: DataSourceMetadata,
     configuration: FetchConfiguration,
     detailed: Bool
@@ -225,14 +177,14 @@ struct StatusCommand: AsyncParsableCommand {
     }
   }
 
-  private func formatDate(_ date: Date) -> String {
+  private static func formatDate(_ date: Date) -> String {
     let formatter = DateFormatter()
     formatter.dateStyle = .short
     formatter.timeStyle = .short
     return formatter.string(from: date)
   }
 
-  private func formatTimeInterval(_ interval: TimeInterval) -> String {
+  private static func formatTimeInterval(_ interval: TimeInterval) -> String {
     let absInterval = abs(interval)
 
     if absInterval < 60 {
