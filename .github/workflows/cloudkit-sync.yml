@@ -45,7 +45,21 @@ jobs:
             ${{ runner.os }}-swift-build-
 
       - name: Build bushel-cloud executable
-        run: swift build -c release
+        id: build
+        run: |
+          swift build -c release
+          BIN_PATH=$(swift build -c release --show-bin-path)
+          echo "bin-path=$BIN_PATH" >> $GITHUB_OUTPUT
+          echo "Binary location: $BIN_PATH/bushel-cloud"
+          ls -lh "$BIN_PATH/bushel-cloud"
+
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bushel-cloud-${{ runner.os }}-${{ github.sha }}
+          path: ${{ steps.build.outputs.bin-path }}/bushel-cloud
+          retention-days: 7
+          if-no-files-found: warn
 
       - name: Run CloudKit sync
         env:
@@ -58,9 +72,13 @@ jobs:
           echo "Container: $CLOUDKIT_CONTAINER_ID"
           echo "Environment: $CLOUDKIT_ENVIRONMENT"
 
-          # Run sync with verbose logging
+          # Use pre-built binary (already computed in build step)
+          BIN_PATH="${{ steps.build.outputs.bin-path }}"
+          echo "Using binary: $BIN_PATH/bushel-cloud"
+
+          # Run pre-built binary
           # Note: Same key works for both development and production
           # Change CLOUDKIT_ENVIRONMENT to 'production' when ready
-          .build/x86_64-unknown-linux-gnu/release/bushel-cloud sync \
+          "$BIN_PATH/bushel-cloud" sync \
             --verbose \
             --container-identifier "$CLOUDKIT_CONTAINER_ID"

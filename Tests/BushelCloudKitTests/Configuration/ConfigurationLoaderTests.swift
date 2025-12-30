@@ -7,6 +7,7 @@
 
 import Configuration
 import Foundation
+import MistKit
 import Testing
 
 @testable import BushelCloudKit
@@ -398,6 +399,165 @@ struct ConfigurationLoaderTests {
       #expect(validated.cloudKit.containerID == "iCloud.com.test.App")
       #expect(validated.cloudKit.keyID == "test-key-id")
       #expect(validated.cloudKit.privateKeyPath == "/path/to/key.pem")
+    }
+
+    @Test("CloudKit privateKey from environment variable")
+    func testPrivateKeyFromEnv() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY":
+            "-----BEGIN PRIVATE KEY-----\nMIGH...\n-----END PRIVATE KEY-----",
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      #expect(validated.cloudKit.privateKey != nil)
+      #expect(validated.cloudKit.privateKey?.contains("BEGIN PRIVATE KEY") == true)
+    }
+
+    @Test(
+      "CloudKit environment from environment variable",
+      arguments: ["development", "production"]
+    )
+    func testEnvironmentFromEnv(environment: String) async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+          "CLOUDKIT_ENVIRONMENT": environment,
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      #expect(validated.cloudKit.environment.rawValue == environment)
+    }
+
+    @Test("Invalid CloudKit environment throws error")
+    func testInvalidEnvironment() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+          "CLOUDKIT_ENVIRONMENT": "staging",  // Invalid
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+
+      #expect(throws: ConfigurationError.self) {
+        try config.validated()
+      }
+    }
+
+    @Test("Missing both privateKey and privateKeyPath throws error")
+    func testMissingBothCredentials() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          // Missing both CLOUDKIT_PRIVATE_KEY and CLOUDKIT_PRIVATE_KEY_PATH
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+
+      #expect(throws: ConfigurationError.self) {
+        try config.validated()
+      }
+    }
+
+    @Test("privateKey takes precedence over privateKeyPath when both are set")
+    func testPrivateKeyPrecedence() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY":
+            "-----BEGIN PRIVATE KEY-----\nfrom-env\n-----END PRIVATE KEY-----",
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      // Both should be set in validated config
+      #expect(validated.cloudKit.privateKey != nil)
+      #expect(!validated.cloudKit.privateKeyPath.isEmpty)
+      // SyncEngine will prefer privateKey when initializing
+    }
+
+    @Test("Empty CLOUDKIT_PRIVATE_KEY is treated as absent")
+    func testEmptyPrivateKeyIsAbsent() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY": "   ",  // Whitespace only
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      // Should use privateKeyPath since privateKey is effectively empty
+      #expect(validated.cloudKit.privateKey == nil)
+      #expect(!validated.cloudKit.privateKeyPath.isEmpty)
+    }
+
+    @Test("Environment parsing is case-insensitive")
+    func testEnvironmentCaseInsensitive() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+          "CLOUDKIT_ENVIRONMENT": "Production",  // Mixed case
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      #expect(validated.cloudKit.environment == .production)
+    }
+
+    @Test("All CloudKit fields present with privateKey passes validation")
+    func testAllCloudKitFieldsWithPrivateKey() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY":
+            "-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----",
+          "CLOUDKIT_ENVIRONMENT": "production",
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      #expect(validated.cloudKit.containerID == "iCloud.com.test.App")
+      #expect(validated.cloudKit.keyID == "test-key-id")
+      #expect(validated.cloudKit.privateKey != nil)
+      #expect(validated.cloudKit.environment == .production)
     }
   }
 

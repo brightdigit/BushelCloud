@@ -80,7 +80,7 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     containerIdentifier: String,
     keyID: String,
     privateKeyPath: String,
-    environment: CloudKitService.Environment = .development
+    environment: Environment = .development
   ) throws {
     // Read PEM file from disk
     guard FileManager.default.fileExists(atPath: privateKeyPath) else {
@@ -123,7 +123,7 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     containerIdentifier: String,
     keyID: String,
     pemString: String,
-    environment: CloudKitService.Environment = .development
+    environment: Environment = .development
   ) throws {
     // Create Server-to-Server authentication manager directly from PEM string
     let tokenManager = try ServerToServerAuthManager(

@@ -29,6 +29,7 @@
 
 public import BushelFoundation
 import Foundation
+public import MistKit
 
 // swiftlint:disable file_length
 
@@ -137,42 +138,26 @@ public struct CloudKitConfiguration: Sendable {
   public var containerID: String?
   public var keyID: String?
   public var privateKeyPath: String?
+  public var privateKey: String?        // Raw PEM string for CI/CD
+  public var environment: String?       // "development" or "production"
 
   public init(
     containerID: String? = nil,
     keyID: String? = nil,
-    privateKeyPath: String? = nil
+    privateKeyPath: String? = nil,
+    privateKey: String? = nil,
+    environment: String? = nil
   ) {
     self.containerID = containerID
     self.keyID = keyID
     self.privateKeyPath = privateKeyPath
+    self.privateKey = privateKey
+    self.environment = environment
   }
 
   /// Validate that all required CloudKit fields are present
   public func validated() throws -> ValidatedCloudKitConfiguration {
-    guard let containerID = containerID, !containerID.isEmpty else {
-      throw ConfigurationError(
-        "CloudKit container ID required. Set CLOUDKIT_CONTAINER_ID or use --cloudkit-container-id",
-        key: "cloudkit.container_id"
-      )
-    }
-    guard let keyID = keyID, !keyID.isEmpty else {
-      throw ConfigurationError(
-        "CloudKit key ID required. Set CLOUDKIT_KEY_ID or use --cloudkit-key-id",
-        key: "cloudkit.key_id"
-      )
-    }
-    guard let privateKeyPath = privateKeyPath, !privateKeyPath.isEmpty else {
-      throw ConfigurationError(
-        "CloudKit private key path required. Set CLOUDKIT_PRIVATE_KEY_PATH or use --cloudkit-private-key-path",
-        key: "cloudkit.private_key_path"
-      )
-    }
-    return ValidatedCloudKitConfiguration(
-      containerID: containerID,
-      keyID: keyID,
-      privateKeyPath: privateKeyPath
-    )
+    try ValidatedCloudKitConfiguration(from: self)
   }
 }
 
@@ -180,12 +165,73 @@ public struct CloudKitConfiguration: Sendable {
 public struct ValidatedCloudKitConfiguration: Sendable {
   public let containerID: String
   public let keyID: String
-  public let privateKeyPath: String
+  public let privateKeyPath: String       // Can be empty if privateKey is used
+  public let privateKey: String?          // Optional (only one method required)
+  public let environment: MistKit.Environment
 
-  public init(containerID: String, keyID: String, privateKeyPath: String) {
+  public init(from config: CloudKitConfiguration) throws {
+    // Validate container ID
+    guard let containerID = config.containerID, !containerID.isEmpty else {
+      throw ConfigurationError(
+        "CloudKit container ID required. Set CLOUDKIT_CONTAINER_ID or use --cloudkit-container-id",
+        key: "cloudkit.container_id"
+      )
+    }
+
+    // Validate key ID
+    guard let keyID = config.keyID, !keyID.isEmpty else {
+      throw ConfigurationError(
+        "CloudKit key ID required. Set CLOUDKIT_KEY_ID or use --cloudkit-key-id",
+        key: "cloudkit.key_id"
+      )
+    }
+
+    // Validate at least ONE credential method is provided (NOT both required)
+    let trimmedPrivateKey = config.privateKey?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    let trimmedPrivateKeyPath = config.privateKeyPath?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+    let hasPrivateKey = !trimmedPrivateKey.isEmpty
+    let hasPrivateKeyPath = !trimmedPrivateKeyPath.isEmpty
+
+    guard hasPrivateKey || hasPrivateKeyPath else {
+      throw ConfigurationError(
+        "Either CLOUDKIT_PRIVATE_KEY or CLOUDKIT_PRIVATE_KEY_PATH must be provided",
+        key: "cloudkit.private_key"
+      )
+    }
+
+    // Parse environment string to enum (case-insensitive for user convenience)
+    let environmentString = (config.environment ?? "development")
+      .lowercased()
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+
+    guard let parsedEnvironment = MistKit.Environment(rawValue: environmentString) else {
+      throw ConfigurationError(
+        "Invalid CLOUDKIT_ENVIRONMENT: '\(config.environment ?? "")'. Must be 'development' or 'production'",
+        key: "cloudkit.environment"
+      )
+    }
+
+    self.containerID = containerID
+    self.keyID = keyID
+    self.privateKeyPath = hasPrivateKeyPath ? trimmedPrivateKeyPath : ""
+    self.privateKey = hasPrivateKey ? trimmedPrivateKey : nil
+    self.environment = parsedEnvironment
+  }
+
+  // Legacy initializer for backward compatibility (if needed by tests)
+  public init(
+    containerID: String,
+    keyID: String,
+    privateKeyPath: String,
+    privateKey: String? = nil,
+    environment: MistKit.Environment
+  ) {
     self.containerID = containerID
     self.keyID = keyID
     self.privateKeyPath = privateKeyPath
+    self.privateKey = privateKey
+    self.environment = environment
   }
 }
 

@@ -249,22 +249,23 @@ env:
   CLOUDKIT_ENVIRONMENT: development  # or 'production'
 ```
 
-Or override with command-line flag:
+Or override with environment variable:
 
 ```yaml
-.build/x86_64-unknown-linux-gnu/release/bushel-cloud sync \
-  --verbose \
-  --environment production
+export CLOUDKIT_ENVIRONMENT=production
+BIN_PATH=$(swift build -c release --show-bin-path)
+"$BIN_PATH/bushel-cloud" sync --verbose
 ```
 
-**Valid values**: `development`, `dev`, `production`, `prod`
+**Valid values**: `development`, `production` (case-insensitive)
 
 ### Sync Specific Record Types Only
 
 Add flags to the sync command in the workflow:
 
 ```yaml
-.build/x86_64-unknown-linux-gnu/release/bushel-cloud sync \
+BIN_PATH=$(swift build -c release --show-bin-path)
+"$BIN_PATH/bushel-cloud" sync \
   --verbose \
   --restore-images-only  # Or --xcode-only, --swift-only
 ```
@@ -274,7 +275,8 @@ Add flags to the sync command in the workflow:
 Add `--force` flag to bypass fetch throttling:
 
 ```yaml
-.build/x86_64-unknown-linux-gnu/release/bushel-cloud sync \
+BIN_PATH=$(swift build -c release --show-bin-path)
+"$BIN_PATH/bushel-cloud" sync \
   --verbose \
   --force  # Fetch fresh data regardless of intervals
 ```

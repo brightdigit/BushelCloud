@@ -52,6 +52,17 @@ internal enum ConfigurationKeys {
       "cloudkit.private_key_path",
       envPrefix: nil
     )
+
+    internal static let privateKey = OptionalConfigKey<String>(
+      "cloudkit.private_key",
+      envPrefix: nil  // Generates: ENV="CLOUDKIT_PRIVATE_KEY"
+    )
+
+    internal static let environment = ConfigKey<String>(
+      "cloudkit.environment",
+      envPrefix: nil,  // Generates: ENV="CLOUDKIT_ENVIRONMENT"
+      default: "development"
+    )
   }
 
   // MARK: - VirtualBuddy Configuration

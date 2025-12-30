@@ -87,7 +87,7 @@ public struct SyncEngine: Sendable {
     keyID: String,
     privateKeyPath: String = "",
     pemString: String = "",
-    environment: CloudKitService.Environment = .development,
+    environment: Environment = .development,
     configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
   ) throws {
     // Prefer PEM string if provided (CI/CD pattern), fall back to file path (local development)

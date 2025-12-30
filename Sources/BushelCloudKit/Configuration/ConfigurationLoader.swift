@@ -209,7 +209,9 @@ public actor ConfigurationLoader {
     let cloudKit = CloudKitConfiguration(
       containerID: read(ConfigurationKeys.CloudKit.containerID),
       keyID: read(ConfigurationKeys.CloudKit.keyID),
-      privateKeyPath: read(ConfigurationKeys.CloudKit.privateKeyPath)
+      privateKeyPath: read(ConfigurationKeys.CloudKit.privateKeyPath),
+      privateKey: read(ConfigurationKeys.CloudKit.privateKey),
+      environment: read(ConfigurationKeys.CloudKit.environment)
     )
 
     // VirtualBuddy configuration
