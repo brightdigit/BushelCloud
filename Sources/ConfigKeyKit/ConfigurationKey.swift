@@ -36,9 +36,6 @@ public enum StandardNamingStyle: NamingStyle, Sendable {
   /// Screaming snake case with prefix (e.g., "BUSHEL_CLOUDKIT_CONTAINER_ID")
   case screamingSnakeCase(prefix: String?)
 
-  /// Screaming snake case without prefix (e.g., "CLOUDKIT_CONTAINER_ID")
-  case screamingSnakeCaseNoPrefix
-
   public func transform(_ base: String) -> String {
     switch self {
     case .dotSeparated:
@@ -50,9 +47,6 @@ public enum StandardNamingStyle: NamingStyle, Sendable {
         return "\(prefix)_\(snakeCase)"
       }
       return snakeCase
-
-    case .screamingSnakeCaseNoPrefix:
-      return base.uppercased().replacingOccurrences(of: ".", with: "_")
     }
   }
 }
@@ -119,9 +113,9 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
   /// Convenience initializer with standard naming conventions and required default
   /// - Parameters:
   ///   - base: Base key string (e.g., "cloudkit.container_id")
-  ///   - envPrefix: Prefix for environment variable (defaults to "BUSHEL")
+  ///   - envPrefix: Prefix for environment variable (defaults to nil)
   ///   - defaultVal: Required default value
-  public init(base: String, envPrefix: String? = "BUSHEL", default defaultVal: Value) {
+  public init(_ base: String, envPrefix: String? = nil, default defaultVal: Value) {
     self.baseKey = base
     self.styles = [
       .commandLine: StandardNamingStyle.dotSeparated,
@@ -143,6 +137,26 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     }
 
     return style.transform(base)
+  }
+}
+
+extension ConfigKey: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    let cliKey = key(for: .commandLine) ?? "nil"
+    let envKey = key(for: .environment) ?? "nil"
+    return "ConfigKey(cli: \(cliKey), env: \(envKey), default: \(defaultValue))"
+  }
+}
+
+// MARK: - Convenience Initializers for BUSHEL Prefix
+
+extension ConfigKey {
+  /// Convenience initializer for keys with BUSHEL prefix
+  /// - Parameters:
+  ///   - base: Base key string (e.g., "sync.dry_run")
+  ///   - defaultVal: Required default value
+  public init(bushelPrefixed base: String, default defaultVal: Value) {
+    self.init(base, envPrefix: "BUSHEL", default: defaultVal)
   }
 }
 
@@ -190,8 +204,8 @@ public struct OptionalConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
   /// Convenience initializer with standard naming conventions (no default)
   /// - Parameters:
   ///   - base: Base key string (e.g., "cloudkit.key_id")
-  ///   - envPrefix: Prefix for environment variable (defaults to "BUSHEL")
-  public init(base: String, envPrefix: String? = "BUSHEL") {
+  ///   - envPrefix: Prefix for environment variable (defaults to nil)
+  public init(_ base: String, envPrefix: String? = nil) {
     self.baseKey = base
     self.styles = [
       .commandLine: StandardNamingStyle.dotSeparated,
@@ -212,6 +226,24 @@ public struct OptionalConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     }
 
     return style.transform(base)
+  }
+}
+
+extension OptionalConfigKey: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    let cliKey = key(for: .commandLine) ?? "nil"
+    let envKey = key(for: .environment) ?? "nil"
+    return "OptionalConfigKey(cli: \(cliKey), env: \(envKey))"
+  }
+}
+
+// MARK: - Convenience Initializers for BUSHEL Prefix
+
+extension OptionalConfigKey {
+  /// Convenience initializer for keys with BUSHEL prefix
+  /// - Parameter base: Base key string (e.g., "sync.min_interval")
+  public init(bushelPrefixed base: String) {
+    self.init(base, envPrefix: "BUSHEL")
   }
 }
 
@@ -236,9 +268,9 @@ extension ConfigKey where Value == Bool {
   /// Initialize a boolean configuration key from base string
   /// - Parameters:
   ///   - base: Base key string (e.g., "sync.verbose")
-  ///   - envPrefix: Prefix for environment variable (defaults to "BUSHEL")
+  ///   - envPrefix: Prefix for environment variable (defaults to nil)
   ///   - defaultVal: Default value (defaults to false)
-  public init(base: String, envPrefix: String? = "BUSHEL", default defaultVal: Bool = false) {
+  public init(_ base: String, envPrefix: String? = nil, default defaultVal: Bool = false) {
     self.baseKey = base
     self.styles = [
       .commandLine: StandardNamingStyle.dotSeparated,
@@ -249,7 +281,20 @@ extension ConfigKey where Value == Bool {
   }
 
   /// Non-optional default value accessor for booleans
+  @available(*, deprecated, message: "Use defaultValue directly instead")
   public var boolDefault: Bool {
     defaultValue  // Already non-optional!
+  }
+}
+
+// MARK: - BUSHEL Prefix Convenience
+
+extension ConfigKey where Value == Bool {
+  /// Convenience initializer for boolean keys with BUSHEL prefix
+  /// - Parameters:
+  ///   - base: Base key string (e.g., "sync.verbose")
+  ///   - defaultVal: Default value (defaults to false)
+  public init(bushelPrefixed base: String, default defaultVal: Bool = false) {
+    self.init(base, envPrefix: "BUSHEL", default: defaultVal)
   }
 }

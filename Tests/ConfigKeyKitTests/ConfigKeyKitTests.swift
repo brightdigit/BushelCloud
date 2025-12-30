@@ -21,7 +21,7 @@ struct ConfigKeyTests {
 
   @Test("ConfigKey with base string and default prefix")
   func baseStringWithDefaultPrefix() {
-    let key = ConfigKey<String>(base: "cloudkit.container_id", default: "iCloud.com.example.App")
+    let key = ConfigKey<String>(bushelPrefixed: "cloudkit.container_id", default: "iCloud.com.example.App")
 
     #expect(key.key(for: .commandLine) == "cloudkit.container_id")
     #expect(key.key(for: .environment) == "BUSHEL_CLOUDKIT_CONTAINER_ID")
@@ -30,7 +30,7 @@ struct ConfigKeyTests {
 
   @Test("ConfigKey with base string and no prefix")
   func baseStringNoPrefix() {
-    let key = ConfigKey<String>(base: "cloudkit.container_id", envPrefix: nil, default: "iCloud.com.example.App")
+    let key = ConfigKey<String>("cloudkit.container_id", envPrefix: nil, default: "iCloud.com.example.App")
 
     #expect(key.key(for: .commandLine) == "cloudkit.container_id")
     #expect(key.key(for: .environment) == "CLOUDKIT_CONTAINER_ID")
@@ -46,9 +46,8 @@ struct ConfigKeyTests {
 
   @Test("Boolean ConfigKey with default")
   func booleanDefaultValue() {
-    let key = ConfigKey<Bool>(base: "sync.verbose", default: false)
+    let key = ConfigKey<Bool>(bushelPrefixed: "sync.verbose", default: false)
 
-    #expect(key.boolDefault == false)
     #expect(key.defaultValue == false)
   }
 }
@@ -69,7 +68,7 @@ struct NamingStyleTests {
 
   @Test("Screaming snake case without prefix")
   func screamingSnakeCaseNoPrefix() {
-    let style = StandardNamingStyle.screamingSnakeCaseNoPrefix
+    let style = StandardNamingStyle.screamingSnakeCase(prefix: nil)
     #expect(style.transform("cloudkit.container_id") == "CLOUDKIT_CONTAINER_ID")
   }
 
@@ -103,7 +102,7 @@ struct OptionalConfigKeyTests {
 
   @Test("OptionalConfigKey with base string and default prefix")
   func baseStringWithDefaultPrefix() {
-    let key = OptionalConfigKey<String>(base: "cloudkit.key_id")
+    let key = OptionalConfigKey<String>(bushelPrefixed: "cloudkit.key_id")
 
     #expect(key.key(for: .commandLine) == "cloudkit.key_id")
     #expect(key.key(for: .environment) == "BUSHEL_CLOUDKIT_KEY_ID")
@@ -111,7 +110,7 @@ struct OptionalConfigKeyTests {
 
   @Test("OptionalConfigKey with base string and no prefix")
   func baseStringNoPrefix() {
-    let key = OptionalConfigKey<String>(base: "cloudkit.key_id", envPrefix: nil)
+    let key = OptionalConfigKey<String>("cloudkit.key_id", envPrefix: nil)
 
     #expect(key.key(for: .commandLine) == "cloudkit.key_id")
     #expect(key.key(for: .environment) == "CLOUDKIT_KEY_ID")
@@ -119,8 +118,8 @@ struct OptionalConfigKeyTests {
 
   @Test("OptionalConfigKey and ConfigKey generate identical keys")
   func keyGenerationParity() {
-    let optional = OptionalConfigKey<String>(base: "test.key")
-    let withDefault = ConfigKey<String>(base: "test.key", default: "default")
+    let optional = OptionalConfigKey<String>(bushelPrefixed: "test.key")
+    let withDefault = ConfigKey<String>(bushelPrefixed: "test.key", default: "default")
 
     #expect(optional.key(for: .commandLine) == withDefault.key(for: .commandLine))
     #expect(optional.key(for: .environment) == withDefault.key(for: .environment))
@@ -128,7 +127,7 @@ struct OptionalConfigKeyTests {
 
   @Test("OptionalConfigKey for Int type")
   func intOptionalKey() {
-    let key = OptionalConfigKey<Int>(base: "sync.min_interval")
+    let key = OptionalConfigKey<Int>(bushelPrefixed: "sync.min_interval")
 
     #expect(key.key(for: .commandLine) == "sync.min_interval")
     #expect(key.key(for: .environment) == "BUSHEL_SYNC_MIN_INTERVAL")
@@ -136,7 +135,7 @@ struct OptionalConfigKeyTests {
 
   @Test("OptionalConfigKey for Double type")
   func doubleOptionalKey() {
-    let key = OptionalConfigKey<Double>(base: "fetch.interval_global")
+    let key = OptionalConfigKey<Double>(bushelPrefixed: "fetch.interval_global")
 
     #expect(key.key(for: .commandLine) == "fetch.interval_global")
     #expect(key.key(for: .environment) == "BUSHEL_FETCH_INTERVAL_GLOBAL")

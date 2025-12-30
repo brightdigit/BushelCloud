@@ -103,7 +103,16 @@ public actor ConfigurationLoader {
   }
 
   /// Read a boolean value with enhanced ENV variable parsing
-  /// Returns non-optional since ConfigKey has a required default
+  ///
+  /// Returns non-optional since ConfigKey has a required default.
+  ///
+  /// Boolean parsing rules:
+  /// - CLI: Flag presence indicates true (e.g., --verbose)
+  /// - ENV: Accepts "true", "1", "yes" (case-insensitive)
+  /// - Empty string in ENV is treated as absent (falls back to default)
+  ///
+  /// - Parameter key: Configuration key with boolean type
+  /// - Returns: Boolean value from CLI/ENV or the key's default
   private func read(_ key: ConfigKeyKit.ConfigKey<Bool>) -> Bool {
     // Try CLI first (presence-based for flags)
     if let cliKey = key.key(for: .commandLine),
