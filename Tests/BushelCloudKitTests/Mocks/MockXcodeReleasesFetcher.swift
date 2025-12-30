@@ -1,5 +1,5 @@
 //
-//  BushelCloudCLI.swift
+//  MockXcodeReleasesFetcher.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -29,33 +29,24 @@
 
 import Foundation
 
-@main
-internal struct BushelCloudCLI {
-  internal static func main() async throws {
-    let args = Array(CommandLine.arguments.dropFirst())
-    let command = args.first ?? "sync"
+@testable import BushelFoundation
 
-    switch command {
-    case "sync":
-      try await SyncCommand.run(args: args)
-    case "status":
-      try await StatusCommand.run(args: args)
-    case "list":
-      try await ListCommand.run(args: args)
-    case "export":
-      try await ExportCommand.run(args: args)
-    case "clear":
-      try await ClearCommand.run(args: args)
-    default:
-      print("Error: Unknown command '\(command)'")
-      print("")
-      print("Available commands:")
-      print("  sync    - Sync data to CloudKit")
-      print("  status  - Show CloudKit data source status")
-      print("  list    - List CloudKit records")
-      print("  export  - Export CloudKit data to JSON")
-      print("  clear   - Clear all CloudKit records")
-      Foundation.exit(1)
+/// Mock fetcher for Xcode Releases data source
+struct MockXcodeReleasesFetcher: DataSourceFetcher, Sendable {
+  typealias Record = [XcodeVersionRecord]
+
+  let recordsToReturn: [XcodeVersionRecord]
+  let errorToThrow: (any Error)?
+
+  init(recordsToReturn: [XcodeVersionRecord] = [], errorToThrow: (any Error)? = nil) {
+    self.recordsToReturn = recordsToReturn
+    self.errorToThrow = errorToThrow
+  }
+
+  func fetch() async throws -> [XcodeVersionRecord] {
+    if let error = errorToThrow {
+      throw error
     }
+    return recordsToReturn
   }
 }

@@ -96,54 +96,68 @@ actor MockCloudKitService: RecordManaging {
     for operation in operations {
       switch operation.operationType {
       case .create, .forceReplace:
-        let recordInfo = createRecordInfo(from: operation)
-        var records = storedRecords[recordType] ?? []
-
-        // For forceReplace, remove existing record with same name
-        if operation.operationType == .forceReplace {
-          records.removeAll { $0.recordName == operation.recordName }
-        }
-
-        records.append(recordInfo)
-        storedRecords[recordType] = records
-
-      case .delete:
-        guard let recordName = operation.recordName else { continue }
-        storedRecords[recordType]?.removeAll { $0.recordName == recordName }
-
+        handleCreateOrReplace(operation, recordType: recordType)
+      case .delete, .forceDelete:
+        handleDelete(operation, recordType: recordType)
       case .update:
-        guard let recordName = operation.recordName else { continue }
-        if let index = storedRecords[recordType]?.firstIndex(where: { $0.recordName == recordName })
-        {
-          let updatedRecordInfo = createRecordInfo(from: operation)
-          storedRecords[recordType]?[index] = updatedRecordInfo
-        }
-
+        handleUpdate(operation, recordType: recordType)
       case .forceUpdate:
-        guard let recordName = operation.recordName else { continue }
-        let updatedRecordInfo = createRecordInfo(from: operation)
-        if let index = storedRecords[recordType]?.firstIndex(where: { $0.recordName == recordName })
-        {
-          storedRecords[recordType]?[index] = updatedRecordInfo
-        } else {
-          var records = storedRecords[recordType] ?? []
-          records.append(updatedRecordInfo)
-          storedRecords[recordType] = records
-        }
-
+        handleForceUpdate(operation, recordType: recordType)
       case .replace:
-        guard let recordName = operation.recordName else { continue }
-        if let index = storedRecords[recordType]?.firstIndex(where: { $0.recordName == recordName })
-        {
-          let updatedRecordInfo = createRecordInfo(from: operation)
-          storedRecords[recordType]?[index] = updatedRecordInfo
-        }
-
-      case .forceDelete:
-        guard let recordName = operation.recordName else { continue }
-        storedRecords[recordType]?.removeAll { $0.recordName == recordName }
+        handleReplace(operation, recordType: recordType)
       }
     }
+  }
+
+  // MARK: - Operation Handlers
+
+  private func handleCreateOrReplace(_ operation: RecordOperation, recordType: String) {
+    let recordInfo = createRecordInfo(from: operation)
+    var records = storedRecords[recordType] ?? []
+
+    // For forceReplace, remove existing record with same name
+    if operation.operationType == .forceReplace {
+      records.removeAll { $0.recordName == operation.recordName }
+    }
+
+    records.append(recordInfo)
+    storedRecords[recordType] = records
+  }
+
+  private func handleDelete(_ operation: RecordOperation, recordType: String) {
+    guard let recordName = operation.recordName else { return }
+    storedRecords[recordType]?.removeAll { $0.recordName == recordName }
+  }
+
+  private func handleUpdate(_ operation: RecordOperation, recordType: String) {
+    guard let recordName = operation.recordName,
+      let index = storedRecords[recordType]?.firstIndex(where: { $0.recordName == recordName })
+    else { return }
+
+    let updatedRecordInfo = createRecordInfo(from: operation)
+    storedRecords[recordType]?[index] = updatedRecordInfo
+  }
+
+  private func handleForceUpdate(_ operation: RecordOperation, recordType: String) {
+    guard let recordName = operation.recordName else { return }
+    let updatedRecordInfo = createRecordInfo(from: operation)
+
+    if let index = storedRecords[recordType]?.firstIndex(where: { $0.recordName == recordName }) {
+      storedRecords[recordType]?[index] = updatedRecordInfo
+    } else {
+      var records = storedRecords[recordType] ?? []
+      records.append(updatedRecordInfo)
+      storedRecords[recordType] = records
+    }
+  }
+
+  private func handleReplace(_ operation: RecordOperation, recordType: String) {
+    guard let recordName = operation.recordName,
+      let index = storedRecords[recordType]?.firstIndex(where: { $0.recordName == recordName })
+    else { return }
+
+    let updatedRecordInfo = createRecordInfo(from: operation)
+    storedRecords[recordType]?[index] = updatedRecordInfo
   }
 
   // MARK: - Helper Methods

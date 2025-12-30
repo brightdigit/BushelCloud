@@ -1,5 +1,5 @@
 //
-//  BushelCloudCLI.swift
+//  MockXcodeReleasesFetcherTests.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -28,34 +28,38 @@
 //
 
 import Foundation
+import Testing
 
-@main
-internal struct BushelCloudCLI {
-  internal static func main() async throws {
-    let args = Array(CommandLine.arguments.dropFirst())
-    let command = args.first ?? "sync"
+@testable import BushelFoundation
 
-    switch command {
-    case "sync":
-      try await SyncCommand.run(args: args)
-    case "status":
-      try await StatusCommand.run(args: args)
-    case "list":
-      try await ListCommand.run(args: args)
-    case "export":
-      try await ExportCommand.run(args: args)
-    case "clear":
-      try await ClearCommand.run(args: args)
-    default:
-      print("Error: Unknown command '\(command)'")
-      print("")
-      print("Available commands:")
-      print("  sync    - Sync data to CloudKit")
-      print("  status  - Show CloudKit data source status")
-      print("  list    - List CloudKit records")
-      print("  export  - Export CloudKit data to JSON")
-      print("  clear   - Clear all CloudKit records")
-      Foundation.exit(1)
+// MARK: - Mock Xcode Releases Fetcher Tests
+
+@Suite("Mock Xcode Releases Fetcher Tests")
+struct MockXcodeReleasesFetcherTests {
+  @Test("Successful fetch returns records")
+  func testSuccessfulFetch() async throws {
+    let expectedRecords = [TestFixtures.xcode15_1, TestFixtures.xcode16_0_beta]
+    let fetcher = MockXcodeReleasesFetcher(recordsToReturn: expectedRecords)
+
+    let result = try await fetcher.fetch()
+
+    #expect(result.count == 2)
+    #expect(result[0].version == "15.1")
+    #expect(result[1].version == "16.0 Beta 1")
+  }
+
+  @Test("Authentication error")
+  func testAuthenticationError() async {
+    let expectedError = MockFetcherError.authenticationFailed
+    let fetcher = MockXcodeReleasesFetcher(errorToThrow: expectedError)
+
+    do {
+      _ = try await fetcher.fetch()
+      Issue.record("Expected error to be thrown")
+    } catch is MockFetcherError {
+      // Success - error was thrown as expected
+    } catch {
+      Issue.record("Unexpected error type: \(error)")
     }
   }
 }
