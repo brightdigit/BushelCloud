@@ -48,7 +48,8 @@ enum ListCommand {
 
     // Determine what to list based on flags
     let listConfig = config.list
-    let listAll = !(listConfig?.restoreImages ?? false)
+    let listAll =
+      !(listConfig?.restoreImages ?? false)
       && !(listConfig?.xcodeVersions ?? false)
       && !(listConfig?.swiftVersions ?? false)
 
