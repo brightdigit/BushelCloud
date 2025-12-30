@@ -22,6 +22,7 @@ jobs:
   sync:
     name: Sync to CloudKit
     runs-on: ubuntu-latest
+    container: swift:6.2-noble
     timeout-minutes: 30
 
     permissions:
@@ -30,11 +31,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Swift 6.2
-        uses: swiftlang/swift-action@v2
-        with:
-          swift-version: '6.2'
 
       - name: Verify Swift version
         run: |
