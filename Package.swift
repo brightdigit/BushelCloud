@@ -87,6 +87,7 @@ let package = Package(
         .visionOS(.v2)
     ],
     products: [
+        .library(name: "ConfigKeyKit", targets: ["ConfigKeyKit"]),
         .library(name: "BushelCloudKit", targets: ["BushelCloudKit"]),
         .executable(name: "bushel-cloud", targets: ["BushelCloudCLI"])
     ],
@@ -103,8 +104,14 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "ConfigKeyKit",
+            dependencies: [],
+            swiftSettings: swiftSettings
+        ),
+        .target(
             name: "BushelCloudKit",
             dependencies: [
+                .target(name: "ConfigKeyKit"),
                 .product(name: "MistKit", package: "MistKit"),
                 .product(name: "BushelLogging", package: "BushelKit"),
                 .product(name: "BushelFoundation", package: "BushelKit"),
@@ -120,6 +127,13 @@ let package = Package(
             name: "BushelCloudCLI",
             dependencies: [
                 .target(name: "BushelCloudKit")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "ConfigKeyKitTests",
+            dependencies: [
+                .target(name: "ConfigKeyKit")
             ],
             swiftSettings: swiftSettings
         ),
