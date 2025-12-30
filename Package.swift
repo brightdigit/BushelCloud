@@ -80,13 +80,14 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
     name: "BushelCloud",
     platforms: [
-        .macOS(.v14),
-        .iOS(.v17),
-        .watchOS(.v10),
-        .tvOS(.v17),
-        .visionOS(.v1)
+        .macOS(.v15),
+        .iOS(.v18),
+        .watchOS(.v11),
+        .tvOS(.v18),
+        .visionOS(.v2)
     ],
     products: [
+        .library(name: "ConfigKeyKit", targets: ["ConfigKeyKit"]),
         .library(name: "BushelCloudKit", targets: ["BushelCloudKit"]),
         .executable(name: "bushel-cloud", targets: ["BushelCloudCLI"])
     ],
@@ -95,27 +96,44 @@ let package = Package(
         .package(url: "https://github.com/brightdigit/BushelKit.git", branch: "v3.0.0-alpha.2"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0"),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0")
+        .package(
+            url: "https://github.com/apple/swift-configuration.git",
+            from: "1.0.0",
+            traits: ["CommandLineArguments"]
+        )
     ],
     targets: [
         .target(
+            name: "ConfigKeyKit",
+            dependencies: [],
+            swiftSettings: swiftSettings
+        ),
+        .target(
             name: "BushelCloudKit",
             dependencies: [
+                .target(name: "ConfigKeyKit"),
                 .product(name: "MistKit", package: "MistKit"),
                 .product(name: "BushelLogging", package: "BushelKit"),
                 .product(name: "BushelFoundation", package: "BushelKit"),
                 .product(name: "BushelUtilities", package: "BushelKit"),
                 .product(name: "BushelVirtualBuddy", package: "BushelKit"),
                 .product(name: "IPSWDownloads", package: "IPSWDownloads"),
-                .product(name: "SwiftSoup", package: "SwiftSoup")
+                .product(name: "SwiftSoup", package: "SwiftSoup"),
+                .product(name: "Configuration", package: "swift-configuration")
             ],
             swiftSettings: swiftSettings
         ),
         .executableTarget(
             name: "BushelCloudCLI",
             dependencies: [
-                .target(name: "BushelCloudKit"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser")
+                .target(name: "BushelCloudKit")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "ConfigKeyKitTests",
+            dependencies: [
+                .target(name: "ConfigKeyKit")
             ],
             swiftSettings: swiftSettings
         ),

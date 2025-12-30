@@ -27,124 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
 import BushelCloudKit
 import BushelFoundation
 import BushelUtilities
 import Foundation
 
-struct SyncCommand: AsyncParsableCommand {
-  static let configuration = CommandConfiguration(
-    commandName: "sync",
-    abstract: "Fetch version data and sync to CloudKit",
-    discussion: """
-      Fetches macOS restore images, Xcode versions, and Swift versions from
-      external data sources and syncs them to the CloudKit public database.
+enum SyncCommand {
+  static func run(args: [String]) async throws {
+    // Load configuration using Swift Configuration
+    let loader = ConfigurationLoader()
+    let rawConfig = try await loader.loadConfiguration()
+    let config = try rawConfig.validated()
 
-      Data sources:
-      • RestoreImage: ipsw.me, TheAppleWiki.com, Mr. Macintosh, Apple MESU
-      • XcodeVersion: xcodereleases.com
-      • SwiftVersion: swiftversion.net
-      """
-  )
-
-  // MARK: - Required Options
-
-  @Option(name: .shortAndLong, help: "CloudKit container identifier")
-  var containerIdentifier: String = "iCloud.com.brightdigit.Bushel"
-
-  @Option(name: .long, help: "Server-to-Server Key ID (or set CLOUDKIT_KEY_ID)")
-  var keyID: String = ""
-
-  @Option(name: .long, help: "Path to private key .pem file (or set CLOUDKIT_PRIVATE_KEY_PATH)")
-  var keyFile: String = ""
-
-  // MARK: - Sync Options
-
-  @Flag(name: .long, help: "Perform a dry run without syncing to CloudKit")
-  var dryRun: Bool = false
-
-  @Flag(name: .long, help: "Sync only restore images")
-  var restoreImagesOnly: Bool = false
-
-  @Flag(name: .long, help: "Sync only Xcode versions")
-  var xcodeOnly: Bool = false
-
-  @Flag(name: .long, help: "Sync only Swift versions")
-  var swiftOnly: Bool = false
-
-  @Flag(name: .long, help: "Exclude beta/RC releases")
-  var noBetas: Bool = false
-
-  @Flag(name: .long, help: "Exclude TheAppleWiki.com as data source")
-  var noAppleWiki: Bool = false
-
-  @Flag(
-    name: .shortAndLong,
-    help:
-      "Enable verbose logging to see detailed CloudKit operations and learn MistKit usage patterns")
-  var verbose: Bool = false
-
-  // MARK: - Throttling Options
-
-  @Flag(name: .long, help: "Force fetch from all sources, ignoring minimum fetch intervals")
-  var force: Bool = false
-
-  @Option(
-    name: .long, help: "Minimum interval between fetches in seconds (overrides default intervals)")
-  var minInterval: Int?
-
-  @Option(
-    name: .long, help: "Fetch from only this specific source (e.g., 'appledb.dev', 'ipsw.me')")
-  var source: String?
-
-  // MARK: - Execution
-
-  mutating func run() async throws {
     // Enable verbose console output if requested
-    BushelUtilities.ConsoleOutput.isVerbose = verbose
+    BushelUtilities.ConsoleOutput.isVerbose = config.sync?.verbose ?? false
 
-    // Get Server-to-Server credentials from environment if not provided
-    let resolvedKeyID =
-      keyID.isEmpty ? ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"] ?? "" : keyID
+    // Build sync options from configuration
+    let options = buildSyncOptions(from: config.sync)
 
-    let resolvedKeyFile =
-      keyFile.isEmpty
-      ? ProcessInfo.processInfo.environment["CLOUDKIT_PRIVATE_KEY_PATH"] ?? "" : keyFile
-
-    guard !resolvedKeyID.isEmpty && !resolvedKeyFile.isEmpty else {
-      print("❌ Error: CloudKit Server-to-Server Key credentials are required")
-      print("")
-      print("   Provide via command-line flags:")
-      print("     --key-id YOUR_KEY_ID --key-file ./private-key.pem")
-      print("")
-      print("   Or set environment variables:")
-      print("     export CLOUDKIT_KEY_ID=\"YOUR_KEY_ID\"")
-      print("     export CLOUDKIT_PRIVATE_KEY_PATH=\"./private-key.pem\"")
-      print("")
-      print("   Get your Server-to-Server Key from:")
-      print("   https://icloud.developer.apple.com/dashboard/")
-      print("   Navigate to: API Access → Server-to-Server Keys")
-      print("")
-      print("   Important:")
-      print("   • Download and save the private key .pem file securely")
-      print("   • Never commit .pem files to version control!")
-      print("")
-      throw ExitCode.failure
-    }
-
-    // Determine what to sync
-    let options = buildSyncOptions()
-
-    // Build fetch configuration
-    let configuration = buildFetchConfiguration()
+    // Get fetch configuration (already loaded by ConfigurationLoader)
+    let fetchConfiguration = config.fetch ?? FetchConfiguration.loadFromEnvironment()
 
     // Create sync engine
     let syncEngine = try SyncEngine(
-      containerIdentifier: containerIdentifier,
-      keyID: resolvedKeyID,
-      privateKeyPath: resolvedKeyFile,
-      configuration: configuration
+      containerIdentifier: config.cloudKit.containerID,
+      keyID: config.cloudKit.keyID,
+      privateKeyPath: config.cloudKit.privateKeyPath,
+      configuration: fetchConfiguration
     )
 
     // Execute sync
@@ -153,62 +62,52 @@ struct SyncCommand: AsyncParsableCommand {
       printSuccess(result)
     } catch {
       printError(error)
-      throw ExitCode.failure
+      Foundation.exit(1)
     }
   }
 
   // MARK: - Private Helpers
 
-  private func buildSyncOptions() -> SyncEngine.SyncOptions {
+  private static func buildSyncOptions(from syncConfig: SyncConfiguration?)
+    -> SyncEngine.SyncOptions
+  {
+    guard let syncConfig = syncConfig else {
+      return SyncEngine.SyncOptions()
+    }
+
     var pipelineOptions = DataSourcePipeline.Options()
 
     // Apply filters based on flags
-    if restoreImagesOnly {
+    if syncConfig.restoreImagesOnly {
       pipelineOptions.includeXcodeVersions = false
       pipelineOptions.includeSwiftVersions = false
-    } else if xcodeOnly {
+    } else if syncConfig.xcodeOnly {
       pipelineOptions.includeRestoreImages = false
       pipelineOptions.includeSwiftVersions = false
-    } else if swiftOnly {
+    } else if syncConfig.swiftOnly {
       pipelineOptions.includeRestoreImages = false
       pipelineOptions.includeXcodeVersions = false
     }
 
-    if noBetas {
+    if syncConfig.noBetas {
       pipelineOptions.includeBetaReleases = false
     }
 
-    if noAppleWiki {
+    if syncConfig.noAppleWiki {
       pipelineOptions.includeTheAppleWiki = false
     }
 
     // Apply throttling options
-    pipelineOptions.force = force
-    pipelineOptions.specificSource = source
+    pipelineOptions.force = syncConfig.force
+    pipelineOptions.specificSource = syncConfig.source
 
     return SyncEngine.SyncOptions(
-      dryRun: dryRun,
+      dryRun: syncConfig.dryRun,
       pipelineOptions: pipelineOptions
     )
   }
 
-  private func buildFetchConfiguration() -> FetchConfiguration {
-    // Load configuration from environment
-    var config = FetchConfiguration.loadFromEnvironment()
-
-    // Override with command-line flag if provided
-    if let interval = minInterval {
-      config = FetchConfiguration(
-        globalMinimumFetchInterval: TimeInterval(interval),
-        perSourceIntervals: config.perSourceIntervals,
-        useDefaults: true
-      )
-    }
-
-    return config
-  }
-
-  private func printSuccess(_ result: SyncEngine.SyncResult) {
+  private static func printSuccess(_ result: SyncEngine.SyncResult) {
     print("\n" + String(repeating: "=", count: 60))
     print("✅ Sync Summary")
     print(String(repeating: "=", count: 60))
@@ -216,10 +115,10 @@ struct SyncCommand: AsyncParsableCommand {
     print("Xcode Versions: \(result.xcodeVersionsCount)")
     print("Swift Versions: \(result.swiftVersionsCount)")
     print(String(repeating: "=", count: 60))
-    print("\n💡 Next: Use 'bushel-images export' to view the synced data")
+    print("\n💡 Next: Use 'bushel-cloud export' to view the synced data")
   }
 
-  private func printError(_ error: Error) {
+  private static func printError(_ error: Error) {
     print("\n❌ Sync failed: \(error.localizedDescription)")
     print("\n💡 Troubleshooting:")
     print("   • Verify your API token is valid")

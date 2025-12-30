@@ -1,5 +1,5 @@
 //
-//  BushelCloudCLI.swift
+//  MockAppleDBFetcherTests.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -28,34 +28,41 @@
 //
 
 import Foundation
+import Testing
 
-@main
-internal struct BushelCloudCLI {
-  internal static func main() async throws {
-    let args = Array(CommandLine.arguments.dropFirst())
-    let command = args.first ?? "sync"
+@testable import BushelFoundation
 
-    switch command {
-    case "sync":
-      try await SyncCommand.run(args: args)
-    case "status":
-      try await StatusCommand.run(args: args)
-    case "list":
-      try await ListCommand.run(args: args)
-    case "export":
-      try await ExportCommand.run(args: args)
-    case "clear":
-      try await ClearCommand.run(args: args)
-    default:
-      print("Error: Unknown command '\(command)'")
-      print("")
-      print("Available commands:")
-      print("  sync    - Sync data to CloudKit")
-      print("  status  - Show CloudKit data source status")
-      print("  list    - List CloudKit records")
-      print("  export  - Export CloudKit data to JSON")
-      print("  clear   - Clear all CloudKit records")
-      Foundation.exit(1)
+// MARK: - Mock AppleDB Fetcher Tests
+
+@Suite("Mock AppleDB Fetcher Tests")
+struct MockAppleDBFetcherTests {
+  @Test("Successful fetch returns records")
+  func testSuccessfulFetch() async throws {
+    let expectedRecords = [TestFixtures.sonoma14_2_1_appledb]
+    let fetcher = MockAppleDBFetcher(recordsToReturn: expectedRecords)
+
+    let result = try await fetcher.fetch()
+
+    #expect(result.count == 1)
+    #expect(result[0].source == "appledb.dev")
+  }
+
+  @Test("Server error throws expected error")
+  func testServerError() async {
+    let expectedError = MockFetcherError.serverError(code: 500)
+    let fetcher = MockAppleDBFetcher(errorToThrow: expectedError)
+
+    do {
+      _ = try await fetcher.fetch()
+      Issue.record("Expected error to be thrown")
+    } catch let error as MockFetcherError {
+      if case .serverError(let code) = error {
+        #expect(code == 500)
+      } else {
+        Issue.record("Wrong error type thrown")
+      }
+    } catch {
+      Issue.record("Unexpected error type: \(error)")
     }
   }
 }

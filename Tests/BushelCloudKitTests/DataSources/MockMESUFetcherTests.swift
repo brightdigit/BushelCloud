@@ -1,5 +1,5 @@
 //
-//  WikiAPITypes.swift
+//  MockMESUFetcherTests.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -28,25 +28,47 @@
 //
 
 import Foundation
+import Testing
 
-// MARK: - TheAppleWiki API Response Types
+@testable import BushelFoundation
 
-/// Root response from TheAppleWiki parse API
-struct ParseResponse: Codable, Sendable {
-  let parse: ParseContent
-}
+// MARK: - Mock MESU Fetcher Tests
 
-/// Parse content container
-struct ParseContent: Codable, Sendable {
-  let title: String
-  let text: TextContent
-}
+@Suite("Mock MESU Fetcher Tests")
+struct MockMESUFetcherTests {
+  @Test("Successful fetch returns single record")
+  func testSuccessfulFetch() async throws {
+    let expectedRecord = TestFixtures.sonoma14_2_1_mesu
+    let fetcher = MockMESUFetcher(recordToReturn: expectedRecord)
 
-/// Text content with HTML
-struct TextContent: Codable, Sendable {
-  let content: String
+    let result = try await fetcher.fetch()
 
-  enum CodingKeys: String, CodingKey {
-    case content = "*"
+    #expect(result != nil)
+    #expect(result?.source == "mesu.apple.com")
+    #expect(result?.buildNumber == "23C71")
+  }
+
+  @Test("Empty fetch returns nil")
+  func testEmptyFetch() async throws {
+    let fetcher = MockMESUFetcher(recordToReturn: nil)
+
+    let result = try await fetcher.fetch()
+
+    #expect(result == nil)
+  }
+
+  @Test("Invalid response error")
+  func testInvalidResponse() async {
+    let expectedError = MockFetcherError.invalidResponse
+    let fetcher = MockMESUFetcher(errorToThrow: expectedError)
+
+    do {
+      _ = try await fetcher.fetch()
+      Issue.record("Expected error to be thrown")
+    } catch is MockFetcherError {
+      // Success - error was thrown as expected
+    } catch {
+      Issue.record("Unexpected error type: \(error)")
+    }
   }
 }
