@@ -21,12 +21,12 @@ internal enum ConfigurationKeys {
       default: "iCloud.com.brightdigit.Bushel"
     )
 
-    internal static let keyID = ConfigKey<String>(
+    internal static let keyID = OptionalConfigKey<String>(
       base: "cloudkit.key_id",
       envPrefix: nil
     )
 
-    internal static let privateKeyPath = ConfigKey<String>(
+    internal static let privateKeyPath = OptionalConfigKey<String>(
       base: "cloudkit.private_key_path",
       envPrefix: nil
     )
@@ -36,7 +36,7 @@ internal enum ConfigurationKeys {
 
   /// VirtualBuddy TSS API configuration keys
   internal enum VirtualBuddy {
-    internal static let apiKey = ConfigKey<String>(
+    internal static let apiKey = OptionalConfigKey<String>(
       base: "virtualbuddy.api_key",
       envPrefix: nil  // Generates: ENV="VIRTUALBUDDY_API_KEY"
     )
@@ -46,17 +46,17 @@ internal enum ConfigurationKeys {
 
   /// Fetch throttling configuration keys
   internal enum Fetch {
-    internal static let intervalGlobal = ConfigKey<Double>(
+    internal static let intervalGlobal = OptionalConfigKey<Double>(
       base: "fetch.interval_global",
       envPrefix: "BUSHEL"  // Generates: ENV="BUSHEL_FETCH_INTERVAL_GLOBAL"
     )
 
     /// Generate per-source interval key dynamically
     /// - Parameter source: Data source identifier (e.g., "appledb.dev")
-    /// - Returns: A ConfigKey<Double> for the source-specific interval
-    internal static func intervalKey(for source: String) -> ConfigKey<Double> {
+    /// - Returns: An OptionalConfigKey<Double> for the source-specific interval
+    internal static func intervalKey(for source: String) -> OptionalConfigKey<Double> {
       let normalized = source.replacingOccurrences(of: ".", with: "_")
-      return ConfigKey<Double>(
+      return OptionalConfigKey<Double>(
         base: "fetch.interval.\(normalized)",
         envPrefix: nil  // CLI: "fetch.interval.appledb_dev", ENV: "FETCH_INTERVAL_APPLEDB_DEV"
       )
@@ -75,15 +75,15 @@ internal enum ConfigurationKeys {
     internal static let noAppleWiki = ConfigKey<Bool>(base: "sync.no_apple_wiki")
     internal static let verbose = ConfigKey<Bool>(base: "sync.verbose")
     internal static let force = ConfigKey<Bool>(base: "sync.force")
-    internal static let minInterval = ConfigKey<Int>(base: "sync.min_interval")
-    internal static let source = ConfigKey<String>(base: "sync.source")
+    internal static let minInterval = OptionalConfigKey<Int>(base: "sync.min_interval")
+    internal static let source = OptionalConfigKey<String>(base: "sync.source")
   }
 
   // MARK: - Export Command Configuration
 
   /// Export command configuration keys
   internal enum Export {
-    internal static let output = ConfigKey<String>(base: "export.output")
+    internal static let output = OptionalConfigKey<String>(base: "export.output")
     internal static let pretty = ConfigKey<Bool>(base: "export.pretty")
     internal static let signedOnly = ConfigKey<Bool>(base: "export.signed_only")
     internal static let noBetas = ConfigKey<Bool>(base: "export.no_betas")

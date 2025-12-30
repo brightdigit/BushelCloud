@@ -69,15 +69,28 @@ public protocol ConfigurationKey: Sendable {
 
 // MARK: - Generic Configuration Key
 
-/// Generic configuration key supporting multiple sources and optional default values
+/// Configuration key for values with default fallbacks
+///
+/// Use `ConfigKey` when a configuration value has a sensible default
+/// that should be used when not provided by the user. The `read()` method
+/// will always return a non-optional value.
+///
+/// Example:
+/// ```swift
+/// let containerID = ConfigKey<String>(
+///   base: "cloudkit.container_id",
+///   default: "iCloud.com.brightdigit.Bushel"
+/// )
+/// // read(containerID) returns String (non-optional)
+/// ```
 public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
   private let baseKey: String?
   private let styles: [ConfigKeySource: any NamingStyle]
   private let explicitKeys: [ConfigKeySource: String]
-  public let defaultValue: Value?
+  public let defaultValue: Value  // Non-optional!
 
-  /// Initialize with explicit CLI and ENV keys
-  public init(cli: String? = nil, env: String? = nil, default defaultVal: Value? = nil) {
+  /// Initialize with explicit CLI and ENV keys and required default
+  public init(cli: String? = nil, env: String? = nil, default defaultVal: Value) {
     self.baseKey = nil
     self.styles = [:]
     var keys: [ConfigKeySource: String] = [:]
@@ -87,15 +100,15 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     self.defaultValue = defaultVal
   }
 
-  /// Initialize from a base key string with naming styles for each source
+  /// Initialize from a base key string with naming styles and required default
   /// - Parameters:
   ///   - base: Base key string (e.g., "cloudkit.container_id")
   ///   - styles: Dictionary mapping sources to naming styles
-  ///   - defaultVal: Optional default value
+  ///   - defaultVal: Required default value
   public init(
     base: String,
     styles: [ConfigKeySource: any NamingStyle],
-    default defaultVal: Value? = nil
+    default defaultVal: Value
   ) {
     self.baseKey = base
     self.styles = styles
@@ -103,12 +116,12 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     self.defaultValue = defaultVal
   }
 
-  /// Convenience initializer with standard naming conventions
+  /// Convenience initializer with standard naming conventions and required default
   /// - Parameters:
   ///   - base: Base key string (e.g., "cloudkit.container_id")
   ///   - envPrefix: Prefix for environment variable (defaults to "BUSHEL")
-  ///   - defaultVal: Optional default value
-  public init(base: String, envPrefix: String? = "BUSHEL", default defaultVal: Value? = nil) {
+  ///   - defaultVal: Required default value
+  public init(base: String, envPrefix: String? = "BUSHEL", default defaultVal: Value) {
     self.baseKey = base
     self.styles = [
       .commandLine: StandardNamingStyle.dotSeparated,
@@ -116,6 +129,75 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     ]
     self.explicitKeys = [:]
     self.defaultValue = defaultVal
+  }
+
+  public func key(for source: ConfigKeySource) -> String? {
+    // Check for explicit key first
+    if let explicit = explicitKeys[source] {
+      return explicit
+    }
+
+    // Generate from base key and style
+    guard let base = baseKey, let style = styles[source] else {
+      return nil
+    }
+
+    return style.transform(base)
+  }
+}
+
+// MARK: - Optional Configuration Key
+
+/// Configuration key for optional values without defaults
+///
+/// Use `OptionalConfigKey` when a configuration value has no sensible default
+/// and should be `nil` when not provided by the user. The `read()` method
+/// will return an optional value.
+///
+/// Example:
+/// ```swift
+/// let apiKey = OptionalConfigKey<String>(base: "api.key")
+/// // read(apiKey) returns String?
+/// ```
+public struct OptionalConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
+  private let baseKey: String?
+  private let styles: [ConfigKeySource: any NamingStyle]
+  private let explicitKeys: [ConfigKeySource: String]
+
+  /// Initialize with explicit CLI and ENV keys (no default)
+  public init(cli: String? = nil, env: String? = nil) {
+    self.baseKey = nil
+    self.styles = [:]
+    var keys: [ConfigKeySource: String] = [:]
+    if let cli = cli { keys[.commandLine] = cli }
+    if let env = env { keys[.environment] = env }
+    self.explicitKeys = keys
+  }
+
+  /// Initialize from a base key string with naming styles (no default)
+  /// - Parameters:
+  ///   - base: Base key string (e.g., "cloudkit.key_id")
+  ///   - styles: Dictionary mapping sources to naming styles
+  public init(
+    base: String,
+    styles: [ConfigKeySource: any NamingStyle]
+  ) {
+    self.baseKey = base
+    self.styles = styles
+    self.explicitKeys = [:]
+  }
+
+  /// Convenience initializer with standard naming conventions (no default)
+  /// - Parameters:
+  ///   - base: Base key string (e.g., "cloudkit.key_id")
+  ///   - envPrefix: Prefix for environment variable (defaults to "BUSHEL")
+  public init(base: String, envPrefix: String? = "BUSHEL") {
+    self.baseKey = base
+    self.styles = [
+      .commandLine: StandardNamingStyle.dotSeparated,
+      .environment: StandardNamingStyle.screamingSnakeCase(prefix: envPrefix)
+    ]
+    self.explicitKeys = [:]
   }
 
   public func key(for source: ConfigKeySource) -> String? {
@@ -168,6 +250,6 @@ extension ConfigKey where Value == Bool {
 
   /// Non-optional default value accessor for booleans
   public var boolDefault: Bool {
-    defaultValue ?? false
+    defaultValue  // Already non-optional!
   }
 }

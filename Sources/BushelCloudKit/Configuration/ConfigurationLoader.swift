@@ -64,42 +64,46 @@ public actor ConfigurationLoader {
     configReader.string(forKey: ConfigKey(key)) != nil
   }
 
-  // MARK: - Generic Helper Methods
+  // MARK: - Generic Helper Methods for ConfigKey (with defaults)
 
   /// Read a string value with automatic CLI → ENV → default fallback
-  private func read(_ key: ConfigKeyKit.ConfigKey<String>) -> String? {
+  /// Returns non-optional since ConfigKey has a required default
+  private func read(_ key: ConfigKeyKit.ConfigKey<String>) -> String {
     for source in ConfigKeySource.allCases {
       guard let keyString = key.key(for: source) else { continue }
       if let value = readString(forKey: keyString) {
         return value
       }
     }
-    return key.defaultValue
+    return key.defaultValue  // Non-optional!
   }
 
   /// Read an integer value with automatic CLI → ENV → default fallback
-  private func read(_ key: ConfigKeyKit.ConfigKey<Int>) -> Int? {
+  /// Returns non-optional since ConfigKey has a required default
+  private func read(_ key: ConfigKeyKit.ConfigKey<Int>) -> Int {
     for source in ConfigKeySource.allCases {
       guard let keyString = key.key(for: source) else { continue }
       if let value = readInt(forKey: keyString) {
         return value
       }
     }
-    return key.defaultValue
+    return key.defaultValue  // Non-optional!
   }
 
   /// Read a double value with automatic CLI → ENV → default fallback
-  private func read(_ key: ConfigKeyKit.ConfigKey<Double>) -> Double? {
+  /// Returns non-optional since ConfigKey has a required default
+  private func read(_ key: ConfigKeyKit.ConfigKey<Double>) -> Double {
     for source in ConfigKeySource.allCases {
       guard let keyString = key.key(for: source) else { continue }
       if let value = readDouble(forKey: keyString) {
         return value
       }
     }
-    return key.defaultValue
+    return key.defaultValue  // Non-optional!
   }
 
   /// Read a boolean value with enhanced ENV variable parsing
+  /// Returns non-optional since ConfigKey has a required default
   private func read(_ key: ConfigKeyKit.ConfigKey<Bool>) -> Bool {
     // Try CLI first (presence-based for flags)
     if let cliKey = key.key(for: .commandLine),
@@ -114,8 +118,46 @@ public actor ConfigurationLoader {
       return lowercased == "true" || lowercased == "1" || lowercased == "yes"
     }
 
-    // Use boolDefault (non-optional)
-    return key.boolDefault
+    // Use default value (non-optional)
+    return key.defaultValue
+  }
+
+  // MARK: - Generic Helper Methods for OptionalConfigKey (without defaults)
+
+  /// Read a string value with automatic CLI → ENV fallback
+  /// Returns optional since OptionalConfigKey has no default
+  private func read(_ key: ConfigKeyKit.OptionalConfigKey<String>) -> String? {
+    for source in ConfigKeySource.allCases {
+      guard let keyString = key.key(for: source) else { continue }
+      if let value = readString(forKey: keyString) {
+        return value
+      }
+    }
+    return nil  // No default available
+  }
+
+  /// Read an integer value with automatic CLI → ENV fallback
+  /// Returns optional since OptionalConfigKey has no default
+  private func read(_ key: ConfigKeyKit.OptionalConfigKey<Int>) -> Int? {
+    for source in ConfigKeySource.allCases {
+      guard let keyString = key.key(for: source) else { continue }
+      if let value = readInt(forKey: keyString) {
+        return value
+      }
+    }
+    return nil  // No default available
+  }
+
+  /// Read a double value with automatic CLI → ENV fallback
+  /// Returns optional since OptionalConfigKey has no default
+  private func read(_ key: ConfigKeyKit.OptionalConfigKey<Double>) -> Double? {
+    for source in ConfigKeySource.allCases {
+      guard let keyString = key.key(for: source) else { continue }
+      if let value = readDouble(forKey: keyString) {
+        return value
+      }
+    }
+    return nil  // No default available
   }
 
   // MARK: - Configuration Reading
@@ -124,7 +166,7 @@ public actor ConfigurationLoader {
   public func loadConfiguration() async throws -> BushelConfiguration {
     // CloudKit configuration (automatic CLI → ENV → default fallback)
     let cloudKit = CloudKitConfiguration(
-      containerID: read(ConfigurationKeys.CloudKit.containerID) ?? "iCloud.com.brightdigit.Bushel",
+      containerID: read(ConfigurationKeys.CloudKit.containerID),
       keyID: read(ConfigurationKeys.CloudKit.keyID),
       privateKeyPath: read(ConfigurationKeys.CloudKit.privateKeyPath)
     )
