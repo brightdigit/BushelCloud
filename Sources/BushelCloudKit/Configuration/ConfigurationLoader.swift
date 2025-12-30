@@ -6,6 +6,7 @@
 //
 
 public import BushelFoundation
+import ConfigKeyKit
 import Configuration
 import Foundation
 
@@ -63,32 +64,81 @@ public actor ConfigurationLoader {
     configReader.string(forKey: ConfigKey(key)) != nil
   }
 
+  // MARK: - Generic Helper Methods
+
+  /// Read a string value with automatic CLI → ENV → default fallback
+  private func read(_ key: ConfigKeyKit.ConfigKey<String>) -> String? {
+    for source in ConfigKeySource.allCases {
+      guard let keyString = key.key(for: source) else { continue }
+      if let value = readString(forKey: keyString) {
+        return value
+      }
+    }
+    return key.defaultValue
+  }
+
+  /// Read an integer value with automatic CLI → ENV → default fallback
+  private func read(_ key: ConfigKeyKit.ConfigKey<Int>) -> Int? {
+    for source in ConfigKeySource.allCases {
+      guard let keyString = key.key(for: source) else { continue }
+      if let value = readInt(forKey: keyString) {
+        return value
+      }
+    }
+    return key.defaultValue
+  }
+
+  /// Read a double value with automatic CLI → ENV → default fallback
+  private func read(_ key: ConfigKeyKit.ConfigKey<Double>) -> Double? {
+    for source in ConfigKeySource.allCases {
+      guard let keyString = key.key(for: source) else { continue }
+      if let value = readDouble(forKey: keyString) {
+        return value
+      }
+    }
+    return key.defaultValue
+  }
+
+  /// Read a boolean value with enhanced ENV variable parsing
+  private func read(_ key: ConfigKeyKit.ConfigKey<Bool>) -> Bool {
+    // Try CLI first (presence-based for flags)
+    if let cliKey = key.key(for: .commandLine),
+       configReader.string(forKey: ConfigKey(cliKey)) != nil {
+      return true
+    }
+
+    // Try ENV (may have string value like VERBOSE=true)
+    if let envKey = key.key(for: .environment),
+       let envValue = configReader.string(forKey: ConfigKey(envKey)) {
+      let lowercased = envValue.lowercased().trimmingCharacters(in: .whitespaces)
+      return lowercased == "true" || lowercased == "1" || lowercased == "yes"
+    }
+
+    // Use boolDefault (non-optional)
+    return key.boolDefault
+  }
+
   // MARK: - Configuration Reading
 
   /// Load the complete configuration from all providers
   public func loadConfiguration() async throws -> BushelConfiguration {
-    // CloudKit configuration (dual-key fallback: CLI → ENV → default)
+    // CloudKit configuration (automatic CLI → ENV → default fallback)
     let cloudKit = CloudKitConfiguration(
-      containerID: readString(forKey: ConfigurationKeys.CloudKit.containerID)
-        ?? readString(forKey: ConfigurationKeys.CloudKit.containerIDEnv)
-        ?? "iCloud.com.brightdigit.Bushel",
-      keyID: readString(forKey: ConfigurationKeys.CloudKit.keyID)
-        ?? readString(forKey: ConfigurationKeys.CloudKit.keyIDEnv),
-      privateKeyPath: readString(forKey: ConfigurationKeys.CloudKit.privateKeyPath)
-        ?? readString(forKey: ConfigurationKeys.CloudKit.privateKeyPathEnv)
+      containerID: read(ConfigurationKeys.CloudKit.containerID) ?? "iCloud.com.brightdigit.Bushel",
+      keyID: read(ConfigurationKeys.CloudKit.keyID),
+      privateKeyPath: read(ConfigurationKeys.CloudKit.privateKeyPath)
     )
 
     // VirtualBuddy configuration
     let virtualBuddy = VirtualBuddyConfiguration(
-      apiKey: readString(forKey: ConfigurationKeys.VirtualBuddy.apiKey)
-        ?? readString(forKey: ConfigurationKeys.VirtualBuddy.apiKeyEnv)
+      apiKey: read(ConfigurationKeys.VirtualBuddy.apiKey)
     )
 
     // Fetch configuration: Start with BushelKit's environment loading, then override with CLI
     var fetch = FetchConfiguration.loadFromEnvironment()
 
     // Override global interval if --min-interval provided
-    if let minInterval = readInt(forKey: ConfigurationKeys.Sync.minInterval) {
+    if let minInterval = read(ConfigurationKeys.Sync.minInterval) {
       fetch = FetchConfiguration(
         globalMinimumFetchInterval: TimeInterval(minInterval),
         perSourceIntervals: fetch.perSourceIntervals,
@@ -102,10 +152,8 @@ public actor ConfigurationLoader {
     for source in DataSource.allCases {
       // Try CLI arg first (e.g., "fetch.interval.appledb_dev")
       // Then try ENV var (e.g., "BUSHEL_FETCH_INTERVAL_APPLEDB_DEV")
-      let cliKey = ConfigurationKeys.Fetch.intervalKey(for: source.rawValue)
-      if let interval =
-        readDouble(forKey: cliKey) ?? readDouble(forKey: source.environmentKey)
-      {
+      let intervalKey = ConfigurationKeys.Fetch.intervalKey(for: source.rawValue)
+      if let interval = read(intervalKey) {
         perSourceIntervals[source.rawValue] = interval
       }
     }
@@ -121,44 +169,44 @@ public actor ConfigurationLoader {
 
     // Sync command configuration
     let sync = SyncConfiguration(
-      dryRun: readBool(forKey: ConfigurationKeys.Sync.dryRun) ?? false,
-      restoreImagesOnly: readBool(forKey: ConfigurationKeys.Sync.restoreImagesOnly) ?? false,
-      xcodeOnly: readBool(forKey: ConfigurationKeys.Sync.xcodeOnly) ?? false,
-      swiftOnly: readBool(forKey: ConfigurationKeys.Sync.swiftOnly) ?? false,
-      noBetas: readBool(forKey: ConfigurationKeys.Sync.noBetas) ?? false,
-      noAppleWiki: readBool(forKey: ConfigurationKeys.Sync.noAppleWiki) ?? false,
-      verbose: readBool(forKey: ConfigurationKeys.Sync.verbose) ?? false,
-      force: readBool(forKey: ConfigurationKeys.Sync.force) ?? false,
-      minInterval: readInt(forKey: ConfigurationKeys.Sync.minInterval),
-      source: readString(forKey: ConfigurationKeys.Sync.source)
+      dryRun: read(ConfigurationKeys.Sync.dryRun),
+      restoreImagesOnly: read(ConfigurationKeys.Sync.restoreImagesOnly),
+      xcodeOnly: read(ConfigurationKeys.Sync.xcodeOnly),
+      swiftOnly: read(ConfigurationKeys.Sync.swiftOnly),
+      noBetas: read(ConfigurationKeys.Sync.noBetas),
+      noAppleWiki: read(ConfigurationKeys.Sync.noAppleWiki),
+      verbose: read(ConfigurationKeys.Sync.verbose),
+      force: read(ConfigurationKeys.Sync.force),
+      minInterval: read(ConfigurationKeys.Sync.minInterval),
+      source: read(ConfigurationKeys.Sync.source)
     )
 
     // Export command configuration
     let export = ExportConfiguration(
-      output: readString(forKey: ConfigurationKeys.Export.output),
-      pretty: readBool(forKey: ConfigurationKeys.Export.pretty) ?? false,
-      signedOnly: readBool(forKey: ConfigurationKeys.Export.signedOnly) ?? false,
-      noBetas: readBool(forKey: ConfigurationKeys.Export.noBetas) ?? false,
-      verbose: readBool(forKey: ConfigurationKeys.Export.verbose) ?? false
+      output: read(ConfigurationKeys.Export.output),
+      pretty: read(ConfigurationKeys.Export.pretty),
+      signedOnly: read(ConfigurationKeys.Export.signedOnly),
+      noBetas: read(ConfigurationKeys.Export.noBetas),
+      verbose: read(ConfigurationKeys.Export.verbose)
     )
 
     // Status command configuration
     let status = StatusConfiguration(
-      errorsOnly: readBool(forKey: ConfigurationKeys.Status.errorsOnly) ?? false,
-      detailed: readBool(forKey: ConfigurationKeys.Status.detailed) ?? false
+      errorsOnly: read(ConfigurationKeys.Status.errorsOnly),
+      detailed: read(ConfigurationKeys.Status.detailed)
     )
 
     // List command configuration
     let list = ListConfiguration(
-      restoreImages: readBool(forKey: ConfigurationKeys.List.restoreImages) ?? false,
-      xcodeVersions: readBool(forKey: ConfigurationKeys.List.xcodeVersions) ?? false,
-      swiftVersions: readBool(forKey: ConfigurationKeys.List.swiftVersions) ?? false
+      restoreImages: read(ConfigurationKeys.List.restoreImages),
+      xcodeVersions: read(ConfigurationKeys.List.xcodeVersions),
+      swiftVersions: read(ConfigurationKeys.List.swiftVersions)
     )
 
     // Clear command configuration
     let clear = ClearConfiguration(
-      yes: readBool(forKey: ConfigurationKeys.Clear.yes) ?? false,
-      verbose: readBool(forKey: ConfigurationKeys.Clear.verbose) ?? false
+      yes: read(ConfigurationKeys.Clear.yes),
+      verbose: read(ConfigurationKeys.Clear.verbose)
     )
 
     return BushelConfiguration(
