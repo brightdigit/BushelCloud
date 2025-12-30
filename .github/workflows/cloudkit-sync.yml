@@ -8,6 +8,11 @@ on:
   # Allow manual trigger for testing
   workflow_dispatch:
 
+  # Run on pushes to feature branch for testing
+  push:
+    branches:
+      - 8-scheduled-job
+
 # Prevent concurrent sync runs
 concurrency:
   group: cloudkit-sync
