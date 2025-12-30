@@ -2,13 +2,37 @@
 //  ConfigurationLoader.swift
 //  BushelCloud
 //
-//  Central configuration management using Swift Configuration
+//  Created by Leo Dion.
+//  Copyright © 2025 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
 //
 
 public import BushelFoundation
 import ConfigKeyKit
 import Configuration
 import Foundation
+
+// swiftlint:disable file_length
 
 /// Actor responsible for loading configuration from CLI arguments and environment variables
 public actor ConfigurationLoader {
@@ -24,7 +48,7 @@ public actor ConfigurationLoader {
         secretsSpecifier: .specific([
           "--cloudkit-key-id",
           "--cloudkit-private-key-path",
-          "--virtualbuddy-api-key"
+          "--virtualbuddy-api-key",
         ])
       )
     )
@@ -34,6 +58,18 @@ public actor ConfigurationLoader {
 
     self.configReader = ConfigReader(providers: providers)
   }
+
+  #if DEBUG
+    /// Test-only initializer that accepts a pre-configured ConfigReader
+    ///
+    /// This allows tests to inject controlled configuration sources without
+    /// modifying process-global state (environment variables).
+    ///
+    /// - Parameter configReader: Pre-configured ConfigReader for testing
+    internal init(configReader: ConfigReader) {
+      self.configReader = configReader
+    }
+  #endif
 
   // MARK: - Helper Methods
 
@@ -56,12 +92,6 @@ public actor ConfigurationLoader {
       return nil
     }
     return Double(stringValue)
-  }
-
-  /// Read a boolean value from configuration
-  /// Swift Configuration uses presence for booleans (--flag means true)
-  private func readBool(forKey key: String) -> Bool? {
-    configReader.string(forKey: ConfigKey(key)) != nil
   }
 
   // MARK: - Generic Helper Methods for ConfigKey (with defaults)
@@ -116,13 +146,15 @@ public actor ConfigurationLoader {
   private func read(_ key: ConfigKeyKit.ConfigKey<Bool>) -> Bool {
     // Try CLI first (presence-based for flags)
     if let cliKey = key.key(for: .commandLine),
-       configReader.string(forKey: ConfigKey(cliKey)) != nil {
+      configReader.string(forKey: ConfigKey(cliKey)) != nil
+    {
       return true
     }
 
     // Try ENV (may have string value like VERBOSE=true)
     if let envKey = key.key(for: .environment),
-       let envValue = configReader.string(forKey: ConfigKey(envKey)) {
+      let envValue = configReader.string(forKey: ConfigKey(envKey))
+    {
       let lowercased = envValue.lowercased().trimmingCharacters(in: .whitespaces)
       return lowercased == "true" || lowercased == "1" || lowercased == "yes"
     }

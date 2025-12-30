@@ -31,6 +31,8 @@ public import BushelFoundation
 import BushelLogging
 import Foundation
 
+// swiftlint:disable file_length type_body_length
+
 /// Orchestrates fetching data from all sources with deduplication and relationship resolution
 public struct DataSourcePipeline: Sendable {
   // MARK: - Configuration
@@ -209,27 +211,43 @@ public struct DataSourcePipeline: Sendable {
 
     var allImages: [RestoreImageRecord] = []
 
-    // Fetch from ipsw.me
+    allImages.append(contentsOf: try await fetchIPSWImages(options: options))
+    allImages.append(contentsOf: try await fetchMESUImages(options: options))
+    allImages.append(contentsOf: try await fetchAppleDBImages(options: options))
+    allImages.append(contentsOf: try await fetchMrMacintoshImages(options: options))
+    allImages.append(contentsOf: try await fetchTheAppleWikiImages(options: options))
+
+    allImages = try await enrichWithVirtualBuddy(allImages, options: options)
+
+    // Deduplicate by build number (keep first occurrence)
+    let preDedupeCount = allImages.count
+    let deduped = deduplicateRestoreImages(allImages)
+    print("   📦 Deduplicated: \(preDedupeCount) → \(deduped.count) images")
+    return deduped
+  }
+
+  private func fetchIPSWImages(options: Options) async throws -> [RestoreImageRecord] {
     do {
-      let ipswImages = try await fetchWithMetadata(
+      let images = try await fetchWithMetadata(
         source: "ipsw.me",
         recordType: "RestoreImage",
         options: options
       ) {
         try await IPSWFetcher().fetch()
       }
-      allImages.append(contentsOf: ipswImages)
-      if !ipswImages.isEmpty {
-        print("   ✓ ipsw.me: \(ipswImages.count) images")
+      if !images.isEmpty {
+        print("   ✓ ipsw.me: \(images.count) images")
       }
+      return images
     } catch {
       print("   ⚠️  ipsw.me failed: \(error)")
       throw error
     }
+  }
 
-    // Fetch from MESU
+  private func fetchMESUImages(options: Options) async throws -> [RestoreImageRecord] {
     do {
-      let mesuImages = try await fetchWithMetadata(
+      let images = try await fetchWithMetadata(
         source: "mesu.apple.com",
         recordType: "RestoreImage",
         options: options
@@ -240,95 +258,109 @@ public struct DataSourcePipeline: Sendable {
           return []
         }
       }
-      allImages.append(contentsOf: mesuImages)
-      if !mesuImages.isEmpty {
-        print("   ✓ MESU: \(mesuImages.count) image")
+      if !images.isEmpty {
+        print("   ✓ MESU: \(images.count) image")
       }
+      return images
     } catch {
       print("   ⚠️  MESU failed: \(error)")
       throw error
     }
+  }
 
-    // Fetch from AppleDB
-    if options.includeAppleDB {
-      do {
-        let appleDBImages = try await fetchWithMetadata(
-          source: "appledb.dev",
-          recordType: "RestoreImage",
-          options: options
-        ) {
-          try await AppleDBFetcher().fetch()
-        }
-        allImages.append(contentsOf: appleDBImages)
-        if !appleDBImages.isEmpty {
-          print("   ✓ AppleDB: \(appleDBImages.count) images")
-        }
-      } catch {
-        print("   ⚠️  AppleDB failed: \(error)")
-        // Don't throw - continue with other sources
-      }
+  private func fetchAppleDBImages(options: Options) async throws -> [RestoreImageRecord] {
+    guard options.includeAppleDB else {
+      return []
     }
 
-    // Fetch from Mr. Macintosh (betas)
-    if options.includeBetaReleases {
-      do {
-        let mrMacImages = try await fetchWithMetadata(
-          source: "mrmacintosh.com",
-          recordType: "RestoreImage",
-          options: options
-        ) {
-          try await MrMacintoshFetcher().fetch()
-        }
-        allImages.append(contentsOf: mrMacImages)
-        if !mrMacImages.isEmpty {
-          print("   ✓ Mr. Macintosh: \(mrMacImages.count) images")
-        }
-      } catch {
-        print("   ⚠️  Mr. Macintosh failed: \(error)")
-        throw error
+    do {
+      let images = try await fetchWithMetadata(
+        source: "appledb.dev",
+        recordType: "RestoreImage",
+        options: options
+      ) {
+        try await AppleDBFetcher().fetch()
       }
+      if !images.isEmpty {
+        print("   ✓ AppleDB: \(images.count) images")
+      }
+      return images
+    } catch {
+      print("   ⚠️  AppleDB failed: \(error)")
+      // Don't throw - continue with other sources
+      return []
+    }
+  }
+
+  private func fetchMrMacintoshImages(options: Options) async throws -> [RestoreImageRecord] {
+    guard options.includeBetaReleases else {
+      return []
     }
 
-    // Fetch from TheAppleWiki
-    if options.includeTheAppleWiki {
-      do {
-        let wikiImages = try await fetchWithMetadata(
-          source: "theapplewiki.com",
-          recordType: "RestoreImage",
-          options: options
-        ) {
-          try await TheAppleWikiFetcher().fetch()
-        }
-        allImages.append(contentsOf: wikiImages)
-        if !wikiImages.isEmpty {
-          print("   ✓ TheAppleWiki: \(wikiImages.count) images")
-        }
-      } catch {
-        print("   ⚠️  TheAppleWiki failed: \(error)")
-        throw error
+    do {
+      let images = try await fetchWithMetadata(
+        source: "mrmacintosh.com",
+        recordType: "RestoreImage",
+        options: options
+      ) {
+        try await MrMacintoshFetcher().fetch()
       }
+      if !images.isEmpty {
+        print("   ✓ Mr. Macintosh: \(images.count) images")
+      }
+      return images
+    } catch {
+      print("   ⚠️  Mr. Macintosh failed: \(error)")
+      throw error
+    }
+  }
+
+  private func fetchTheAppleWikiImages(options: Options) async throws -> [RestoreImageRecord] {
+    guard options.includeTheAppleWiki else {
+      return []
     }
 
-    // Enrich with VirtualBuddy TSS signing status
-    if options.includeVirtualBuddy, let fetcher = VirtualBuddyFetcher() {
-      do {
-        let enrichableCount = allImages.filter { $0.downloadURL.scheme != "file" }.count
-        let enrichedImages = try await fetcher.fetch(existingImages: allImages)
-        allImages = enrichedImages
-        print("   ✓ VirtualBuddy: Enriched \(enrichableCount) images with signing status")
-      } catch {
-        print("   ⚠️  VirtualBuddy failed: \(error)")
-        // Don't throw - continue with original data
+    do {
+      let images = try await fetchWithMetadata(
+        source: "theapplewiki.com",
+        recordType: "RestoreImage",
+        options: options
+      ) {
+        try await TheAppleWikiFetcher().fetch()
       }
-    } else if options.includeVirtualBuddy {
+      if !images.isEmpty {
+        print("   ✓ TheAppleWiki: \(images.count) images")
+      }
+      return images
+    } catch {
+      print("   ⚠️  TheAppleWiki failed: \(error)")
+      throw error
+    }
+  }
+
+  private func enrichWithVirtualBuddy(
+    _ images: [RestoreImageRecord],
+    options: Options
+  ) async throws -> [RestoreImageRecord] {
+    guard options.includeVirtualBuddy else {
+      return images
+    }
+
+    guard let fetcher = VirtualBuddyFetcher() else {
       print("   ⚠️  VirtualBuddy: No API key found (set VIRTUALBUDDY_API_KEY)")
+      return images
     }
 
-    // Deduplicate by build number (keep first occurrence)
-    let preDedupeCount = allImages.count
-    let deduped = deduplicateRestoreImages(allImages)
-    print("   📦 Deduplicated: \(preDedupeCount) → \(deduped.count) images")
-    return deduped
+    do {
+      let enrichableCount = images.filter { $0.downloadURL.scheme != "file" }.count
+      let enrichedImages = try await fetcher.fetch(existingImages: images)
+      print("   ✓ VirtualBuddy: Enriched \(enrichableCount) images with signing status")
+      return enrichedImages
+    } catch {
+      print("   ⚠️  VirtualBuddy failed: \(error)")
+      // Don't throw - continue with original data
+      return images
+    }
   }
 
   private func fetchXcodeVersions(options: Options) async throws -> [XcodeVersionRecord] {
@@ -404,74 +436,105 @@ public struct DataSourcePipeline: Sendable {
     var merged = first
 
     // Backfill missing hashes and file size from second record
-    if !second.sha256Hash.isEmpty && first.sha256Hash.isEmpty {
-      merged.sha256Hash = second.sha256Hash
-    }
-    if !second.sha1Hash.isEmpty && first.sha1Hash.isEmpty {
-      merged.sha1Hash = second.sha1Hash
-    }
-    if second.fileSize > 0 && first.fileSize == 0 {
-      merged.fileSize = second.fileSize
-    }
+    merged.sha256Hash = backfillValue(first: first.sha256Hash, second: second.sha256Hash)
+    merged.sha1Hash = backfillValue(first: first.sha1Hash, second: second.sha1Hash)
+    merged.fileSize = backfillFileSize(first: first.fileSize, second: second.fileSize)
 
-    // Merge isSigned with priority rules:
-    // 1. MESU or VirtualBuddy are always authoritative (Apple's real-time signing status)
-    // 2. For other sources, prefer the most recently updated
-    // 3. If both have same update time (or both nil) and disagree, prefer false
+    // Merge isSigned using priority rules
+    merged.isSigned = mergeIsSignedStatus(first: first, second: second)
 
+    // Combine notes
+    merged.notes = combineNotes(first: first.notes, second: second.notes)
+
+    return merged
+  }
+
+  private func backfillValue(first: String, second: String) -> String {
+    if !second.isEmpty && first.isEmpty {
+      return second
+    }
+    return first
+  }
+
+  private func backfillFileSize(first: Int, second: Int) -> Int {
+    if second > 0 && first == 0 {
+      return second
+    }
+    return first
+  }
+
+  private func mergeIsSignedStatus(
+    first: RestoreImageRecord,
+    second: RestoreImageRecord
+  ) -> Bool? {
     // Define authoritative sources for signing status
     let authoritativeSources: Set<String> = ["mesu.apple.com", "tss.virtualbuddy.app"]
 
-    if authoritativeSources.contains(first.source) && first.isSigned != nil {
-      merged.isSigned = first.isSigned  // First is authoritative (MESU or VirtualBuddy)
-    } else if authoritativeSources.contains(second.source) && second.isSigned != nil {
-      merged.isSigned = second.isSigned  // Second is authoritative (MESU or VirtualBuddy)
-    } else {
-      // Neither is MESU, compare update timestamps
-      let firstUpdated = first.sourceUpdatedAt
-      let secondUpdated = second.sourceUpdatedAt
-
-      if let firstDate = firstUpdated, let secondDate = secondUpdated {
-        // Both have dates - use the more recent one
-        if secondDate > firstDate && second.isSigned != nil {
-          merged.isSigned = second.isSigned
-        } else if firstDate >= secondDate && first.isSigned != nil {
-          merged.isSigned = first.isSigned
-        } else if first.isSigned != nil {
-          merged.isSigned = first.isSigned
-        } else {
-          merged.isSigned = second.isSigned
-        }
-      } else if secondUpdated != nil && second.isSigned != nil {
-        // Second has date, first doesn't - prefer second
-        merged.isSigned = second.isSigned
-      } else if firstUpdated != nil && first.isSigned != nil {
-        // First has date, second doesn't - prefer first
-        merged.isSigned = first.isSigned
-      } else if first.isSigned != nil && second.isSigned != nil {
-        // Both have values but no dates - prefer false when they disagree
-        if first.isSigned == second.isSigned {
-          merged.isSigned = first.isSigned
-        } else {
-          merged.isSigned = false
-        }
-      } else if second.isSigned != nil {
-        merged.isSigned = second.isSigned
-      } else if first.isSigned != nil {
-        merged.isSigned = first.isSigned
-      }
+    // Priority 1: Authoritative sources (MESU or VirtualBuddy)
+    if authoritativeSources.contains(first.source), let signed = first.isSigned {
+      return signed
+    }
+    if authoritativeSources.contains(second.source), let signed = second.isSigned {
+      return signed
     }
 
-    // Combine notes
-    if let secondNotes = second.notes, !secondNotes.isEmpty {
-      if let firstNotes = first.notes, !firstNotes.isEmpty {
-        merged.notes = "\(firstNotes); \(secondNotes)"
+    // Priority 2: Most recent update timestamp
+    return mergeIsSignedByTimestamp(
+      firstSigned: first.isSigned,
+      firstDate: first.sourceUpdatedAt,
+      secondSigned: second.isSigned,
+      secondDate: second.sourceUpdatedAt
+    )
+  }
+
+  private func mergeIsSignedByTimestamp(
+    firstSigned: Bool?,
+    firstDate: Date?,
+    secondSigned: Bool?,
+    secondDate: Date?
+  ) -> Bool? {
+    // Both have dates - use the more recent one
+    if let firstTimestamp = firstDate, let secondTimestamp = secondDate {
+      if secondTimestamp > firstTimestamp {
+        return secondSigned ?? firstSigned
       } else {
-        merged.notes = secondNotes
+        return firstSigned ?? secondSigned
       }
     }
 
-    return merged
+    // Only second has date
+    if secondDate != nil {
+      return secondSigned ?? firstSigned
+    }
+
+    // Only first has date
+    if firstDate != nil {
+      return firstSigned ?? secondSigned
+    }
+
+    // No dates - handle conflicting values
+    return resolveConflictingSignedStatus(first: firstSigned, second: secondSigned)
+  }
+
+  private func resolveConflictingSignedStatus(first: Bool?, second: Bool?) -> Bool? {
+    guard let firstValue = first, let secondValue = second else {
+      return second ?? first
+    }
+
+    // Both have values - prefer false when they disagree
+    return firstValue == secondValue ? firstValue : false
+  }
+
+  private func combineNotes(first: String?, second: String?) -> String? {
+    guard let secondNotes = second, !secondNotes.isEmpty else {
+      return first
+    }
+
+    if let firstNotes = first, !firstNotes.isEmpty {
+      return "\(firstNotes); \(secondNotes)"
+    }
+
+    return secondNotes
   }
 
   /// Resolve XcodeVersion → RestoreImage references by mapping version strings to record names
