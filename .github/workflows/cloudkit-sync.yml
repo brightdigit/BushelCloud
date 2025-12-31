@@ -1,9 +1,12 @@
 name: Scheduled CloudKit Sync
 
 on:
-  # Run every 12 hours (00:00 and 12:00 UTC)
+  # Run three times daily (every ~8 hours) with randomized minutes
+  # Staggered to avoid predictable patterns and align with VirtualBuddy TSS cache (12h)
   schedule:
-    - cron: '0 */12 * * *'
+    - cron: '17 2 * * *'   # 02:17 UTC
+    - cron: '43 10 * * *'  # 10:43 UTC
+    - cron: '29 18 * * *'  # 18:29 UTC
 
   # Allow manual trigger for testing
   workflow_dispatch:
@@ -19,11 +22,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sync:
-    name: Sync to CloudKit
+  build:
+    name: Build bushel-cloud
     runs-on: ubuntu-latest
     container: swift:6.2-noble
-    timeout-minutes: 30
+    timeout-minutes: 20
 
     permissions:
       contents: read  # Read repository code
@@ -54,13 +57,32 @@ jobs:
           echo "Binary location: $BIN_PATH/bushel-cloud"
           ls -lh "$BIN_PATH/bushel-cloud"
 
-      - name: Upload binary as artifact
+      - name: Upload binary for sync job
         uses: actions/upload-artifact@v4
         with:
-          name: bushel-cloud-${{ runner.os }}-${{ github.sha }}
+          name: bushel-cloud-binary
           path: ${{ steps.build.outputs.bin-path }}/bushel-cloud
-          retention-days: 7
-          if-no-files-found: warn
+          retention-days: 1  # Short retention, only needed for sync job
+          if-no-files-found: error
+
+  sync:
+    name: Sync to CloudKit
+    runs-on: ubuntu-latest  # No container needed - uses pre-built binary
+    needs: [build]
+    timeout-minutes: 30
+
+    permissions:
+      contents: read  # Read repository code
+
+    steps:
+      - name: Download built binary
+        uses: actions/download-artifact@v4
+        with:
+          name: bushel-cloud-binary
+          path: ./binary
+
+      - name: Make binary executable
+        run: chmod +x ./binary/bushel-cloud
 
       - name: Run CloudKit sync
         env:
@@ -73,13 +95,9 @@ jobs:
           echo "Container: $CLOUDKIT_CONTAINER_ID"
           echo "Environment: $CLOUDKIT_ENVIRONMENT"
 
-          # Use pre-built binary (already computed in build step)
-          BIN_PATH="${{ steps.build.outputs.bin-path }}"
-          echo "Using binary: $BIN_PATH/bushel-cloud"
-
           # Run pre-built binary
           # Note: Same key works for both development and production
           # Change CLOUDKIT_ENVIRONMENT to 'production' when ready
-          "$BIN_PATH/bushel-cloud" sync \
+          ./binary/bushel-cloud sync \
             --verbose \
             --container-identifier "$CLOUDKIT_CONTAINER_ID"

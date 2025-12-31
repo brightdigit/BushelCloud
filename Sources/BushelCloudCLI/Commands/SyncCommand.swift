@@ -53,7 +53,7 @@ enum SyncCommand {
       containerIdentifier: config.cloudKit.containerID,
       keyID: config.cloudKit.keyID,
       privateKeyPath: config.cloudKit.privateKeyPath,
-      pemString: config.cloudKit.privateKey ?? "",      // Raw PEM if provided
+      pemString: config.cloudKit.privateKey,           // Raw PEM if provided (optional)
       environment: config.cloudKit.environment,         // Parsed environment enum
       configuration: fetchConfiguration
     )

@@ -35,11 +35,13 @@ internal enum ConfigurationKeys {
   // MARK: - CloudKit Configuration
 
   /// CloudKit configuration keys
+  ///
+  /// Uses `envPrefix: nil` to auto-generate environment variable names from the key path.
+  /// Example: "cloudkit.container_id" → ENV: CLOUDKIT_CONTAINER_ID
   internal enum CloudKit {
-    // Using base key with auto-generation (no prefix for CloudKit ENV vars)
     internal static let containerID = ConfigKey<String>(
       "cloudkit.container_id",
-      envPrefix: nil,  // Generates: CLI="cloudkit.container_id", ENV="CLOUDKIT_CONTAINER_ID"
+      envPrefix: nil,
       default: "iCloud.com.brightdigit.Bushel"
     )
 
@@ -55,12 +57,12 @@ internal enum ConfigurationKeys {
 
     internal static let privateKey = OptionalConfigKey<String>(
       "cloudkit.private_key",
-      envPrefix: nil  // Generates: ENV="CLOUDKIT_PRIVATE_KEY"
+      envPrefix: nil
     )
 
     internal static let environment = ConfigKey<String>(
       "cloudkit.environment",
-      envPrefix: nil,  // Generates: ENV="CLOUDKIT_ENVIRONMENT"
+      envPrefix: nil,
       default: "development"
     )
   }
@@ -68,19 +70,24 @@ internal enum ConfigurationKeys {
   // MARK: - VirtualBuddy Configuration
 
   /// VirtualBuddy TSS API configuration keys
+  ///
+  /// Uses `envPrefix: nil` for auto-generated ENV names (VIRTUALBUDDY_API_KEY).
   internal enum VirtualBuddy {
     internal static let apiKey = OptionalConfigKey<String>(
       "virtualbuddy.api_key",
-      envPrefix: nil  // Generates: ENV="VIRTUALBUDDY_API_KEY"
+      envPrefix: nil
     )
   }
 
   // MARK: - Fetch Configuration
 
   /// Fetch throttling configuration keys
+  ///
+  /// Uses `bushelPrefixed:` to add BUSHEL_ prefix to all environment variables.
+  /// Example: "fetch.interval_global" → ENV: BUSHEL_FETCH_INTERVAL_GLOBAL
   internal enum Fetch {
     internal static let intervalGlobal = OptionalConfigKey<Double>(
-      bushelPrefixed: "fetch.interval_global"  // Generates: ENV="BUSHEL_FETCH_INTERVAL_GLOBAL"
+      bushelPrefixed: "fetch.interval_global"
     )
 
     /// Generate per-source interval key dynamically
@@ -90,14 +97,16 @@ internal enum ConfigurationKeys {
       let normalized = source.replacingOccurrences(of: ".", with: "_")
       return OptionalConfigKey<Double>(
         "fetch.interval.\(normalized)",
-        envPrefix: nil  // CLI: "fetch.interval.appledb_dev", ENV: "FETCH_INTERVAL_APPLEDB_DEV"
+        envPrefix: nil
       )
     }
   }
 
   // MARK: - Sync Command Configuration
 
-  /// Sync command configuration keys (using base key with BUSHEL prefix)
+  /// Sync command configuration keys
+  ///
+  /// Uses `bushelPrefixed:` for BUSHEL_SYNC_* environment variables.
   internal enum Sync {
     internal static let dryRun = ConfigKey<Bool>(bushelPrefixed: "sync.dry_run")
     internal static let restoreImagesOnly = ConfigKey<Bool>(
@@ -115,6 +124,8 @@ internal enum ConfigurationKeys {
   // MARK: - Export Command Configuration
 
   /// Export command configuration keys
+  ///
+  /// Uses `bushelPrefixed:` for BUSHEL_EXPORT_* environment variables.
   internal enum Export {
     internal static let output = OptionalConfigKey<String>(bushelPrefixed: "export.output")
     internal static let pretty = ConfigKey<Bool>(bushelPrefixed: "export.pretty")
@@ -126,6 +137,8 @@ internal enum ConfigurationKeys {
   // MARK: - Status Command Configuration
 
   /// Status command configuration keys
+  ///
+  /// Uses `bushelPrefixed:` for BUSHEL_STATUS_* environment variables.
   internal enum Status {
     internal static let errorsOnly = ConfigKey<Bool>(bushelPrefixed: "status.errors_only")
     internal static let detailed = ConfigKey<Bool>(bushelPrefixed: "status.detailed")
@@ -134,6 +147,8 @@ internal enum ConfigurationKeys {
   // MARK: - List Command Configuration
 
   /// List command configuration keys
+  ///
+  /// Uses `bushelPrefixed:` for BUSHEL_LIST_* environment variables.
   internal enum List {
     internal static let restoreImages = ConfigKey<Bool>(bushelPrefixed: "list.restore_images")
     internal static let xcodeVersions = ConfigKey<Bool>(bushelPrefixed: "list.xcode_versions")
@@ -143,6 +158,8 @@ internal enum ConfigurationKeys {
   // MARK: - Clear Command Configuration
 
   /// Clear command configuration keys
+  ///
+  /// Uses `bushelPrefixed:` for BUSHEL_CLEAR_* environment variables.
   internal enum Clear {
     internal static let yes = ConfigKey<Bool>(bushelPrefixed: "clear.yes")
     internal static let verbose = ConfigKey<Bool>(bushelPrefixed: "clear.verbose")

@@ -78,7 +78,7 @@ public struct SyncEngine: Sendable {
   ///   - containerIdentifier: CloudKit container ID
   ///   - keyID: Server-to-Server Key ID
   ///   - privateKeyPath: Path to .pem file (use if pemString not provided)
-  ///   - pemString: PEM content as string (use for CI/CD, takes priority over privateKeyPath)
+  ///   - pemString: PEM content as string (use for CI/CD, takes priority over privateKeyPath when non-nil)
   ///   - environment: CloudKit environment (.development or .production, defaults to .development)
   ///   - configuration: Fetch configuration for data sources
   /// - Throws: Error if authentication credentials are invalid or missing
@@ -86,13 +86,13 @@ public struct SyncEngine: Sendable {
     containerIdentifier: String,
     keyID: String,
     privateKeyPath: String = "",
-    pemString: String = "",
+    pemString: String? = nil,
     environment: Environment = .development,
     configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
   ) throws {
     // Prefer PEM string if provided (CI/CD pattern), fall back to file path (local development)
     let service: BushelCloudKitService
-    if !pemString.isEmpty {
+    if let pemString = pemString {
       service = try BushelCloudKitService(
         containerIdentifier: containerIdentifier,
         keyID: keyID,
