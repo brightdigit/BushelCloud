@@ -46,9 +46,17 @@ jobs:
           echo "Binary location: $BIN_PATH/bushel-cloud"
           ls -lh "$BIN_PATH/bushel-cloud"
 
-      - name: Create build metadata
+      - name: Prepare binary for upload
+        id: prepare
         run: |
-          cat > build-metadata.json <<EOF
+          # Create a clean directory for the artifact
+          mkdir -p artifact
+
+          # Copy binary to artifact directory
+          cp "${{ steps.build.outputs.bin-path }}/bushel-cloud" artifact/
+
+          # Create build metadata
+          cat > artifact/build-metadata.json <<EOF
           {
             "commit_sha": "${{ github.sha }}",
             "commit_ref": "${{ github.ref }}",
@@ -57,14 +65,15 @@ jobs:
             "workflow_run_number": "${{ github.run_number }}"
           }
           EOF
-          cat build-metadata.json
+
+          # Show what we're uploading
+          ls -lh artifact/
+          cat artifact/build-metadata.json
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
           name: bushel-cloud-binary
-          path: |
-            ${{ steps.build.outputs.bin-path }}/bushel-cloud
-            build-metadata.json
+          path: artifact/
           retention-days: 30  # Keep for 30 days to support scheduled syncs
           if-no-files-found: error
