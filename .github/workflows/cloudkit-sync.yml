@@ -11,8 +11,10 @@ on:
   # Allow manual trigger for testing
   workflow_dispatch:
 
-  # Run on pushes to feature branch for testing
-  push:
+  # Run after successful build (for testing on feature branch)
+  workflow_run:
+    workflows: ["Build bushel-cloud Binary"]
+    types: [completed]
     branches:
       - 8-scheduled-job
 
@@ -26,6 +28,8 @@ jobs:
     name: Sync to CloudKit
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Only run if triggered by schedule/manual, OR if build workflow succeeded
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
 
     permissions:
       contents: read  # Read repository code
