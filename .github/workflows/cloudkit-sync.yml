@@ -46,12 +46,24 @@ jobs:
       - name: Make binary executable
         run: chmod +x ./binary/bushel-cloud
 
+      - name: Validate required secrets
+        env:
+          VIRTUALBUDDY_API_KEY: ${{ secrets.VIRTUALBUDDY_API_KEY }}
+        run: |
+          if [ -z "$VIRTUALBUDDY_API_KEY" ]; then
+            echo "❌ Error: VIRTUALBUDDY_API_KEY is not set"
+            echo "Please add VIRTUALBUDDY_API_KEY to repository secrets"
+            exit 1
+          fi
+          echo "✅ All required secrets are present"
+
       - name: Run CloudKit sync
         env:
           CLOUDKIT_KEY_ID: ${{ secrets.CLOUDKIT_KEY_ID }}
           CLOUDKIT_PRIVATE_KEY: ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
           CLOUDKIT_ENVIRONMENT: development
           CLOUDKIT_CONTAINER_ID: iCloud.com.brightdigit.Bushel
+          VIRTUALBUDDY_API_KEY: ${{ secrets.VIRTUALBUDDY_API_KEY }}
         run: |
           echo "Starting CloudKit sync..."
           echo "Container: $CLOUDKIT_CONTAINER_ID"
