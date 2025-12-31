@@ -58,6 +58,27 @@ Optional for VirtualBuddy TSS signing status:
 export VIRTUALBUDDY_API_KEY="your-virtualbuddy-api-key"  # Get from https://tss.virtualbuddy.app/
 ```
 
+### GitHub Actions Workflows
+
+Manually trigger the scheduled CloudKit sync workflow:
+
+```bash
+# Trigger sync workflow on 8-scheduled-job branch
+gh workflow run cloudkit-sync.yml --ref 8-scheduled-job
+
+# Or using the API directly
+gh api repos/brightdigit/BushelCloud/actions/workflows/cloudkit-sync.yml/dispatches -f ref=8-scheduled-job
+
+# Check status of recent workflow runs
+gh run list --workflow=cloudkit-sync.yml --limit 5
+
+# View details of a specific run
+gh run view <run-id>
+
+# Watch logs of a running workflow
+gh run watch <run-id>
+```
+
 ## Architecture
 
 ### Modular Architecture with BushelKit
