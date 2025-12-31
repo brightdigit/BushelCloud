@@ -22,62 +22,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build bushel-cloud
-    runs-on: ubuntu-latest
-    container: swift:6.2-noble
-    timeout-minutes: 20
-
-    permissions:
-      contents: read  # Read repository code
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Verify Swift version
-        run: |
-          swift --version
-          swift package --version
-
-      - name: Cache Swift build
-        uses: actions/cache@v4
-        with:
-          path: .build
-          key: ${{ runner.os }}-swift-build-${{ hashFiles('**/Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-swift-build-
-
-      - name: Build bushel-cloud executable
-        id: build
-        run: |
-          swift build -c release
-          BIN_PATH=$(swift build -c release --show-bin-path)
-          echo "bin-path=$BIN_PATH" >> $GITHUB_OUTPUT
-          echo "Binary location: $BIN_PATH/bushel-cloud"
-          ls -lh "$BIN_PATH/bushel-cloud"
-
-      - name: Upload binary for sync job
-        uses: actions/upload-artifact@v4
-        with:
-          name: bushel-cloud-binary
-          path: ${{ steps.build.outputs.bin-path }}/bushel-cloud
-          retention-days: 1  # Short retention, only needed for sync job
-          if-no-files-found: error
-
   sync:
     name: Sync to CloudKit
-    runs-on: ubuntu-latest  # No container needed - uses pre-built binary
-    needs: [build]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     permissions:
       contents: read  # Read repository code
 
     steps:
-      - name: Download built binary
-        uses: actions/download-artifact@v4
+      - name: Download latest built binary
+        uses: dawidd6/action-download-artifact@v3
         with:
+          workflow: bushel-cloud-build.yml
+          workflow_conclusion: success
           name: bushel-cloud-binary
           path: ./binary
 
