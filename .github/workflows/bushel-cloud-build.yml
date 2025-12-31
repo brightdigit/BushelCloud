@@ -40,8 +40,8 @@ jobs:
       - name: Build bushel-cloud executable
         id: build
         run: |
-          swift build -c release
-          BIN_PATH=$(swift build -c release --show-bin-path)
+          swift build -c release --static-swift-stdlib
+          BIN_PATH=$(swift build -c release --static-swift-stdlib --show-bin-path)
           echo "bin-path=$BIN_PATH" >> $GITHUB_OUTPUT
           echo "Binary location: $BIN_PATH/bushel-cloud"
           ls -lh "$BIN_PATH/bushel-cloud"
