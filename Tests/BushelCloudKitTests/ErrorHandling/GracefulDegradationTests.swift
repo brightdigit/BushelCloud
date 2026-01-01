@@ -30,8 +30,6 @@
 import Foundation
 import Testing
 
-@testable import BushelCloudKit
-
 // MARK: - Graceful Degradation Tests
 
 @Suite("Graceful Degradation Tests")

@@ -31,10 +31,8 @@ import Foundation
 
 /// Represents a single macOS build entry from AppleDB
 struct AppleDBEntry: Codable {
-  let osStr: String
   let version: String
   let build: String?  // Some entries may not have a build number
-  let uniqueBuild: String?
   let released: String  // ISO date or empty string
   let beta: Bool?
   let rc: Bool?
@@ -44,7 +42,7 @@ struct AppleDBEntry: Codable {
   let sources: [AppleDBSource]?
 
   enum CodingKeys: String, CodingKey {
-    case osStr, version, build, uniqueBuild, released
+    case version, build, released
     case beta, rc
     case `internal` = "internal"
     case deviceMap, signed, sources

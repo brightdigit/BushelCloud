@@ -37,15 +37,15 @@ internal struct BushelCloudCLI {
 
     switch command {
     case "sync":
-      try await SyncCommand.run(args: args)
+      try await SyncCommand.run(args)
     case "status":
-      try await StatusCommand.run(args: args)
+      try await StatusCommand.run(args)
     case "list":
-      try await ListCommand.run(args: args)
+      try await ListCommand.run(args)
     case "export":
-      try await ExportCommand.run(args: args)
+      try await ExportCommand.run(args)
     case "clear":
-      try await ClearCommand.run(args: args)
+      try await ClearCommand.run(args)
     default:
       print("Error: Unknown command '\(command)'")
       print("")

@@ -106,30 +106,6 @@ public actor ConfigurationLoader {
     return key.defaultValue  // Non-optional!
   }
 
-  /// Read an integer value with automatic CLI → ENV → default fallback
-  /// Returns non-optional since ConfigKey has a required default
-  private func read(_ key: ConfigKeyKit.ConfigKey<Int>) -> Int {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readInt(forKey: keyString) {
-        return value
-      }
-    }
-    return key.defaultValue  // Non-optional!
-  }
-
-  /// Read a double value with automatic CLI → ENV → default fallback
-  /// Returns non-optional since ConfigKey has a required default
-  private func read(_ key: ConfigKeyKit.ConfigKey<Double>) -> Double {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readDouble(forKey: keyString) {
-        return value
-      }
-    }
-    return key.defaultValue  // Non-optional!
-  }
-
   /// Read a boolean value with enhanced ENV variable parsing
   ///
   /// Returns non-optional since ConfigKey has a required default.

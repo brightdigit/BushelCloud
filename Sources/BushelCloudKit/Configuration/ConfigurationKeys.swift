@@ -79,10 +79,6 @@ internal enum ConfigurationKeys {
   /// Uses `bushelPrefixed:` to add BUSHEL_ prefix to all environment variables.
   /// Example: "fetch.interval_global" → ENV: BUSHEL_FETCH_INTERVAL_GLOBAL
   internal enum Fetch {
-    internal static let intervalGlobal = OptionalConfigKey<Double>(
-      bushelPrefixed: "fetch.interval_global"
-    )
-
     /// Generate per-source interval key dynamically
     /// - Parameter source: Data source identifier (e.g., "appledb.dev")
     /// - Returns: An OptionalConfigKey<Double> for the source-specific interval

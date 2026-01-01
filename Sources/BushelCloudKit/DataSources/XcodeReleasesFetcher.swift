@@ -62,22 +62,18 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
     let version: Version
 
     struct Checksums: Codable {
-      let sha1: String
+      // API provides checksums but we don't use them currently
     }
 
     struct Compilers: Codable {
-      let clang: [Compiler]?
       let swift: [Compiler]?
     }
 
     struct Compiler: Codable {
-      let build: String?
       let number: String?
-      let release: Release?
     }
 
     struct Release: Codable {
-      let release: Bool?
       let beta: Int?
       let rc: Int?
 
@@ -118,9 +114,7 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
       let watchOS: [SDK]?
 
       struct SDK: Codable {
-        let build: String?
         let number: String?
-        let release: Release?
       }
     }
 
