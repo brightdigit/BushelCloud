@@ -25,46 +25,46 @@ struct ConfigurationLoaderTests {
   // MARK: - Test Utilities
 
   /// Create a ConfigurationLoader with simulated CLI args and environment variables
-    ///
-    /// - Parameters:
-    ///   - cliArgs: Simulated CLI arguments (format: "key=value" or "key" for flags)
-    ///   - env: Simulated environment variables
-    /// - Returns: ConfigurationLoader with controlled inputs
-    private static func createLoader(
-      cliArgs: [String],
-      env: [String: String]
-    ) -> ConfigurationLoader {
-      // Parse CLI args: "key=value" or "key" for flags
-      var cliValues: [AbsoluteConfigKey: ConfigValue] = [:]
-      for arg in cliArgs {
-        if arg.contains("=") {
-          let parts = arg.split(separator: "=", maxSplits: 1)
-          if parts.count == 2 {
-            let key = AbsoluteConfigKey(stringLiteral: String(parts[0]))
-            cliValues[key] = .init(.string(String(parts[1])), isSecret: false)
-          }
-        } else {
-          // Flag presence (boolean)
-          let key = AbsoluteConfigKey(stringLiteral: arg)
-          cliValues[key] = .init(.string("true"), isSecret: false)
+  ///
+  /// - Parameters:
+  ///   - cliArgs: Simulated CLI arguments (format: "key=value" or "key" for flags)
+  ///   - env: Simulated environment variables
+  /// - Returns: ConfigurationLoader with controlled inputs
+  private static func createLoader(
+    cliArgs: [String],
+    env: [String: String]
+  ) -> ConfigurationLoader {
+    // Parse CLI args: "key=value" or "key" for flags
+    var cliValues: [AbsoluteConfigKey: ConfigValue] = [:]
+    for arg in cliArgs {
+      if arg.contains("=") {
+        let parts = arg.split(separator: "=", maxSplits: 1)
+        if parts.count == 2 {
+          let key = AbsoluteConfigKey(stringLiteral: String(parts[0]))
+          cliValues[key] = .init(.string(String(parts[1])), isSecret: false)
         }
+      } else {
+        // Flag presence (boolean)
+        let key = AbsoluteConfigKey(stringLiteral: arg)
+        cliValues[key] = .init(.string("true"), isSecret: false)
       }
-
-      // ENV vars as-is
-      var envValues: [AbsoluteConfigKey: ConfigValue] = [:]
-      for (key, value) in env {
-        let configKey = AbsoluteConfigKey(stringLiteral: key)
-        envValues[configKey] = .init(.string(value), isSecret: false)
-      }
-
-      let providers: [any ConfigProvider] = [
-        InMemoryProvider(values: cliValues),  // Priority 1: CLI
-        InMemoryProvider(values: envValues),  // Priority 2: ENV
-      ]
-
-      let configReader = ConfigReader(providers: providers)
-      return ConfigurationLoader(configReader: configReader)
     }
+
+    // ENV vars as-is
+    var envValues: [AbsoluteConfigKey: ConfigValue] = [:]
+    for (key, value) in env {
+      let configKey = AbsoluteConfigKey(stringLiteral: key)
+      envValues[configKey] = .init(.string(value), isSecret: false)
+    }
+
+    let providers: [any ConfigProvider] = [
+      InMemoryProvider(values: cliValues),  // Priority 1: CLI
+      InMemoryProvider(values: envValues),  // Priority 2: ENV
+    ]
+
+    let configReader = ConfigReader(providers: providers)
+    return ConfigurationLoader(configReader: configReader)
+  }
 
   // MARK: - Boolean Parsing Tests
 
@@ -465,7 +465,7 @@ struct ConfigurationLoaderTests {
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
           "CLOUDKIT_KEY_ID": "test-key-id",
-          // Missing both CLOUDKIT_PRIVATE_KEY and CLOUDKIT_PRIVATE_KEY_PATH
+            // Missing both CLOUDKIT_PRIVATE_KEY and CLOUDKIT_PRIVATE_KEY_PATH
         ]
       )
 

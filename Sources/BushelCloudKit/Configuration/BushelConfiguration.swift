@@ -138,8 +138,8 @@ public struct CloudKitConfiguration: Sendable {
   public var containerID: String?
   public var keyID: String?
   public var privateKeyPath: String?
-  public var privateKey: String?        // Raw PEM string for CI/CD
-  public var environment: String?       // "development" or "production"
+  public var privateKey: String?  // Raw PEM string for CI/CD
+  public var environment: String?  // "development" or "production"
 
   public init(
     containerID: String? = nil,
@@ -165,8 +165,8 @@ public struct CloudKitConfiguration: Sendable {
 public struct ValidatedCloudKitConfiguration: Sendable {
   public let containerID: String
   public let keyID: String
-  public let privateKeyPath: String       // Can be empty if privateKey is used
-  public let privateKey: String?          // Optional (only one method required)
+  public let privateKeyPath: String  // Can be empty if privateKey is used
+  public let privateKey: String?  // Optional (only one method required)
   public let environment: MistKit.Environment
 
   public init(from config: CloudKitConfiguration) throws {
@@ -188,7 +188,8 @@ public struct ValidatedCloudKitConfiguration: Sendable {
 
     // Validate at least ONE credential method is provided (NOT both required)
     let trimmedPrivateKey = config.privateKey?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-    let trimmedPrivateKeyPath = config.privateKeyPath?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    let trimmedPrivateKeyPath =
+      config.privateKeyPath?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
     let hasPrivateKey = !trimmedPrivateKey.isEmpty
     let hasPrivateKeyPath = !trimmedPrivateKeyPath.isEmpty

@@ -43,13 +43,14 @@ import Testing
 @Suite(
   "VirtualBuddyFetcher Tests",
   .serialized,
-  .enabled(if: {
-    #if os(macOS) || os(Linux)
-      return true
-    #else
-      return false
-    #endif
-  }())
+  .enabled(
+    if: {
+      #if os(macOS) || os(Linux)
+        return true
+      #else
+        return false
+      #endif
+    }())
 )
 struct VirtualBuddyFetcherTests {
   // MARK: - Initialization Tests

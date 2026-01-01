@@ -28,11 +28,11 @@
 //
 
 import Testing
+
 @testable import BushelCloudKit
 
 @Suite("PEM Validation Tests")
 struct PEMValidatorTests {
-
   @Test("Valid PEM passes validation")
   func testValidPEM() throws {
     let validPEM = """
