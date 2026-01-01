@@ -656,12 +656,14 @@ The `main` branch requires:
 
 As noted in README.md, this is a **demonstration project** with known limitations:
 
-- No duplicate detection (repeated syncs create duplicate records)
-- No incremental sync (always fetches all data)
+- No incremental sync (always fetches all data from external sources)
 - No conflict resolution for concurrent updates
 - Limited error recovery in batch operations
+- **Export pagination**: Export only retrieves first 200 records per type (see Issue #8)
 
 These are intentional to keep the demo focused on MistKit patterns rather than production robustness.
+
+**Note on Duplicates**: The sync properly uses `.forceReplace` operations with deterministic record names (based on build numbers), so repeated syncs **update** existing records rather than creating duplicates.
 
 ## Additional Documentation
 

@@ -66,4 +66,4 @@ jobs:
           cloudkit-key-id: ${{ secrets.CLOUDKIT_KEY_ID }}
           cloudkit-private-key: ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
           virtualbuddy-api-key: ${{ secrets.VIRTUALBUDDY_API_KEY }}
-          enable-export: 'true'
+          enable-export: 'false'  # Disabled until pagination is implemented (see issue #17)
