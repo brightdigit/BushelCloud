@@ -29,7 +29,12 @@
 
 import BushelLogging
 import BushelUtilities
+import Logging
 public import MistKit
+
+#if canImport(FelinePineSwift)
+  import FelinePineSwift
+#endif
 
 // MARK: - Export Operations
 
