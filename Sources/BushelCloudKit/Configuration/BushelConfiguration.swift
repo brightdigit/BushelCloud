@@ -29,7 +29,7 @@
 
 public import BushelFoundation
 import Foundation
-public import MistKit
+import MistKit
 
 // MARK: - Configuration Error
 
@@ -128,4 +128,3 @@ public struct ValidatedBushelConfiguration: Sendable {
     self.clear = clear
   }
 }
-

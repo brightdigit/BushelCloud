@@ -82,4 +82,3 @@ public protocol ConfigurationKey: Sendable {
   /// - Returns: The key string for that source, or nil if the key doesn't support that source
   func key(for source: ConfigKeySource) -> String?
 }
-

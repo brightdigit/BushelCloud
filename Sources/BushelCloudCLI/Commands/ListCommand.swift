@@ -32,8 +32,8 @@ import BushelFoundation
 import Foundation
 import MistKit
 
-enum ListCommand {
-  static func run(_ _args: [String]) async throws {
+internal enum ListCommand {
+  internal static func run(_ args: [String]) async throws {
     // Load configuration using Swift Configuration
     let loader = ConfigurationLoader()
     let rawConfig = try await loader.loadConfiguration()
