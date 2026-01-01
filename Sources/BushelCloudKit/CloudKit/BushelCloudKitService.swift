@@ -94,6 +94,9 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
       throw BushelCloudKitError.privateKeyFileReadFailed(path: privateKeyPath, error: error)
     }
 
+    // Validate PEM format before using it
+    try PEMValidator.validate(pemString)
+
     // Create Server-to-Server authentication manager
     let tokenManager = try ServerToServerAuthManager(
       keyID: keyID,
@@ -125,6 +128,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     pemString: String,
     environment: Environment = .development
   ) throws {
+    // Validate PEM format BEFORE passing to MistKit
+    // This provides better error messages than MistKit's internal validation
+    try PEMValidator.validate(pemString)
+
     // Create Server-to-Server authentication manager directly from PEM string
     let tokenManager = try ServerToServerAuthManager(
       keyID: keyID,

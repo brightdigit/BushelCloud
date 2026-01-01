@@ -25,13 +25,49 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Download latest built binary
+    - name: Download pre-built binary (if available)
+      id: download-binary
       uses: dawidd6/action-download-artifact@v3
+      continue-on-error: true  # Don't fail if artifact is missing
       with:
         workflow: bushel-cloud-build.yml
         workflow_conclusion: success
         name: bushel-cloud-binary
         path: ./binary
+
+    - name: Build binary (fallback if artifact unavailable)
+      if: steps.download-binary.outcome != 'success'
+      shell: bash
+      run: |
+        echo "⚠️  Pre-built binary not available (may have expired after retention period)"
+        echo "Building fresh binary as fallback..."
+
+        # Build using Swift 6.2 (matches build workflow)
+        docker run --rm -v "$PWD:/workspace" -w /workspace swift:6.2-noble \
+          swift build -c release --static-swift-stdlib
+
+        # Copy binary to expected location
+        mkdir -p ./binary
+        cp .build/release/bushel-cloud ./binary/
+
+        echo "✅ Binary built successfully"
+
+    - name: Validate binary availability
+      shell: bash
+      run: |
+        if [ ! -f ./binary/bushel-cloud ]; then
+          echo "❌ Error: Binary not found at ./binary/bushel-cloud"
+          exit 1
+        fi
+
+        # Log source for debugging
+        if [ "${{ steps.download-binary.outcome }}" == "success" ]; then
+          echo "✅ Using pre-built binary (fast path)"
+        else
+          echo "✅ Using freshly-built binary (fallback path)"
+        fi
+
+        ls -lh ./binary/bushel-cloud
 
     - name: Make binary executable
       shell: bash
@@ -48,6 +84,52 @@ runs:
           exit 1
         fi
         echo "✅ All required secrets are present"
+
+    - name: Validate PEM format
+      shell: bash
+      env:
+        CLOUDKIT_PRIVATE_KEY: ${{ inputs.cloudkit-private-key }}
+      run: |
+        echo "Validating PEM format..."
+
+        # Check for required PEM headers/footers
+        if ! echo "$CLOUDKIT_PRIVATE_KEY" | grep -q "BEGIN.*PRIVATE KEY"; then
+          echo "❌ Error: PEM header not found"
+          echo ""
+          echo "Expected format:"
+          echo "  -----BEGIN PRIVATE KEY-----"
+          echo "  [base64 encoded key]"
+          echo "  -----END PRIVATE KEY-----"
+          echo ""
+          echo "Common issues:"
+          echo "  - Missing BEGIN/END markers"
+          echo "  - Extra whitespace or newlines"
+          echo "  - Copy/paste truncation"
+          echo ""
+          exit 1
+        fi
+
+        if ! echo "$CLOUDKIT_PRIVATE_KEY" | grep -q "END.*PRIVATE KEY"; then
+          echo "❌ Error: PEM footer not found"
+          echo "Ensure the complete PEM file was copied (including footer)"
+          exit 1
+        fi
+
+        # Check for base64 content between headers
+        PEM_CONTENT=$(echo "$CLOUDKIT_PRIVATE_KEY" | sed -n '/BEGIN/,/END/p' | grep -v "BEGIN\|END")
+        if [ -z "$PEM_CONTENT" ]; then
+          echo "❌ Error: PEM file appears empty (no key data between headers)"
+          exit 1
+        fi
+
+        # Validate base64 encoding
+        if ! echo "$PEM_CONTENT" | base64 -d >/dev/null 2>&1; then
+          echo "❌ Error: PEM content is not valid base64"
+          echo "The key may be corrupted or in the wrong format"
+          exit 1
+        fi
+
+        echo "✅ PEM format validation passed"
 
     - name: Run CloudKit sync
       shell: bash

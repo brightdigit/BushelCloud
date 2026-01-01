@@ -1,28 +1,36 @@
 name: Scheduled CloudKit Sync (Development)
 
 on:
-  # Run three times daily (every ~8 hours) with randomized minutes
-  # Staggered to avoid predictable patterns and align with VirtualBuddy TSS cache (12h)
+  # Scheduled sync: 3x daily at randomized minutes
+  # Why randomized minutes (17, 43, 29)?
+  # - Avoids predictable traffic patterns
+  # - Reduces GitHub Actions "thundering herd" at :00 minutes
+  # - Aligns with VirtualBuddy TSS cache lifetime (12h)
   schedule:
     - cron: '17 2 * * *'   # 02:17 UTC
     - cron: '43 10 * * *'  # 10:43 UTC
     - cron: '29 18 * * *'  # 18:29 UTC
 
-  # Allow manual trigger for testing
+  # Manual trigger for testing
   workflow_dispatch:
 
-  # Run after successful build (for testing on feature branch)
+  # Automatic trigger after binary build completes
+  # Why use workflow_run?
+  # - Waits for build to complete before syncing
+  # - Prevents race condition: sync starting before binary is ready
+  # - Only runs on success, skips on build failures
+  # - Branch filter: Only for testing on 8-scheduled-job
   workflow_run:
     workflows: ["Build bushel-cloud Binary"]
     types: [completed]
     branches:
       - 8-scheduled-job
 
-# Prevent concurrent sync runs
-# Why cancel-in-progress?
-# - Only latest sync matters (syncs are idempotent)
-# - Prevents race conditions when writing to CloudKit
-# - Saves resources by canceling redundant syncs
+# Why cancel-in-progress for dev environment?
+# - Syncs are idempotent (safe to retry)
+# - Newer data supersedes older data
+# - Saves CI minutes by canceling outdated syncs
+# - Multiple triggers may fire close together (build + schedule)
 concurrency:
   group: cloudkit-sync-dev
   cancel-in-progress: true
@@ -32,7 +40,15 @@ jobs:
     name: Sync to CloudKit (Development)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # Only run if triggered by schedule/manual, OR if build workflow succeeded
+
+    # Condition explanation:
+    # - Always run for: schedule triggers (cron) or manual triggers (workflow_dispatch)
+    # - Conditionally run for: workflow_run ONLY if the build succeeded
+    #
+    # Why this condition?
+    # - Prevents sync from running when build fails
+    # - Allows manual testing without waiting for schedule
+    # - Supports feature branch testing on 8-scheduled-job
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
 
     permissions:

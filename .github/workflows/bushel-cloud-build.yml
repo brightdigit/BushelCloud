@@ -79,5 +79,9 @@ jobs:
         with:
           name: bushel-cloud-binary
           path: artifact/
-          retention-days: 30  # Keep for 30 days to support scheduled syncs
+          # Why 90 days?
+          # - Free repos get 90 days maximum retention
+          # - Provides 3x safety margin for 3x daily syncs
+          # - Fallback build handles expiration gracefully
+          retention-days: 90
           if-no-files-found: error
