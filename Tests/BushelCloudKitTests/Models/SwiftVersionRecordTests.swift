@@ -16,7 +16,7 @@ import Testing
 struct SwiftVersionRecordTests {
   @Test("Convert to CloudKit fields with all data")
   func testToCloudKitFieldsComplete() {
-    let record = TestFixtures.swift5_9_2
+    let record = TestFixtures.swift592
     let fields = record.toCloudKitFields()
 
     fields["version"]?.assertStringEquals("5.9.2")
@@ -30,7 +30,7 @@ struct SwiftVersionRecordTests {
 
   @Test("Convert snapshot record to CloudKit fields")
   func testToCloudKitFieldsSnapshot() {
-    let record = TestFixtures.swift6_0_snapshot
+    let record = TestFixtures.swift60Snapshot
     let fields = record.toCloudKitFields()
 
     fields["version"]?.assertStringEquals("6.0")
@@ -42,7 +42,7 @@ struct SwiftVersionRecordTests {
 
   @Test("Roundtrip conversion preserves data")
   func testRoundtripConversion() {
-    let original = TestFixtures.swift5_9_2
+    let original = TestFixtures.swift592
     let fields = original.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
       recordType: "SwiftVersion",
@@ -75,8 +75,8 @@ struct SwiftVersionRecordTests {
 
   @Test("RecordName generation format")
   func testRecordNameFormat() {
-    #expect(TestFixtures.swift5_9_2.recordName == "SwiftVersion-5.9.2")
-    #expect(TestFixtures.swift6_0_snapshot.recordName == "SwiftVersion-6.0")
+    #expect(TestFixtures.swift592.recordName == "SwiftVersion-5.9.2")
+    #expect(TestFixtures.swift60Snapshot.recordName == "SwiftVersion-6.0")
   }
 
   @Test("CloudKit record type is correct")

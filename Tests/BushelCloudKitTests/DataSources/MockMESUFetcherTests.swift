@@ -38,7 +38,7 @@ import Testing
 struct MockMESUFetcherTests {
   @Test("Successful fetch returns single record")
   func testSuccessfulFetch() async throws {
-    let expectedRecord = TestFixtures.sonoma14_2_1_mesu
+    let expectedRecord = TestFixtures.sonoma1421Mesu
     let fetcher = MockMESUFetcher(recordToReturn: expectedRecord)
 
     let result = try await fetcher.fetch()

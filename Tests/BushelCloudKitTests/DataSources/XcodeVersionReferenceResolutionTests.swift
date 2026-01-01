@@ -41,8 +41,8 @@ struct XcodeVersionReferenceResolutionTests {
 
   @Test("Resolve exact version match 14.2")
   func testResolveExactMatch() {
-    let xcode = TestFixtures.xcodeWithRequires_14_2
-    let restoreImages = [TestFixtures.restoreImage_14_2]
+    let xcode = TestFixtures.xcodeWithRequires142
+    let restoreImages = [TestFixtures.restoreImage142]
 
     let resolved = pipeline.resolveXcodeVersionReferences([xcode], restoreImages: restoreImages)
 
@@ -52,8 +52,8 @@ struct XcodeVersionReferenceResolutionTests {
 
   @Test("Resolve 3-component version 14.2.1")
   func testResolveThreeComponentVersion() {
-    let xcode = TestFixtures.xcodeWithRequires_14_2_1
-    let restoreImages = [TestFixtures.sonoma14_2_1]
+    let xcode = TestFixtures.xcodeWithRequires1421
+    let restoreImages = [TestFixtures.sonoma1421]
 
     let resolved = pipeline.resolveXcodeVersionReferences([xcode], restoreImages: restoreImages)
 
@@ -63,8 +63,8 @@ struct XcodeVersionReferenceResolutionTests {
 
   @Test("Resolve 2-component to 3-component match")
   func testResolveTwoToThreeComponent() {
-    let xcode = TestFixtures.xcodeWithRequires_14_2
-    let restoreImages = [TestFixtures.sonoma14_2_1]  // version="14.2.1"
+    let xcode = TestFixtures.xcodeWithRequires142
+    let restoreImages = [TestFixtures.sonoma1421]  // version="14.2.1"
 
     let resolved = pipeline.resolveXcodeVersionReferences([xcode], restoreImages: restoreImages)
 
@@ -75,8 +75,8 @@ struct XcodeVersionReferenceResolutionTests {
 
   @Test("No match leaves minimumMacOS nil")
   func testNoMatchLeavesNil() {
-    let xcode = TestFixtures.xcodeWithRequires_14_2
-    let restoreImages = [TestFixtures.sequoia15_1]  // Different version
+    let xcode = TestFixtures.xcodeWithRequires142
+    let restoreImages = [TestFixtures.sequoia151]  // Different version
 
     let resolved = pipeline.resolveXcodeVersionReferences([xcode], restoreImages: restoreImages)
 
@@ -87,7 +87,7 @@ struct XcodeVersionReferenceResolutionTests {
   @Test("No REQUIRES field leaves minimumMacOS nil")
   func testNoRequiresLeavesNil() {
     let xcode = TestFixtures.xcodeNoRequires
-    let restoreImages = [TestFixtures.sonoma14_2_1]
+    let restoreImages = [TestFixtures.sonoma1421]
 
     let resolved = pipeline.resolveXcodeVersionReferences([xcode], restoreImages: restoreImages)
 
@@ -98,7 +98,7 @@ struct XcodeVersionReferenceResolutionTests {
   @Test("Invalid REQUIRES format leaves minimumMacOS nil")
   func testInvalidRequiresLeavesNil() {
     let xcode = TestFixtures.xcodeInvalidRequires
-    let restoreImages = [TestFixtures.sonoma14_2_1]
+    let restoreImages = [TestFixtures.sonoma1421]
 
     let resolved = pipeline.resolveXcodeVersionReferences([xcode], restoreImages: restoreImages)
 
@@ -108,8 +108,8 @@ struct XcodeVersionReferenceResolutionTests {
 
   @Test("NOTES_URL preserved after resolution")
   func testNotesURLPreserved() {
-    let xcode = TestFixtures.xcodeWithRequires_14_2
-    let restoreImages = [TestFixtures.restoreImage_14_2]
+    let xcode = TestFixtures.xcodeWithRequires142
+    let restoreImages = [TestFixtures.restoreImage142]
 
     let resolved = pipeline.resolveXcodeVersionReferences([xcode], restoreImages: restoreImages)
 
@@ -119,7 +119,7 @@ struct XcodeVersionReferenceResolutionTests {
 
   @Test("Empty restoreImages array leaves all nil")
   func testEmptyRestoreImagesArray() {
-    let xcode = TestFixtures.xcodeWithRequires_14_2
+    let xcode = TestFixtures.xcodeWithRequires142
     let restoreImages: [RestoreImageRecord] = []
 
     let resolved = pipeline.resolveXcodeVersionReferences([xcode], restoreImages: restoreImages)
@@ -131,13 +131,13 @@ struct XcodeVersionReferenceResolutionTests {
   @Test("Multiple Xcodes resolved correctly")
   func testMultipleXcodeResolution() {
     let xcodes = [
-      TestFixtures.xcodeWithRequires_14_2,
-      TestFixtures.xcodeWithRequires_14_2_1,
+      TestFixtures.xcodeWithRequires142,
+      TestFixtures.xcodeWithRequires1421,
       TestFixtures.xcodeNoRequires,
     ]
     let restoreImages = [
-      TestFixtures.restoreImage_14_2,
-      TestFixtures.sonoma14_2_1,
+      TestFixtures.restoreImage142,
+      TestFixtures.sonoma1421,
     ]
 
     let resolved = pipeline.resolveXcodeVersionReferences(xcodes, restoreImages: restoreImages)

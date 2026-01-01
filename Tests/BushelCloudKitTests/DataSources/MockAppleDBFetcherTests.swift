@@ -38,7 +38,7 @@ import Testing
 struct MockAppleDBFetcherTests {
   @Test("Successful fetch returns records")
   func testSuccessfulFetch() async throws {
-    let expectedRecords = [TestFixtures.sonoma14_2_1_appledb]
+    let expectedRecords = [TestFixtures.sonoma1421Appledb]
     let fetcher = MockAppleDBFetcher(recordsToReturn: expectedRecords)
 
     let result = try await fetcher.fetch()

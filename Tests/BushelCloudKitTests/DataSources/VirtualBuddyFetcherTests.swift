@@ -159,7 +159,7 @@ struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma14_2_1Response.data(using: .utf8)!
+        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
         return (response, data)
       }
 
@@ -167,7 +167,7 @@ struct VirtualBuddyFetcherTests {
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
 
       // Test with Sonoma 14.2.1 image
-      let images = [TestFixtures.sonoma14_2_1]
+      let images = [TestFixtures.sonoma1421]
       let enriched = try await fetcher.fetch(existingImages: images)
 
       // Verify enrichment
@@ -286,7 +286,7 @@ struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma14_2_1Response.data(using: .utf8)!
+        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
         return (response, data)
       }
 
@@ -308,7 +308,7 @@ struct VirtualBuddyFetcherTests {
         sourceUpdatedAt: nil
       )
 
-      let images = [fileImage, TestFixtures.sonoma14_2_1]
+      let images = [fileImage, TestFixtures.sonoma1421]
       let result = try await fetcher.fetch(existingImages: images)
 
       #expect(result.count == 2)
@@ -344,7 +344,7 @@ struct VirtualBuddyFetcherTests {
 
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
 
-      let images = [TestFixtures.sonoma14_2_1]
+      let images = [TestFixtures.sonoma1421]
       let result = try await fetcher.fetch(existingImages: images)
 
       // Should preserve original when build number doesn't match
@@ -375,7 +375,7 @@ struct VirtualBuddyFetcherTests {
 
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
 
-      let images = [TestFixtures.sonoma14_2_1]
+      let images = [TestFixtures.sonoma1421]
       let result = try await fetcher.fetch(existingImages: images)
 
       // Should preserve original on error
@@ -405,7 +405,7 @@ struct VirtualBuddyFetcherTests {
 
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
 
-      let images = [TestFixtures.sonoma14_2_1]
+      let images = [TestFixtures.sonoma1421]
       let result = try await fetcher.fetch(existingImages: images)
 
       // Should preserve original on rate limit
@@ -434,7 +434,7 @@ struct VirtualBuddyFetcherTests {
 
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
 
-      let images = [TestFixtures.sonoma14_2_1]
+      let images = [TestFixtures.sonoma1421]
       let result = try await fetcher.fetch(existingImages: images)
 
       // Should preserve original on server error
@@ -457,7 +457,7 @@ struct VirtualBuddyFetcherTests {
 
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
 
-      let images = [TestFixtures.sonoma14_2_1]
+      let images = [TestFixtures.sonoma1421]
       let result = try await fetcher.fetch(existingImages: images)
 
       // Should preserve original on network error
@@ -487,7 +487,7 @@ struct VirtualBuddyFetcherTests {
 
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
 
-      let images = [TestFixtures.sonoma14_2_1]
+      let images = [TestFixtures.sonoma1421]
       let result = try await fetcher.fetch(existingImages: images)
 
       // Should preserve original on decode error
@@ -515,14 +515,14 @@ struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma14_2_1Response.data(using: .utf8)!
+        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
         return (response, data)
       }
 
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
 
       let startTime = Date()
-      let images = [TestFixtures.sonoma14_2_1]
+      let images = [TestFixtures.sonoma1421]
       _ = try await fetcher.fetch(existingImages: images)
       let duration = Date().timeIntervalSince(startTime)
 
@@ -545,14 +545,14 @@ struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma14_2_1Response.data(using: .utf8)!
+        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
         return (response, data)
       }
 
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
 
       // Two HTTP images
-      let image1 = TestFixtures.sonoma14_2_1
+      let image1 = TestFixtures.sonoma1421
       let image2 = RestoreImageRecord(
         version: "14.3",
         buildNumber: "23D56",
@@ -729,13 +729,13 @@ struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma14_2_1Response.data(using: .utf8)!
+        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
         return (response, data)
       }
 
       let fetcher = VirtualBuddyFetcher(apiKey: "my-api-key-123", urlSession: mockSession)
 
-      _ = try await fetcher.fetch(existingImages: [TestFixtures.sonoma14_2_1])
+      _ = try await fetcher.fetch(existingImages: [TestFixtures.sonoma1421])
 
       // Verify URL was constructed correctly
       let request = try #require(capturedRequest)

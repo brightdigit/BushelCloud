@@ -38,7 +38,7 @@ import Testing
 struct MockIPSWFetcherTests {
   @Test("Successful fetch returns records")
   func testSuccessfulFetch() async throws {
-    let expectedRecords = [TestFixtures.sonoma14_2_1, TestFixtures.sequoia15_0_beta]
+    let expectedRecords = [TestFixtures.sonoma1421, TestFixtures.sequoia150Beta]
     let fetcher = MockIPSWFetcher(recordsToReturn: expectedRecords)
 
     let result = try await fetcher.fetch()

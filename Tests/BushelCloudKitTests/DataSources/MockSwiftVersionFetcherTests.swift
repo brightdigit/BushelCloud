@@ -38,7 +38,7 @@ import Testing
 struct MockSwiftVersionFetcherTests {
   @Test("Successful fetch returns records")
   func testSuccessfulFetch() async throws {
-    let expectedRecords = [TestFixtures.swift5_9_2, TestFixtures.swift6_0_snapshot]
+    let expectedRecords = [TestFixtures.swift592, TestFixtures.swift60Snapshot]
     let fetcher = MockSwiftVersionFetcher(recordsToReturn: expectedRecords)
 
     let result = try await fetcher.fetch()

@@ -46,7 +46,7 @@ public enum TestFixtures: Sendable {
   // MARK: - RestoreImage Fixtures
 
   /// Stable macOS 14.2.1 release (Sonoma)
-  public static let sonoma14_2_1 = RestoreImageRecord(
+  public static let sonoma1421 = RestoreImageRecord(
     version: "14.2.1",
     buildNumber: "23C71",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),  // Dec 12, 2023
@@ -62,7 +62,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Beta macOS 15.0 (Sequoia)
-  public static let sequoia15_0_beta = RestoreImageRecord(
+  public static let sequoia150Beta = RestoreImageRecord(
     version: "15.0 Beta 3",
     buildNumber: "24A5264n",
     releaseDate: Date(timeIntervalSince1970: 1_720_000_000),  // Jul 3, 2024
@@ -96,7 +96,7 @@ public enum TestFixtures: Sendable {
   // MARK: - XcodeVersion Fixtures
 
   /// Xcode 15.1 stable release
-  public static let xcode15_1 = XcodeVersionRecord(
+  public static let xcode151 = XcodeVersionRecord(
     version: "15.1",
     buildNumber: "15C65",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),  // Dec 12, 2023
@@ -111,7 +111,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Xcode 16.0 beta
-  public static let xcode16_0_beta = XcodeVersionRecord(
+  public static let xcode160Beta = XcodeVersionRecord(
     version: "16.0 Beta 1",
     buildNumber: "16A5171c",
     releaseDate: Date(timeIntervalSince1970: 1_717_977_600),  // Jun 10, 2024
@@ -141,7 +141,7 @@ public enum TestFixtures: Sendable {
   // MARK: - SwiftVersion Fixtures
 
   /// Swift 5.9.2 stable
-  public static let swift5_9_2 = SwiftVersionRecord(
+  public static let swift592 = SwiftVersionRecord(
     version: "5.9.2",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),  // Dec 12, 2023
     downloadURL: URL(
@@ -151,7 +151,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Swift 6.0 development snapshot
-  public static let swift6_0_snapshot = SwiftVersionRecord(
+  public static let swift60Snapshot = SwiftVersionRecord(
     version: "6.0",
     releaseDate: Date(timeIntervalSince1970: 1_717_977_600),  // Jun 10, 2024
     downloadURL: nil,
@@ -218,10 +218,10 @@ public enum TestFixtures: Sendable {
 
   // MARK: RestoreImage Merge Scenarios
 
-  /// Same build as sonoma14_2_1, MESU source (authoritative for isSigned)
-  public static let sonoma14_2_1_mesu = RestoreImageRecord(
+  /// Same build as sonoma1421, MESU source (authoritative for isSigned)
+  public static let sonoma1421Mesu = RestoreImageRecord(
     version: "14.2.1",
-    buildNumber: "23C71",  // Same as sonoma14_2_1
+    buildNumber: "23C71",  // Same as sonoma1421
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
     downloadURL: url("https://mesu.apple.com/assets/macos/23C71/RestoreImage.ipsw"),
     fileSize: 0,  // MESU doesn't provide fileSize
@@ -231,13 +231,13 @@ public enum TestFixtures: Sendable {
     isPrerelease: false,
     source: "mesu.apple.com",
     notes: "MESU signing status",
-    sourceUpdatedAt: Date(timeIntervalSince1970: 1_702_400_000)  // Later than sonoma14_2_1
+    sourceUpdatedAt: Date(timeIntervalSince1970: 1_702_400_000)  // Later than sonoma1421
   )
 
-  /// Same build as sonoma14_2_1, AppleDB source with hashes
-  public static let sonoma14_2_1_appledb = RestoreImageRecord(
+  /// Same build as sonoma1421, AppleDB source with hashes
+  public static let sonoma1421Appledb = RestoreImageRecord(
     version: "14.2.1",
-    buildNumber: "23C71",  // Same as sonoma14_2_1
+    buildNumber: "23C71",  // Same as sonoma1421
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
     downloadURL: url("https://updates.cdn-apple.com/2023/macos/23C71/RestoreImage.ipsw"),
     fileSize: 13_500_000_000,
@@ -250,8 +250,8 @@ public enum TestFixtures: Sendable {
     sourceUpdatedAt: Date(timeIntervalSince1970: 1_702_350_000)  // Between ipsw.me and MESU
   )
 
-  /// Same build as sonoma14_2_1, incomplete data (missing hashes)
-  public static let sonoma14_2_1_incomplete = RestoreImageRecord(
+  /// Same build as sonoma1421, incomplete data (missing hashes)
+  public static let sonoma1421Incomplete = RestoreImageRecord(
     version: "14.2.1",
     buildNumber: "23C71",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
@@ -267,7 +267,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Sequoia 15.1 for sorting tests (newer)
-  public static let sequoia15_1 = RestoreImageRecord(
+  public static let sequoia151 = RestoreImageRecord(
     version: "15.1",
     buildNumber: "24B83",
     releaseDate: Date(timeIntervalSince1970: 1_730_000_000),  // Nov 2024
@@ -283,7 +283,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Sonoma 14.0 for sorting tests (older)
-  public static let sonoma14_0 = RestoreImageRecord(
+  public static let sonoma140 = RestoreImageRecord(
     version: "14.0",
     buildNumber: "23A344",
     releaseDate: Date(timeIntervalSince1970: 1_695_657_600),  // Sep 2023
@@ -331,7 +331,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// RestoreImage for version 14.2 (matches 14.2 and 14.2.x)
-  public static let restoreImage_14_2 = RestoreImageRecord(
+  public static let restoreImage142 = RestoreImageRecord(
     version: "14.2",
     buildNumber: "23C64",
     releaseDate: Date(timeIntervalSince1970: 1_700_000_000),
@@ -349,7 +349,7 @@ public enum TestFixtures: Sendable {
   // MARK: XcodeVersion Reference Resolution Fixtures
 
   /// Xcode with REQUIRES in notes (to be resolved)
-  public static let xcodeWithRequires_14_2 = XcodeVersionRecord(
+  public static let xcodeWithRequires142 = XcodeVersionRecord(
     version: "15.1",
     buildNumber: "15C65",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
@@ -363,7 +363,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Xcode with REQUIRES using 3-component version
-  public static let xcodeWithRequires_14_2_1 = XcodeVersionRecord(
+  public static let xcodeWithRequires1421 = XcodeVersionRecord(
     version: "15.2",
     buildNumber: "15C500b",
     releaseDate: Date(timeIntervalSince1970: 1_710_000_000),
@@ -407,9 +407,9 @@ public enum TestFixtures: Sendable {
   // MARK: Xcode/Swift Deduplication Fixtures
 
   /// Duplicate Xcode build (for deduplication)
-  public static let xcode15_1_duplicate = XcodeVersionRecord(
+  public static let xcode151Duplicate = XcodeVersionRecord(
     version: "15.1",
-    buildNumber: "15C65",  // Same build as xcode15_1
+    buildNumber: "15C65",  // Same build as xcode151
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
     downloadURL: URL(string: "https://different-url.com/Xcode_15.1.xip"),
     fileSize: 8_500_000_000,  // Different metadata
@@ -421,7 +421,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Xcode 16.0 for sorting tests
-  public static let xcode16_0 = XcodeVersionRecord(
+  public static let xcode160 = XcodeVersionRecord(
     version: "16.0",
     buildNumber: "16A242d",
     releaseDate: Date(timeIntervalSince1970: 1_725_000_000),  // Sep 2024
@@ -435,8 +435,8 @@ public enum TestFixtures: Sendable {
   )
 
   /// Duplicate Swift version
-  public static let swift5_9_2_duplicate = SwiftVersionRecord(
-    version: "5.9.2",  // Same as swift5_9_2
+  public static let swift592Duplicate = SwiftVersionRecord(
+    version: "5.9.2",  // Same as swift592
     releaseDate: Date(timeIntervalSince1970: 1_702_400_000),  // Different date
     downloadURL: URL(string: "https://different-swift-url.com/swift-5.9.2.pkg"),
     isPrerelease: false,
@@ -444,7 +444,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Swift 6.1 for sorting tests
-  public static let swift6_1 = SwiftVersionRecord(
+  public static let swift61 = SwiftVersionRecord(
     version: "6.1",
     releaseDate: Date(timeIntervalSince1970: 1_730_000_000),  // Nov 2024
     downloadURL: nil,
@@ -479,7 +479,7 @@ public enum TestFixtures: Sendable {
     """
 
   /// VirtualBuddy API response for Sonoma 14.2.1 (signed)
-  public static let virtualBuddySonoma14_2_1Response = """
+  public static let virtualBuddySonoma1421Response = """
     {
       "uuid": "A1B2C3D4-E5F6-7890-1234-567890ABCDEF",
       "version": "14.2.1",

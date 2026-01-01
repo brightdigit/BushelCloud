@@ -50,7 +50,7 @@ struct MockCloudKitServiceTests {
   @Test("Create operation stores record")
   func testCreateOperationStoresRecord() async throws {
     let service = MockCloudKitService()
-    let record = TestFixtures.sonoma14_2_1
+    let record = TestFixtures.sonoma1421
 
     let operation = RecordOperation(
       operationType: .create,
@@ -72,7 +72,7 @@ struct MockCloudKitServiceTests {
     let recordName = "RestoreImage-23C71"
 
     // Create initial record
-    let initialRecord = TestFixtures.sonoma14_2_1
+    let initialRecord = TestFixtures.sonoma1421
     let createOp = RecordOperation(
       operationType: .create,
       recordType: "RestoreImage",
@@ -123,7 +123,7 @@ struct MockCloudKitServiceTests {
     let recordName = "RestoreImage-23C71"
 
     // Create record
-    let record = TestFixtures.sonoma14_2_1
+    let record = TestFixtures.sonoma1421
     let createOp = RecordOperation(
       operationType: .create,
       recordType: "RestoreImage",
@@ -154,19 +154,19 @@ struct MockCloudKitServiceTests {
         operationType: .create,
         recordType: "RestoreImage",
         recordName: "RestoreImage-23C71",
-        fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+        fields: TestFixtures.sonoma1421.toCloudKitFields()
       ),
       RecordOperation(
         operationType: .create,
         recordType: "RestoreImage",
         recordName: "RestoreImage-24A5264n",
-        fields: TestFixtures.sequoia15_0_beta.toCloudKitFields()
+        fields: TestFixtures.sequoia150Beta.toCloudKitFields()
       ),
       RecordOperation(
         operationType: .create,
         recordType: "XcodeVersion",
         recordName: "XcodeVersion-15C65",
-        fields: TestFixtures.xcode15_1.toCloudKitFields()
+        fields: TestFixtures.xcode151.toCloudKitFields()
       ),
     ]
 
@@ -209,7 +209,7 @@ struct MockCloudKitServiceTests {
       operationType: .create,
       recordType: "RestoreImage",
       recordName: "test",
-      fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+      fields: TestFixtures.sonoma1421.toCloudKitFields()
     )
 
     do {
@@ -231,7 +231,7 @@ struct MockCloudKitServiceTests {
         operationType: .create,
         recordType: "RestoreImage",
         recordName: "test1",
-        fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+        fields: TestFixtures.sonoma1421.toCloudKitFields()
       )
     ]
 
@@ -240,7 +240,7 @@ struct MockCloudKitServiceTests {
         operationType: .create,
         recordType: "XcodeVersion",
         recordName: "test2",
-        fields: TestFixtures.xcode15_1.toCloudKitFields()
+        fields: TestFixtures.xcode151.toCloudKitFields()
       )
     ]
 
@@ -262,7 +262,7 @@ struct MockCloudKitServiceTests {
       operationType: .create,
       recordType: "RestoreImage",
       recordName: "test",
-      fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+      fields: TestFixtures.sonoma1421.toCloudKitFields()
     )
     try await service.executeBatchOperations([operation], recordType: "RestoreImage")
 

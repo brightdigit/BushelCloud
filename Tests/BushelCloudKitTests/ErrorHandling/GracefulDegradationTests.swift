@@ -38,7 +38,7 @@ struct GracefulDegradationTests {
   func testPartialFetcherFailure() async {
     // Simulate one fetcher failing while others succeed
     let ipswFetcher = MockIPSWFetcher(
-      recordsToReturn: [TestFixtures.sonoma14_2_1]
+      recordsToReturn: [TestFixtures.sonoma1421]
     )
     let appleDBFetcher = MockAppleDBFetcher(
       errorToThrow: MockFetcherError.networkError("Network unavailable")

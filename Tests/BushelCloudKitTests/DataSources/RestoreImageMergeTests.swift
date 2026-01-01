@@ -43,8 +43,8 @@ struct RestoreImageMergeTests {
 
   @Test("Backfill SHA256 hash from second record")
   func testBackfillSHA256() {
-    let incomplete = TestFixtures.sonoma14_2_1_incomplete
-    let complete = TestFixtures.sonoma14_2_1
+    let incomplete = TestFixtures.sonoma1421Incomplete
+    let complete = TestFixtures.sonoma1421
 
     let merged = pipeline.mergeRestoreImages(incomplete, complete)
 
@@ -54,8 +54,8 @@ struct RestoreImageMergeTests {
 
   @Test("Backfill SHA1 hash from second record")
   func testBackfillSHA1() {
-    let incomplete = TestFixtures.sonoma14_2_1_incomplete
-    let complete = TestFixtures.sonoma14_2_1
+    let incomplete = TestFixtures.sonoma1421Incomplete
+    let complete = TestFixtures.sonoma1421
 
     let merged = pipeline.mergeRestoreImages(incomplete, complete)
 
@@ -65,8 +65,8 @@ struct RestoreImageMergeTests {
 
   @Test("Backfill file size from second record")
   func testBackfillFileSize() {
-    let incomplete = TestFixtures.sonoma14_2_1_incomplete
-    let complete = TestFixtures.sonoma14_2_1
+    let incomplete = TestFixtures.sonoma1421Incomplete
+    let complete = TestFixtures.sonoma1421
 
     let merged = pipeline.mergeRestoreImages(incomplete, complete)
 
@@ -78,8 +78,8 @@ struct RestoreImageMergeTests {
 
   @Test("MESU first takes precedence for isSigned")
   func testMESUFirstAuthoritative() {
-    let mesu = TestFixtures.sonoma14_2_1_mesu  // isSigned=false
-    let ipsw = TestFixtures.sonoma14_2_1  // isSigned=true
+    let mesu = TestFixtures.sonoma1421Mesu  // isSigned=false
+    let ipsw = TestFixtures.sonoma1421  // isSigned=true
 
     let merged = pipeline.mergeRestoreImages(mesu, ipsw)
 
@@ -89,8 +89,8 @@ struct RestoreImageMergeTests {
 
   @Test("MESU second takes precedence for isSigned")
   func testMESUSecondAuthoritative() {
-    let ipsw = TestFixtures.sonoma14_2_1  // isSigned=true
-    let mesu = TestFixtures.sonoma14_2_1_mesu  // isSigned=false
+    let ipsw = TestFixtures.sonoma1421  // isSigned=true
+    let mesu = TestFixtures.sonoma1421Mesu  // isSigned=false
 
     let merged = pipeline.mergeRestoreImages(ipsw, mesu)
 
@@ -100,8 +100,8 @@ struct RestoreImageMergeTests {
 
   @Test("MESU authority overrides newer timestamp")
   func testMESUOverridesNewerTimestamp() {
-    let appledb = TestFixtures.sonoma14_2_1_appledb  // newer timestamp, isSigned=true
-    let mesu = TestFixtures.sonoma14_2_1_mesu  // MESU, isSigned=false
+    let appledb = TestFixtures.sonoma1421Appledb  // newer timestamp, isSigned=true
+    let mesu = TestFixtures.sonoma1421Mesu  // MESU, isSigned=false
 
     let merged = pipeline.mergeRestoreImages(appledb, mesu)
 
@@ -124,7 +124,7 @@ struct RestoreImageMergeTests {
       isPrerelease: false,
       source: "mesu.apple.com"
     )
-    let ipsw = TestFixtures.sonoma14_2_1  // isSigned=true
+    let ipsw = TestFixtures.sonoma1421  // isSigned=true
 
     let merged = pipeline.mergeRestoreImages(mesuNil, ipsw)
 
@@ -309,8 +309,8 @@ struct RestoreImageMergeTests {
 
   @Test("Second isSigned nil preserves first value")
   func testSecondNilPreservesFirst() {
-    let signed = TestFixtures.sonoma14_2_1  // isSigned=true
-    let incomplete = TestFixtures.sonoma14_2_1_incomplete  // isSigned=nil
+    let signed = TestFixtures.sonoma1421  // isSigned=true
+    let incomplete = TestFixtures.sonoma1421Incomplete  // isSigned=nil
 
     let merged = pipeline.mergeRestoreImages(signed, incomplete)
 
@@ -319,8 +319,8 @@ struct RestoreImageMergeTests {
 
   @Test("First isSigned nil uses second value")
   func testFirstNilUsesSecond() {
-    let incomplete = TestFixtures.sonoma14_2_1_incomplete  // isSigned=nil
-    let signed = TestFixtures.sonoma14_2_1  // isSigned=true
+    let incomplete = TestFixtures.sonoma1421Incomplete  // isSigned=nil
+    let signed = TestFixtures.sonoma1421  // isSigned=true
 
     let merged = pipeline.mergeRestoreImages(incomplete, signed)
 

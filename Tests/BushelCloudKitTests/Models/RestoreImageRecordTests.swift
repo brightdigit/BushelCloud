@@ -38,7 +38,7 @@ import Testing
 struct RestoreImageRecordTests {
   @Test("Convert to CloudKit fields with all data")
   func testToCloudKitFieldsComplete() {
-    let record = TestFixtures.sonoma14_2_1
+    let record = TestFixtures.sonoma1421
     let fields = record.toCloudKitFields()
 
     // Required fields
@@ -64,7 +64,7 @@ struct RestoreImageRecordTests {
 
   @Test("Convert beta record to CloudKit fields")
   func testToCloudKitFieldsBeta() {
-    let record = TestFixtures.sequoia15_0_beta
+    let record = TestFixtures.sequoia150Beta
     let fields = record.toCloudKitFields()
 
     fields["version"]?.assertStringEquals("15.0 Beta 3")
@@ -92,7 +92,7 @@ struct RestoreImageRecordTests {
 
   @Test("Roundtrip conversion preserves data")
   func testRoundtripConversion() {
-    let original = TestFixtures.sonoma14_2_1
+    let original = TestFixtures.sonoma1421
     let fields = original.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
       recordType: "RestoreImage",
@@ -149,10 +149,10 @@ struct RestoreImageRecordTests {
 
   @Test("RecordName generation format")
   func testRecordNameFormat() {
-    let record = TestFixtures.sonoma14_2_1
+    let record = TestFixtures.sonoma1421
     #expect(record.recordName == "RestoreImage-23C71")
 
-    let betaRecord = TestFixtures.sequoia15_0_beta
+    let betaRecord = TestFixtures.sequoia150Beta
     #expect(betaRecord.recordName == "RestoreImage-24A5264n")
   }
 
@@ -183,7 +183,7 @@ struct RestoreImageRecordTests {
 
   @Test("Format for display produces non-empty string")
   func testFormatForDisplay() {
-    let fields = TestFixtures.sonoma14_2_1.toCloudKitFields()
+    let fields = TestFixtures.sonoma1421.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
       recordType: "RestoreImage",
       recordName: "RestoreImage-23C71",

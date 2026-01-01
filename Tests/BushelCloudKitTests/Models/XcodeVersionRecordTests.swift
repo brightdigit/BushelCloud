@@ -16,7 +16,7 @@ import Testing
 struct XcodeVersionRecordTests {
   @Test("Convert to CloudKit fields with all data")
   func testToCloudKitFieldsComplete() {
-    let record = TestFixtures.xcode15_1
+    let record = TestFixtures.xcode151
     let fields = record.toCloudKitFields()
 
     fields["version"]?.assertStringEquals("15.1")
@@ -43,7 +43,7 @@ struct XcodeVersionRecordTests {
 
   @Test("Convert beta record to CloudKit fields")
   func testToCloudKitFieldsBeta() {
-    let record = TestFixtures.xcode16_0_beta
+    let record = TestFixtures.xcode160Beta
     let fields = record.toCloudKitFields()
 
     fields["version"]?.assertStringEquals("16.0 Beta 1")
@@ -59,7 +59,7 @@ struct XcodeVersionRecordTests {
 
   @Test("Roundtrip conversion preserves data")
   func testRoundtripConversion() {
-    let original = TestFixtures.xcode15_1
+    let original = TestFixtures.xcode151
     let fields = original.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
       recordType: "XcodeVersion",
@@ -97,8 +97,8 @@ struct XcodeVersionRecordTests {
 
   @Test("RecordName generation format")
   func testRecordNameFormat() {
-    #expect(TestFixtures.xcode15_1.recordName == "XcodeVersion-15C65")
-    #expect(TestFixtures.xcode16_0_beta.recordName == "XcodeVersion-16A5171c")
+    #expect(TestFixtures.xcode151.recordName == "XcodeVersion-15C65")
+    #expect(TestFixtures.xcode160Beta.recordName == "XcodeVersion-16A5171c")
   }
 
   @Test("CloudKit record type is correct")

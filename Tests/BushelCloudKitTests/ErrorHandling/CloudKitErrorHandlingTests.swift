@@ -47,7 +47,7 @@ struct CloudKitErrorHandlingTests {
       operationType: .create,
       recordType: "RestoreImage",
       recordName: "test",
-      fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+      fields: TestFixtures.sonoma1421.toCloudKitFields()
     )
 
     do {
@@ -74,7 +74,7 @@ struct CloudKitErrorHandlingTests {
       operationType: .create,
       recordType: "XcodeVersion",
       recordName: "XcodeVersion-15C65",
-      fields: TestFixtures.xcode15_1.toCloudKitFields()
+      fields: TestFixtures.xcode151.toCloudKitFields()
     )
 
     do {
@@ -101,7 +101,7 @@ struct CloudKitErrorHandlingTests {
       operationType: .create,
       recordType: "RestoreImage",
       recordName: "test",
-      fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+      fields: TestFixtures.sonoma1421.toCloudKitFields()
     )
 
     do {

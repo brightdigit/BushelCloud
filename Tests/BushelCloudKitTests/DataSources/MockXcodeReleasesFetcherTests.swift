@@ -38,7 +38,7 @@ import Testing
 struct MockXcodeReleasesFetcherTests {
   @Test("Successful fetch returns records")
   func testSuccessfulFetch() async throws {
-    let expectedRecords = [TestFixtures.xcode15_1, TestFixtures.xcode16_0_beta]
+    let expectedRecords = [TestFixtures.xcode151, TestFixtures.xcode160Beta]
     let fetcher = MockXcodeReleasesFetcher(recordsToReturn: expectedRecords)
 
     let result = try await fetcher.fetch()

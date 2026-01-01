@@ -47,7 +47,7 @@ struct SwiftVersionDeduplicationTests {
 
   @Test("Single record returns unchanged")
   func testDeduplicateSingle() {
-    let input = [TestFixtures.swift5_9_2]
+    let input = [TestFixtures.swift592]
     let result = pipeline.deduplicateSwiftVersions(input)
 
     #expect(result.count == 1)
@@ -57,8 +57,8 @@ struct SwiftVersionDeduplicationTests {
   @Test("Duplicate versions keep first occurrence")
   func testDuplicateVersionsKeepFirst() {
     let input = [
-      TestFixtures.swift5_9_2,
-      TestFixtures.swift5_9_2_duplicate,
+      TestFixtures.swift592,
+      TestFixtures.swift592Duplicate,
     ]
     let result = pipeline.deduplicateSwiftVersions(input)
 
@@ -71,14 +71,14 @@ struct SwiftVersionDeduplicationTests {
   @Test("Results sorted by release date descending")
   func testSortingByReleaseDateDescending() {
     let input = [
-      TestFixtures.swift5_9_2,  // Dec 2023
-      TestFixtures.swift6_1,  // Nov 2024
+      TestFixtures.swift592,  // Dec 2023
+      TestFixtures.swift61,  // Nov 2024
     ]
     let result = pipeline.deduplicateSwiftVersions(input)
 
     #expect(result.count == 2)
     // Verify descending order (newer first)
-    #expect(result[0].version == "6.1")  // swift6_1
-    #expect(result[1].version == "5.9.2")  // swift5_9_2
+    #expect(result[0].version == "6.1")  // swift61
+    #expect(result[1].version == "5.9.2")  // swift592
   }
 }

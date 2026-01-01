@@ -66,6 +66,7 @@ struct IPSWParser: Sendable {
   /// Fetch all available IPSW versions for macOS 12+
   /// - Parameter deviceFilter: Optional device identifier to filter by (e.g., "VirtualMac2,1")
   /// - Returns: Array of IPSW versions matching the filter
+  /// - Throws: Network errors, decoding errors, or if URL construction fails
   func fetchAllIPSWVersions(deviceFilter: String? = nil) async throws -> [IPSWVersion] {
     // Get list of Mac firmware pages
     let pagesURL = try buildPagesURL()
