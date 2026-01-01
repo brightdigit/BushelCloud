@@ -55,7 +55,8 @@ struct IPSWFetcher: DataSourceFetcher, Sendable {
     let ipswURL = Self.ipswBaseURL
     #if canImport(FoundationNetworking)
       // Use FoundationNetworking.URLSession directly on Linux
-      let lastModified = await FoundationNetworking.URLSession.shared.fetchLastModified(from: ipswURL)
+      let lastModified = await FoundationNetworking.URLSession.shared.fetchLastModified(
+        from: ipswURL)
     #else
       let lastModified = await URLSession.shared.fetchLastModified(from: ipswURL)
     #endif

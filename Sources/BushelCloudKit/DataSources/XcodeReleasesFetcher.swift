@@ -44,6 +44,9 @@ import Logging
 public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
   public typealias Record = [XcodeVersionRecord]
 
+  // swiftlint:disable:next force_unwrapping
+  private static let xcodeReleasesURL = URL(string: "https://xcodereleases.com/data.json")!
+
   public init() {}
 
   // MARK: - API Models
@@ -132,8 +135,7 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
 
   /// Fetch all Xcode releases from xcodereleases.com
   public func fetch() async throws -> [XcodeVersionRecord] {
-    let url = URL(string: "https://xcodereleases.com/data.json")!
-    let (data, _) = try await URLSession.shared.data(from: url)
+    let (data, _) = try await URLSession.shared.data(from: Self.xcodeReleasesURL)
     let releases = try JSONDecoder().decode([XcodeRelease].self, from: data)
 
     return releases.map { release in

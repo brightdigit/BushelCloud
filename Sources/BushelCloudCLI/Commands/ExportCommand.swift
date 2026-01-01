@@ -155,7 +155,7 @@ enum ExportCommand {
     try content.write(toFile: path, atomically: true, encoding: .utf8)
   }
 
-  private static func printError(_ error: Error) {
+  private static func printError(_ error: any Error) {
     print("\n❌ Export failed: \(error.localizedDescription)")
     print("\n💡 Troubleshooting:")
     print("   • Verify your API token is valid")

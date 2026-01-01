@@ -38,6 +38,10 @@ import SwiftSoup
 /// Fetcher for Swift compiler versions from swiftversion.net
 struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
   typealias Record = [SwiftVersionRecord]
+
+  // swiftlint:disable:next force_unwrapping
+  private static let swiftVersionURL = URL(string: "https://swiftversion.net")!
+
   // MARK: - Internal Models
 
   private struct SwiftVersionEntry {
@@ -50,8 +54,7 @@ struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
 
   /// Fetch all Swift versions from swiftversion.net
   func fetch() async throws -> [SwiftVersionRecord] {
-    let url = URL(string: "https://swiftversion.net")!
-    let (data, _) = try await URLSession.shared.data(from: url)
+    let (data, _) = try await URLSession.shared.data(from: Self.swiftVersionURL)
     guard let html = String(data: data, encoding: .utf8) else {
       throw FetchError.invalidEncoding
     }

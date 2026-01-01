@@ -34,6 +34,15 @@ public import Foundation
 
 /// Centralized test data fixtures for all record types
 public enum TestFixtures: Sendable {
+  // MARK: - Helpers
+
+  /// Create a URL from a string, force unwrapping for test fixtures
+  /// Test URLs are known to be valid, so force unwrap is acceptable here
+  private static func url(_ string: String) -> URL {
+    // swiftlint:disable:next force_unwrapping
+    URL(string: string)!
+  }
+
   // MARK: - RestoreImage Fixtures
 
   /// Stable macOS 14.2.1 release (Sonoma)
@@ -41,7 +50,7 @@ public enum TestFixtures: Sendable {
     version: "14.2.1",
     buildNumber: "23C71",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),  // Dec 12, 2023
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2023/macos/23C71/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2023/macos/23C71/RestoreImage.ipsw"),
     fileSize: 13_500_000_000,
     sha256Hash: "abc123def456789abcdef0123456789abcdef0123456789abcdef0123456789ab",
     sha1Hash: "def4567890123456789abcdef01234567890",
@@ -57,8 +66,7 @@ public enum TestFixtures: Sendable {
     version: "15.0 Beta 3",
     buildNumber: "24A5264n",
     releaseDate: Date(timeIntervalSince1970: 1_720_000_000),  // Jul 3, 2024
-    downloadURL: URL(
-      string: "https://updates.cdn-apple.com/2024/macos/24A5264n/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2024/macos/24A5264n/RestoreImage.ipsw"),
     fileSize: 14_000_000_000,
     sha256Hash: "xyz789uvw012345xyzvuwxyz789012345xyzvuwxyz789012345xyzvuwxyz789",
     sha1Hash: "uvw0123456789abcdef0123456789abcdef01",
@@ -74,7 +82,7 @@ public enum TestFixtures: Sendable {
     version: "14.0",
     buildNumber: "23A344",
     releaseDate: Date(timeIntervalSince1970: 1_695_657_600),  // Sep 26, 2023
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2023/macos/23A344/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2023/macos/23A344/RestoreImage.ipsw"),
     fileSize: 13_000_000_000,
     sha256Hash: "minimal123456789abcdef0123456789abcdef0123456789abcdef0123456789ab",
     sha1Hash: "minimal456789abcdef0123456789abcdef0",
@@ -215,7 +223,7 @@ public enum TestFixtures: Sendable {
     version: "14.2.1",
     buildNumber: "23C71",  // Same as sonoma14_2_1
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
-    downloadURL: URL(string: "https://mesu.apple.com/assets/macos/23C71/RestoreImage.ipsw")!,
+    downloadURL: url("https://mesu.apple.com/assets/macos/23C71/RestoreImage.ipsw"),
     fileSize: 0,  // MESU doesn't provide fileSize
     sha256Hash: "",  // MESU doesn't provide hashes
     sha1Hash: "",
@@ -231,7 +239,7 @@ public enum TestFixtures: Sendable {
     version: "14.2.1",
     buildNumber: "23C71",  // Same as sonoma14_2_1
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2023/macos/23C71/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2023/macos/23C71/RestoreImage.ipsw"),
     fileSize: 13_500_000_000,
     sha256Hash: "different789hash456123different789hash456123different789hash456123diff",
     sha1Hash: "appledb1234567890123456789abcdef0",
@@ -247,7 +255,7 @@ public enum TestFixtures: Sendable {
     version: "14.2.1",
     buildNumber: "23C71",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2023/macos/23C71/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2023/macos/23C71/RestoreImage.ipsw"),
     fileSize: 0,  // Missing
     sha256Hash: "",  // Missing
     sha1Hash: "",  // Missing
@@ -263,7 +271,7 @@ public enum TestFixtures: Sendable {
     version: "15.1",
     buildNumber: "24B83",
     releaseDate: Date(timeIntervalSince1970: 1_730_000_000),  // Nov 2024
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2024/macos/24B83/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2024/macos/24B83/RestoreImage.ipsw"),
     fileSize: 14_500_000_000,
     sha256Hash: "sequoia123456789abcdef0123456789abcdef0123456789abcdef0123456789",
     sha1Hash: "sequoia456789abcdef0123456789abcdef",
@@ -279,7 +287,7 @@ public enum TestFixtures: Sendable {
     version: "14.0",
     buildNumber: "23A344",
     releaseDate: Date(timeIntervalSince1970: 1_695_657_600),  // Sep 2023
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2023/macos/23A344/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2023/macos/23A344/RestoreImage.ipsw"),
     fileSize: 13_000_000_000,
     sha256Hash: "sonoma14hash123456789abcdef0123456789abcdef0123456789abcdef012",
     sha1Hash: "sonoma14hash456789abcdef012345678",
@@ -295,7 +303,7 @@ public enum TestFixtures: Sendable {
     version: "14.3",
     buildNumber: "23D56",
     releaseDate: Date(timeIntervalSince1970: 1_705_000_000),
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2024/macos/23D56/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2024/macos/23D56/RestoreImage.ipsw"),
     fileSize: 13_600_000_000,
     sha256Hash: "hash123",
     sha1Hash: "hash456",
@@ -311,7 +319,7 @@ public enum TestFixtures: Sendable {
     version: "14.3",
     buildNumber: "23D56",  // Same build as signedOld
     releaseDate: Date(timeIntervalSince1970: 1_705_000_000),
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2024/macos/23D56/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2024/macos/23D56/RestoreImage.ipsw"),
     fileSize: 13_600_000_000,
     sha256Hash: "hash123",
     sha1Hash: "hash456",
@@ -327,7 +335,7 @@ public enum TestFixtures: Sendable {
     version: "14.2",
     buildNumber: "23C64",
     releaseDate: Date(timeIntervalSince1970: 1_700_000_000),
-    downloadURL: URL(string: "https://updates.cdn-apple.com/2023/macos/23C64/RestoreImage.ipsw")!,
+    downloadURL: url("https://updates.cdn-apple.com/2023/macos/23C64/RestoreImage.ipsw"),
     fileSize: 13_400_000_000,
     sha256Hash: "hash142",
     sha1Hash: "sha142",

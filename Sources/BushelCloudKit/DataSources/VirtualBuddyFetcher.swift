@@ -41,6 +41,7 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
   typealias Record = [RestoreImageRecord]
 
   /// Base URL components for VirtualBuddy TSS API endpoint
+  // swiftlint:disable:next force_unwrapping
   private static let baseURLComponents = URLComponents(
     string: "https://tss.virtualbuddy.app/v1/status")!
 

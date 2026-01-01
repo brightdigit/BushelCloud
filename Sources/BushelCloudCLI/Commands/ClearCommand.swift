@@ -87,7 +87,7 @@ enum ClearCommand {
 
   // MARK: - Private Helpers
 
-  private static func printError(_ error: Error) {
+  private static func printError(_ error: any Error) {
     print("\n❌ Clear failed: \(error.localizedDescription)")
     print("\n💡 Troubleshooting:")
     print("   • Verify your API token is valid")

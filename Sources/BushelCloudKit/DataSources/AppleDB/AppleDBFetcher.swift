@@ -44,7 +44,17 @@ import Logging
 /// Fetcher for macOS restore images using AppleDB API
 public struct AppleDBFetcher: DataSourceFetcher, Sendable {
   public typealias Record = [RestoreImageRecord]
+
   private let deviceIdentifier = "VirtualMac2,1"
+
+  // swiftlint:disable:next force_unwrapping
+  private static let githubCommitsURL = URL(
+    string:
+      "https://api.github.com/repos/littlebyteorg/appledb/commits?path=osFiles/macOS&per_page=1"
+  )!
+
+  // swiftlint:disable:next force_unwrapping
+  private static let appleDBURL = URL(string: "https://api.appledb.dev/ios/macOS/main.json")!
 
   public init() {}
 
@@ -71,12 +81,7 @@ public struct AppleDBFetcher: DataSourceFetcher, Sendable {
   /// Fetch the last commit date for macOS data from GitHub API
   private static func fetchGitHubLastCommitDate() async -> Date? {
     do {
-      let url = URL(
-        string:
-          "https://api.github.com/repos/littlebyteorg/appledb/commits?path=osFiles/macOS&per_page=1"
-      )!
-
-      let (data, _) = try await URLSession.shared.data(from: url)
+      let (data, _) = try await URLSession.shared.data(from: githubCommitsURL)
 
       let commits = try JSONDecoder().decode([GitHubCommitsResponse].self, from: data)
 
@@ -105,18 +110,15 @@ public struct AppleDBFetcher: DataSourceFetcher, Sendable {
         "Failed to fetch GitHub commit date for AppleDB: \(error)"
       )
       // Fallback to HTTP Last-Modified header
-      let appleDBURL = URL(string: "https://api.appledb.dev/ios/macOS/main.json")!
       return await URLSession.shared.fetchLastModified(from: appleDBURL)
     }
   }
 
   /// Fetch macOS data from AppleDB API
   private static func fetchAppleDBData() async throws -> [AppleDBEntry] {
-    let url = URL(string: "https://api.appledb.dev/ios/macOS/main.json")!
+    Self.logger.debug("Fetching AppleDB data from \(appleDBURL)")
 
-    Self.logger.debug("Fetching AppleDB data from \(url)")
-
-    let (data, _) = try await URLSession.shared.data(from: url)
+    let (data, _) = try await URLSession.shared.data(from: appleDBURL)
 
     let entries = try JSONDecoder().decode([AppleDBEntry].self, from: data)
 

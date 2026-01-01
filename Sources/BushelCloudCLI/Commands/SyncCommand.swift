@@ -127,7 +127,7 @@ enum SyncCommand {
     print("\n💡 Next: Use 'bushel-cloud export' to view the synced data")
   }
 
-  private static func printError(_ error: Error) {
+  private static func printError(_ error: any Error) {
     print("\n❌ Sync failed: \(error.localizedDescription)")
     print("\n💡 Troubleshooting:")
     print("   • Verify your API token is valid")
