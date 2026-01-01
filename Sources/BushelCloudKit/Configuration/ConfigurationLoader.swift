@@ -32,8 +32,6 @@ import ConfigKeyKit
 import Configuration
 import Foundation
 
-// swiftlint:disable file_length
-
 /// Actor responsible for loading configuration from CLI arguments and environment variables
 public actor ConfigurationLoader {
   private let configReader: ConfigReader
@@ -211,7 +209,8 @@ public actor ConfigurationLoader {
       keyID: read(ConfigurationKeys.CloudKit.keyID),
       privateKeyPath: read(ConfigurationKeys.CloudKit.privateKeyPath),
       privateKey: read(ConfigurationKeys.CloudKit.privateKey),
-      environment: read(ConfigurationKeys.CloudKit.environment) ?? "development"  // Default to development
+      // Default to development
+      environment: read(ConfigurationKeys.CloudKit.environment) ?? "development"
     )
 
     // VirtualBuddy configuration

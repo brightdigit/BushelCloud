@@ -14,8 +14,6 @@ import Testing
 @testable import BushelFoundation
 @testable import ConfigKeyKit
 
-// swiftlint:disable file_length type_body_length
-
 /// Comprehensive tests for ConfigurationLoader
 ///
 /// Tests the configuration loading pipeline from CLI arguments and environment

@@ -33,7 +33,6 @@ public import Foundation
 @testable public import BushelFoundation
 
 /// Centralized test data fixtures for all record types
-// swiftlint:disable identifier_name file_length type_body_length
 public enum TestFixtures: Sendable {
   // MARK: - RestoreImage Fixtures
 

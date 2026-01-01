@@ -29,8 +29,6 @@
 
 import Foundation
 
-// swiftlint:disable file_length
-
 // MARK: - Configuration Key Source
 
 /// Source for configuration keys (CLI arguments or environment variables)

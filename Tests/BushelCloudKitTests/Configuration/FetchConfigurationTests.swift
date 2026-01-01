@@ -40,10 +40,14 @@ struct FetchConfigurationTests {
   func testDefaultIntervals() {
     let config = FetchConfiguration(useDefaults: true)
 
-    #expect(config.minimumInterval(for: "appledb.dev") == TimeInterval(6 * 3_600))  // 6 hours
-    #expect(config.minimumInterval(for: "ipsw.me") == TimeInterval(12 * 3_600))  // 12 hours
-    #expect(config.minimumInterval(for: "mesu.apple.com") == TimeInterval(1 * 3_600))  // 1 hour
-    #expect(config.minimumInterval(for: "xcodereleases.com") == TimeInterval(12 * 3_600))  // 12 hours
+    // 6 hours
+    #expect(config.minimumInterval(for: "appledb.dev") == TimeInterval(6 * 3_600))
+    // 12 hours
+    #expect(config.minimumInterval(for: "ipsw.me") == TimeInterval(12 * 3_600))
+    // 1 hour
+    #expect(config.minimumInterval(for: "mesu.apple.com") == TimeInterval(1 * 3_600))
+    // 12 hours
+    #expect(config.minimumInterval(for: "xcodereleases.com") == TimeInterval(12 * 3_600))
   }
 
   @Test("Default intervals not used when disabled")

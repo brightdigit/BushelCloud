@@ -31,8 +31,6 @@ public import BushelFoundation
 import BushelLogging
 import Foundation
 
-// swiftlint:disable file_length type_body_length
-
 /// Orchestrates fetching data from all sources with deduplication and relationship resolution
 public struct DataSourcePipeline: Sendable {
   // MARK: - Configuration

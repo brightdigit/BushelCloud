@@ -37,8 +37,6 @@ import Testing
   import FoundationNetworking
 #endif
 
-// swiftlint:disable file_length type_body_length
-
 /// All VirtualBuddy tests wrapped in a serialized suite to prevent mock handler conflicts
 @Suite(
   "VirtualBuddyFetcher Tests",

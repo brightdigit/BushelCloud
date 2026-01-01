@@ -32,7 +32,7 @@ public import Foundation
 /// Errors that can occur during BushelCloudKitService operations
 public enum BushelCloudKitError: LocalizedError {
   case privateKeyFileNotFound(path: String)
-  case privateKeyFileReadFailed(path: String, error: Error)
+  case privateKeyFileReadFailed(path: String, error: any Error)
   case invalidPEMFormat(reason: String, suggestion: String)
   case invalidMetadataRecord(recordName: String)
 

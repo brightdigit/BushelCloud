@@ -33,8 +33,6 @@ import Testing
 @testable import BushelCloudKit
 @testable import BushelFoundation
 
-// swiftlint:disable file_length
-
 // MARK: - Suite 2: RestoreImage Merge Tests
 
 @Suite("RestoreImage Merge Logic")

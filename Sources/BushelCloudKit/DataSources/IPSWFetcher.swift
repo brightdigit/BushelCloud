@@ -56,9 +56,9 @@ struct IPSWFetcher: DataSourceFetcher, Sendable {
     let lastModified: Date?
     #if canImport(FoundationNetworking)
       // Use FoundationNetworking.URLSession directly on Apple platforms
-      let URLSession = FoundationNetworking.URLSession.self
+      let urlSession = FoundationNetworking.URLSession.self
     #endif
-    lastModified = await URLSession.shared.fetchLastModified(from: ipswURL)
+    lastModified = await urlSession.shared.fetchLastModified(from: ipswURL)
 
     // Create IPSWDownloads client with URLSession transport
     let client = IPSWDownloads(

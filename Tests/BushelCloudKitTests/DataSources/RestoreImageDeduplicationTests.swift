@@ -33,8 +33,6 @@ import Testing
 @testable import BushelCloudKit
 @testable import BushelFoundation
 
-// swiftlint:disable file_length type_body_length
-
 // MARK: - Suite 1: RestoreImage Deduplication Tests
 
 @Suite("RestoreImage Deduplication")

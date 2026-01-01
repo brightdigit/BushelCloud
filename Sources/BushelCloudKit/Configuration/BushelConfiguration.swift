@@ -31,8 +31,6 @@ public import BushelFoundation
 import Foundation
 public import MistKit
 
-// swiftlint:disable file_length
-
 // MARK: - Configuration Error
 
 /// Errors that can occur during configuration validation

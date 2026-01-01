@@ -170,7 +170,7 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
 /// Errors that can occur during VirtualBuddy fetching
 enum VirtualBuddyFetcherError: Error {
   case invalidURL
-  case networkError(Error)
+  case networkError(any Error)
   case httpError(Int)
-  case decodingError(Error)
+  case decodingError(any Error)
 }
