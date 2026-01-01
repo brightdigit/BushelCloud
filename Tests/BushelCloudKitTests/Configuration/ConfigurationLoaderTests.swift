@@ -24,8 +24,7 @@ import Testing
 struct ConfigurationLoaderTests {
   // MARK: - Test Utilities
 
-  #if DEBUG
-    /// Create a ConfigurationLoader with simulated CLI args and environment variables
+  /// Create a ConfigurationLoader with simulated CLI args and environment variables
     ///
     /// - Parameters:
     ///   - cliArgs: Simulated CLI arguments (format: "key=value" or "key" for flags)
@@ -66,7 +65,6 @@ struct ConfigurationLoaderTests {
       let configReader = ConfigReader(providers: providers)
       return ConfigurationLoader(configReader: configReader)
     }
-  #endif
 
   // MARK: - Boolean Parsing Tests
 

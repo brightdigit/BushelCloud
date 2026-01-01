@@ -40,7 +40,17 @@ import Testing
 // swiftlint:disable file_length type_body_length
 
 /// All VirtualBuddy tests wrapped in a serialized suite to prevent mock handler conflicts
-@Suite("VirtualBuddyFetcher Tests", .serialized)
+@Suite(
+  "VirtualBuddyFetcher Tests",
+  .serialized,
+  .enabled(if: {
+    #if os(macOS) || os(Linux)
+      return true
+    #else
+      return false
+    #endif
+  }())
+)
 struct VirtualBuddyFetcherTests {
   // MARK: - Initialization Tests
 
