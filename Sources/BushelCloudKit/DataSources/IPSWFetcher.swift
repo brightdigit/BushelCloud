@@ -53,12 +53,12 @@ struct IPSWFetcher: DataSourceFetcher, Sendable {
   func fetch() async throws -> [RestoreImageRecord] {
     // Fetch Last-Modified header to know when ipsw.me data was updated
     let ipswURL = Self.ipswBaseURL
-    let lastModified: Date?
     #if canImport(FoundationNetworking)
-      // Use FoundationNetworking.URLSession directly on Apple platforms
-      let urlSession = FoundationNetworking.URLSession.self
+      // Use FoundationNetworking.URLSession directly on Linux
+      let lastModified = await FoundationNetworking.URLSession.shared.fetchLastModified(from: ipswURL)
+    #else
+      let lastModified = await URLSession.shared.fetchLastModified(from: ipswURL)
     #endif
-    lastModified = await urlSession.shared.fetchLastModified(from: ipswURL)
 
     // Create IPSWDownloads client with URLSession transport
     let client = IPSWDownloads(

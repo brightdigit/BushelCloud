@@ -58,12 +58,12 @@ internal struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
     // Fetch Last-Modified header from TheAppleWiki API
     let apiURL = Self.wikiAPIURL
 
-    let lastModified: Date?
     #if canImport(FoundationNetworking)
-      // Use FoundationNetworking.URLSession directly on Apple platforms
-      let urlSession = FoundationNetworking.URLSession.self
+      // Use FoundationNetworking.URLSession directly on Linux
+      let lastModified = await FoundationNetworking.URLSession.shared.fetchLastModified(from: apiURL)
+    #else
+      let lastModified = await URLSession.shared.fetchLastModified(from: apiURL)
     #endif
-    lastModified = await urlSession.shared.fetchLastModified(from: apiURL)
 
     let parser = IPSWParser()
 
