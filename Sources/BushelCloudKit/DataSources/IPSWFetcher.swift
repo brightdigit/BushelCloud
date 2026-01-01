@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -31,8 +31,8 @@ import BushelFoundation
 import BushelUtilities
 import Foundation
 import IPSWDownloads
-import OSVer
 import OpenAPIURLSession
+import OSVer
 
 #if canImport(FoundationNetworking)
   import FoundationNetworking
