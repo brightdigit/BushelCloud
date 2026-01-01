@@ -36,34 +36,28 @@ internal enum ConfigurationKeys {
 
   /// CloudKit configuration keys
   ///
-  /// Uses `envPrefix: nil` to auto-generate environment variable names from the key path.
+  /// Auto-generates environment variable names from the key path.
   /// Example: "cloudkit.container_id" → ENV: CLOUDKIT_CONTAINER_ID
   internal enum CloudKit {
     internal static let containerID = ConfigKey<String>(
       "cloudkit.container_id",
-      envPrefix: nil,
       default: "iCloud.com.brightdigit.Bushel"
     )
 
     internal static let keyID = OptionalConfigKey<String>(
-      "cloudkit.key_id",
-      envPrefix: nil
+      "cloudkit.key_id"
     )
 
     internal static let privateKeyPath = OptionalConfigKey<String>(
-      "cloudkit.private_key_path",
-      envPrefix: nil
+      "cloudkit.private_key_path"
     )
 
     internal static let privateKey = OptionalConfigKey<String>(
-      "cloudkit.private_key",
-      envPrefix: nil
+      "cloudkit.private_key"
     )
 
-    internal static let environment = ConfigKey<String>(
-      "cloudkit.environment",
-      envPrefix: nil,
-      default: "development"
+    internal static let environment = OptionalConfigKey<String>(
+      "cloudkit.environment"
     )
   }
 
@@ -71,11 +65,10 @@ internal enum ConfigurationKeys {
 
   /// VirtualBuddy TSS API configuration keys
   ///
-  /// Uses `envPrefix: nil` for auto-generated ENV names (VIRTUALBUDDY_API_KEY).
+  /// Auto-generates ENV names (VIRTUALBUDDY_API_KEY).
   internal enum VirtualBuddy {
     internal static let apiKey = OptionalConfigKey<String>(
-      "virtualbuddy.api_key",
-      envPrefix: nil
+      "virtualbuddy.api_key"
     )
   }
 
@@ -96,8 +89,7 @@ internal enum ConfigurationKeys {
     internal static func intervalKey(for source: String) -> OptionalConfigKey<Double> {
       let normalized = source.replacingOccurrences(of: ".", with: "_")
       return OptionalConfigKey<Double>(
-        "fetch.interval.\(normalized)",
-        envPrefix: nil
+        "fetch.interval.\(normalized)"
       )
     }
   }

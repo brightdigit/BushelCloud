@@ -1,0 +1,137 @@
+name: 'CloudKit Sync Action'
+description: 'Reusable action for syncing data to CloudKit with export reporting'
+
+inputs:
+  environment:
+    description: 'CloudKit environment (development or production)'
+    required: true
+  container-id:
+    description: 'CloudKit container ID'
+    required: true
+  cloudkit-key-id:
+    description: 'CloudKit S2S key ID'
+    required: true
+  cloudkit-private-key:
+    description: 'CloudKit S2S private key (PEM content)'
+    required: true
+  virtualbuddy-api-key:
+    description: 'VirtualBuddy TSS API key'
+    required: true
+  enable-export:
+    description: 'Run export after sync and generate reports'
+    required: false
+    default: 'true'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download latest built binary
+      uses: dawidd6/action-download-artifact@v3
+      with:
+        workflow: bushel-cloud-build.yml
+        workflow_conclusion: success
+        name: bushel-cloud-binary
+        path: ./binary
+
+    - name: Make binary executable
+      shell: bash
+      run: chmod +x ./binary/bushel-cloud
+
+    - name: Validate required secrets
+      shell: bash
+      env:
+        VIRTUALBUDDY_API_KEY: ${{ inputs.virtualbuddy-api-key }}
+      run: |
+        if [ -z "$VIRTUALBUDDY_API_KEY" ]; then
+          echo "❌ Error: VIRTUALBUDDY_API_KEY is not set"
+          echo "Please add VIRTUALBUDDY_API_KEY to repository secrets"
+          exit 1
+        fi
+        echo "✅ All required secrets are present"
+
+    - name: Run CloudKit sync
+      shell: bash
+      env:
+        CLOUDKIT_KEY_ID: ${{ inputs.cloudkit-key-id }}
+        CLOUDKIT_PRIVATE_KEY: ${{ inputs.cloudkit-private-key }}
+        CLOUDKIT_ENVIRONMENT: ${{ inputs.environment }}
+        CLOUDKIT_CONTAINER_ID: ${{ inputs.container-id }}
+        VIRTUALBUDDY_API_KEY: ${{ inputs.virtualbuddy-api-key }}
+      run: |
+        echo "Starting CloudKit sync..."
+        echo "Container: $CLOUDKIT_CONTAINER_ID"
+        echo "Environment: $CLOUDKIT_ENVIRONMENT"
+
+        ./binary/bushel-cloud sync \
+          --verbose \
+          --container-identifier "$CLOUDKIT_CONTAINER_ID"
+
+    - name: Run export and generate reports
+      if: inputs.enable-export == 'true'
+      shell: bash
+      env:
+        CLOUDKIT_KEY_ID: ${{ inputs.cloudkit-key-id }}
+        CLOUDKIT_PRIVATE_KEY: ${{ inputs.cloudkit-private-key }}
+        CLOUDKIT_ENVIRONMENT: ${{ inputs.environment }}
+        CLOUDKIT_CONTAINER_ID: ${{ inputs.container-id }}
+      run: |
+        echo "Exporting CloudKit data..."
+
+        # Export to JSON
+        ./binary/bushel-cloud export \
+          --output "cloudkit-export-${{ inputs.environment }}.json" \
+          --pretty \
+          --verbose \
+          --container-identifier "$CLOUDKIT_CONTAINER_ID"
+
+        # Parse JSON to extract counts
+        RESTORE_COUNT=$(jq '.restoreImages | length' "cloudkit-export-${{ inputs.environment }}.json")
+        XCODE_COUNT=$(jq '.xcodeVersions | length' "cloudkit-export-${{ inputs.environment }}.json")
+        SWIFT_COUNT=$(jq '.swiftVersions | length' "cloudkit-export-${{ inputs.environment }}.json")
+        TOTAL_COUNT=$((RESTORE_COUNT + XCODE_COUNT + SWIFT_COUNT))
+
+        # Count signed restore images
+        SIGNED_COUNT=$(jq '[.restoreImages[] | select(.fields.isSigned == "int64(1)")] | length' "cloudkit-export-${{ inputs.environment }}.json" || echo "0")
+
+        # Generate markdown summary
+        cat > export-summary.md <<EOF
+        # CloudKit Export Summary
+
+        **Environment**: \`${{ inputs.environment }}\`
+        **Container**: \`${{ inputs.container-id }}\`
+        **Export Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+        ## Record Counts
+
+        | Record Type | Count |
+        |-------------|-------|
+        | Restore Images | ${RESTORE_COUNT} |
+        | Xcode Versions | ${XCODE_COUNT} |
+        | Swift Versions | ${SWIFT_COUNT} |
+        | **Total** | **${TOTAL_COUNT}** |
+
+        ## Restore Image Status
+
+        - **Signed**: ${SIGNED_COUNT} images currently signed by Apple
+        - **Unsigned**: $((RESTORE_COUNT - SIGNED_COUNT)) images no longer signed
+
+        ## Artifacts
+
+        - 📄 Full export data: \`cloudkit-export-${{ inputs.environment }}.json\`
+        - 📊 This summary: \`export-summary.md\`
+        EOF
+
+        # Append to GitHub Actions summary
+        cat export-summary.md >> $GITHUB_STEP_SUMMARY
+
+        echo "✅ Export complete with ${TOTAL_COUNT} total records"
+
+    - name: Upload export artifacts
+      if: inputs.enable-export == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: cloudkit-export-${{ inputs.environment }}
+        path: |
+          cloudkit-export-${{ inputs.environment }}.json
+          export-summary.md
+        retention-days: 30

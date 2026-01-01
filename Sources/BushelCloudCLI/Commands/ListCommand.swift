@@ -40,11 +40,22 @@ enum ListCommand {
     let config = try rawConfig.validated()
 
     // Create CloudKit service
-    let cloudKitService = try BushelCloudKitService(
-      containerIdentifier: config.cloudKit.containerID,
-      keyID: config.cloudKit.keyID,
-      privateKeyPath: config.cloudKit.privateKeyPath
-    )
+    let cloudKitService: BushelCloudKitService
+    if let pemString = config.cloudKit.privateKey {
+      cloudKitService = try BushelCloudKitService(
+        containerIdentifier: config.cloudKit.containerID,
+        keyID: config.cloudKit.keyID,
+        pemString: pemString,
+        environment: config.cloudKit.environment
+      )
+    } else {
+      cloudKitService = try BushelCloudKitService(
+        containerIdentifier: config.cloudKit.containerID,
+        keyID: config.cloudKit.keyID,
+        privateKeyPath: config.cloudKit.privateKeyPath,
+        environment: config.cloudKit.environment
+      )
+    }
 
     // Determine what to list based on flags
     let listConfig = config.list

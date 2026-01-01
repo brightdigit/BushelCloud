@@ -14,6 +14,10 @@ on:
   pull_request:
 
 # Prevent concurrent builds
+# Why cancel-in-progress?
+# - Newer code changes supersede older builds
+# - Saves CI minutes by canceling outdated builds
+# - Each branch gets independent builds via ${{ github.ref }}
 concurrency:
   group: bushel-cloud-build-${{ github.ref }}
   cancel-in-progress: true

@@ -66,9 +66,9 @@ public struct SyncEngine: Sendable {
 
   /// Initialize sync engine with CloudKit credentials
   ///
-  /// **Flexible Authentication**: Supports both file-based and environment variable-based PEM content:
-  /// - Provide `pemString` for CI/CD environments (GitHub Actions, etc.)
-  /// - Provide `privateKeyPath` for local development
+  /// **Flexible Authentication**: Supports both file-based and string-based PEM content:
+  /// - `.pemString`: For CI/CD environments (GitHub Actions secrets)
+  /// - `.pemFile`: For local development (file on disk)
   ///
   /// **Environment Separation**: Use separate keys for development and production:
   /// - Development: Safe for testing, free API calls, can clear data freely
@@ -77,33 +77,32 @@ public struct SyncEngine: Sendable {
   /// - Parameters:
   ///   - containerIdentifier: CloudKit container ID
   ///   - keyID: Server-to-Server Key ID
-  ///   - privateKeyPath: Path to .pem file (use if pemString not provided)
-  ///   - pemString: PEM content as string (use for CI/CD, takes priority over privateKeyPath when non-nil)
+  ///   - authMethod: Authentication method (`.pemString` or `.pemFile`)
   ///   - environment: CloudKit environment (.development or .production, defaults to .development)
   ///   - configuration: Fetch configuration for data sources
   /// - Throws: Error if authentication credentials are invalid or missing
   public init(
     containerIdentifier: String,
     keyID: String,
-    privateKeyPath: String = "",
-    pemString: String? = nil,
+    authMethod: CloudKitAuthMethod,
     environment: Environment = .development,
     configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
   ) throws {
-    // Prefer PEM string if provided (CI/CD pattern), fall back to file path (local development)
+    // Initialize CloudKit service based on auth method
     let service: BushelCloudKitService
-    if let pemString = pemString {
+    switch authMethod {
+    case .pemString(let pem):
       service = try BushelCloudKitService(
         containerIdentifier: containerIdentifier,
         keyID: keyID,
-        pemString: pemString,
+        pemString: pem,
         environment: environment
       )
-    } else {
+    case .pemFile(let path):
       service = try BushelCloudKitService(
         containerIdentifier: containerIdentifier,
         keyID: keyID,
-        privateKeyPath: privateKeyPath,
+        privateKeyPath: path,
         environment: environment
       )
     }

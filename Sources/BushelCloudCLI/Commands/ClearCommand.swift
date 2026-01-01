@@ -59,11 +59,20 @@ enum ClearCommand {
       }
     }
 
+    // Determine authentication method
+    let authMethod: CloudKitAuthMethod
+    if let pemString = config.cloudKit.privateKey {
+      authMethod = .pemString(pemString)
+    } else {
+      authMethod = .pemFile(path: config.cloudKit.privateKeyPath)
+    }
+
     // Create sync engine
     let syncEngine = try SyncEngine(
       containerIdentifier: config.cloudKit.containerID,
       keyID: config.cloudKit.keyID,
-      privateKeyPath: config.cloudKit.privateKeyPath
+      authMethod: authMethod,
+      environment: config.cloudKit.environment
     )
 
     // Execute clear

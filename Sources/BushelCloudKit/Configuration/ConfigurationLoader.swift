@@ -211,7 +211,7 @@ public actor ConfigurationLoader {
       keyID: read(ConfigurationKeys.CloudKit.keyID),
       privateKeyPath: read(ConfigurationKeys.CloudKit.privateKeyPath),
       privateKey: read(ConfigurationKeys.CloudKit.privateKey),
-      environment: read(ConfigurationKeys.CloudKit.environment)
+      environment: read(ConfigurationKeys.CloudKit.environment) ?? "development"  // Default to development
     )
 
     // VirtualBuddy configuration

@@ -1,0 +1,53 @@
+name: Scheduled CloudKit Sync (Development)
+
+on:
+  # Run three times daily (every ~8 hours) with randomized minutes
+  # Staggered to avoid predictable patterns and align with VirtualBuddy TSS cache (12h)
+  schedule:
+    - cron: '17 2 * * *'   # 02:17 UTC
+    - cron: '43 10 * * *'  # 10:43 UTC
+    - cron: '29 18 * * *'  # 18:29 UTC
+
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+  # Run after successful build (for testing on feature branch)
+  workflow_run:
+    workflows: ["Build bushel-cloud Binary"]
+    types: [completed]
+    branches:
+      - 8-scheduled-job
+
+# Prevent concurrent sync runs
+# Why cancel-in-progress?
+# - Only latest sync matters (syncs are idempotent)
+# - Prevents race conditions when writing to CloudKit
+# - Saves resources by canceling redundant syncs
+concurrency:
+  group: cloudkit-sync-dev
+  cancel-in-progress: true
+
+jobs:
+  sync-dev:
+    name: Sync to CloudKit (Development)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Only run if triggered by schedule/manual, OR if build workflow succeeded
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+
+    permissions:
+      contents: read  # Read repository code
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: CloudKit Sync
+        uses: ./.github/actions/cloudkit-sync
+        with:
+          environment: development
+          container-id: iCloud.com.brightdigit.Bushel
+          cloudkit-key-id: ${{ secrets.CLOUDKIT_KEY_ID }}
+          cloudkit-private-key: ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
+          virtualbuddy-api-key: ${{ secrets.VIRTUALBUDDY_API_KEY }}
+          enable-export: 'true'
