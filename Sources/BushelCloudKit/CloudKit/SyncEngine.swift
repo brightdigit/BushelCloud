@@ -79,22 +79,6 @@ public struct SyncEngine: Sendable {
     public let xcodeVersions: TypeSyncResult
     public let swiftVersions: TypeSyncResult
 
-    public var totalCreated: Int {
-      restoreImages.created + xcodeVersions.created + swiftVersions.created
-    }
-
-    public var totalUpdated: Int {
-      restoreImages.updated + xcodeVersions.updated + swiftVersions.updated
-    }
-
-    public var totalFailed: Int {
-      restoreImages.failed + xcodeVersions.failed + swiftVersions.failed
-    }
-
-    public var totalRecords: Int {
-      totalCreated + totalUpdated + totalFailed
-    }
-
     public init(
       restoreImages: TypeSyncResult, xcodeVersions: TypeSyncResult, swiftVersions: TypeSyncResult
     ) {
@@ -203,9 +187,9 @@ public struct SyncEngine: Sendable {
   /// - Parameter options: Sync options including dry-run mode
   /// - Returns: Detailed sync result with per-type breakdown
   public func sync(options: SyncOptions = SyncOptions()) async throws -> DetailedSyncResult {
-    print("\n" + String(repeating: "=", count: 60))
+    ConsoleOutput.print("\n" + String(repeating: "=", count: 60))
     BushelUtilities.ConsoleOutput.info("Starting Bushel CloudKit Sync")
-    print(String(repeating: "=", count: 60))
+    ConsoleOutput.print(String(repeating: "=", count: 60))
     Self.logger.info("Sync started")
 
     if options.dryRun {
@@ -218,7 +202,7 @@ public struct SyncEngine: Sendable {
     )
 
     // Step 1: Fetch from all data sources
-    print("\n📥 Step 1: Fetching data from external sources...")
+    ConsoleOutput.print("\n📥 Step 1: Fetching data from external sources...")
     Self.logger.debug(
       "Initializing data source pipeline to fetch from ipsw.me, TheAppleWiki, MESU, and other sources"
     )
@@ -236,12 +220,12 @@ public struct SyncEngine: Sendable {
       fetchResult.restoreImages.count + fetchResult.xcodeVersions.count
       + fetchResult.swiftVersions.count
 
-    print("\n📊 Data Summary:")
-    print("   RestoreImages: \(fetchResult.restoreImages.count)")
-    print("   XcodeVersions: \(fetchResult.xcodeVersions.count)")
-    print("   SwiftVersions: \(fetchResult.swiftVersions.count)")
-    print("   ─────────────────────")
-    print("   Total: \(totalRecords) records")
+    ConsoleOutput.print("\n📊 Data Summary:")
+    ConsoleOutput.print("   RestoreImages: \(fetchResult.restoreImages.count)")
+    ConsoleOutput.print("   XcodeVersions: \(fetchResult.xcodeVersions.count)")
+    ConsoleOutput.print("   SwiftVersions: \(fetchResult.swiftVersions.count)")
+    ConsoleOutput.print("   ─────────────────────")
+    ConsoleOutput.print("   Total: \(totalRecords) records")
 
     Self.logger.debug(
       "Records ready for CloudKit upload: \(totalRecords) total"
@@ -379,16 +363,16 @@ public struct SyncEngine: Sendable {
 
   /// Delete all records from CloudKit
   public func clear() async throws {
-    print("\n" + String(repeating: "=", count: 60))
+    ConsoleOutput.print("\n" + String(repeating: "=", count: 60))
     BushelUtilities.ConsoleOutput.info("Clearing all CloudKit data")
-    print(String(repeating: "=", count: 60))
+    ConsoleOutput.print(String(repeating: "=", count: 60))
     Self.logger.info("Clearing all CloudKit records")
 
     try await cloudKitService.deleteAllRecords()
 
-    print("\n" + String(repeating: "=", count: 60))
+    ConsoleOutput.print("\n" + String(repeating: "=", count: 60))
     BushelUtilities.ConsoleOutput.success("Clear completed successfully!")
-    print(String(repeating: "=", count: 60))
+    ConsoleOutput.print(String(repeating: "=", count: 60))
     Self.logger.info("Clear completed successfully")
   }
 }

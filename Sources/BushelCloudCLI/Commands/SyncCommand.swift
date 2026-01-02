@@ -69,13 +69,15 @@ internal enum SyncCommand {
     do {
       let result = try await syncEngine.sync(options: options)
 
-      // Output based on format
-      if config.sync?.jsonOutput == true {
+      // Write JSON to file if path specified
+      if let outputFile = config.sync?.jsonOutputFile {
         let json = try result.toJSON(pretty: true)
-        print(json)
-      } else {
-        printSuccess(result)
+        try json.write(toFile: outputFile, atomically: true, encoding: .utf8)
+        BushelCloudKit.ConsoleOutput.info("✅ JSON output written to: \(outputFile)")
       }
+
+      // Always show human-readable summary
+      printSuccess(result)
     } catch {
       printError(error)
       Foundation.exit(1)
@@ -132,12 +134,16 @@ internal enum SyncCommand {
     printTypeResult("XcodeVersions", result.xcodeVersions)
     printTypeResult("SwiftVersions", result.swiftVersions)
 
+    let totalCreated = result.restoreImages.created + result.xcodeVersions.created + result.swiftVersions.created
+    let totalUpdated = result.restoreImages.updated + result.xcodeVersions.updated + result.swiftVersions.updated
+    let totalFailed = result.restoreImages.failed + result.xcodeVersions.failed + result.swiftVersions.failed
+
     print(String(repeating: "-", count: 60))
     print("TOTAL:")
-    print("  ✨ Created: \(result.totalCreated)")
-    print("  🔄 Updated: \(result.totalUpdated)")
-    if result.totalFailed > 0 {
-      print("  ❌ Failed:  \(result.totalFailed)")
+    print("  ✨ Created: \(totalCreated)")
+    print("  🔄 Updated: \(totalUpdated)")
+    if totalFailed > 0 {
+      print("  ❌ Failed:  \(totalFailed)")
     }
     print(String(repeating: "=", count: 60))
     print("\n💡 Next: Use 'bushel-cloud export' to view the synced data")

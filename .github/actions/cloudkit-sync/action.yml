@@ -143,6 +143,7 @@ runs:
         workflow_conclusion: success
         name: bushel-cloud-binary
         path: ./binary
+        branch: ${{ github.ref_name }}
 
     - name: Build binary (fallback if artifact unavailable)
       if: steps.download-binary.outcome != 'success'
@@ -248,17 +249,17 @@ runs:
         CLOUDKIT_ENVIRONMENT: ${{ inputs.environment }}
         CLOUDKIT_CONTAINER_ID: ${{ inputs.container-id }}
         VIRTUALBUDDY_API_KEY: ${{ inputs.virtualbuddy-api-key }}
-        BUSHEL_SYNC_JSON_OUTPUT: true
+        BUSHEL_SYNC_JSON_OUTPUT_FILE: sync-result.json
       run: |
         echo "Starting CloudKit sync with change tracking..."
         echo "Container: $CLOUDKIT_CONTAINER_ID"
         echo "Environment: $CLOUDKIT_ENVIRONMENT"
 
-        # Run sync with JSON output (captures create/update/failure statistics)
+        # Run sync with JSON output written directly to file
+        # All verbose logs go to console (will be captured in workflow logs)
         ./binary/bushel-cloud sync \
           --verbose \
-          --container-identifier "$CLOUDKIT_CONTAINER_ID" \
-          > sync-result.json
+          --container-identifier "$CLOUDKIT_CONTAINER_ID"
 
         # Parse sync results using jq
         RESTORE_CREATED=$(jq '.restoreImages.created' sync-result.json)
@@ -273,9 +274,10 @@ runs:
         SWIFT_UPDATED=$(jq '.swiftVersions.updated' sync-result.json)
         SWIFT_FAILED=$(jq '.swiftVersions.failed' sync-result.json)
 
-        TOTAL_CREATED=$(jq '.totalCreated' sync-result.json)
-        TOTAL_UPDATED=$(jq '.totalUpdated' sync-result.json)
-        TOTAL_FAILED=$(jq '.totalFailed' sync-result.json)
+        # Calculate totals manually
+        TOTAL_CREATED=$((RESTORE_CREATED + XCODE_CREATED + SWIFT_CREATED))
+        TOTAL_UPDATED=$((RESTORE_UPDATED + XCODE_UPDATED + SWIFT_UPDATED))
+        TOTAL_FAILED=$((RESTORE_FAILED + XCODE_FAILED + SWIFT_FAILED))
 
         # Generate summary showing changes (not just totals)
         cat > sync-summary.md <<EOF
@@ -365,6 +367,16 @@ runs:
         cat export-summary.md >> $GITHUB_STEP_SUMMARY
 
         echo "✅ Export complete with ${TOTAL_COUNT} total records"
+
+    - name: Upload sync results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: sync-results-${{ inputs.environment }}
+        path: |
+          sync-result.json
+          sync-summary.md
+        retention-days: 7
 
     - name: Upload export artifacts
       if: inputs.enable-export == 'true'

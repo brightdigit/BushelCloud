@@ -33,6 +33,8 @@ import Foundation
 ///
 /// Provides user-facing console output with verbose mode support.
 /// This is separate from logging, which is used for debugging and monitoring.
+///
+/// **Important**: All output goes to stderr to keep stdout clean for structured output (JSON, etc.)
 public enum ConsoleOutput {
   /// Global verbose mode flag
   ///
@@ -40,31 +42,39 @@ public enum ConsoleOutput {
   /// before any concurrent access and then only read. This pattern is safe for CLI tools.
   nonisolated(unsafe) public static var isVerbose = false
 
+  /// Print to stderr (keeping stdout clean for structured output)
+  ///
+  /// This is a drop-in replacement for Swift's `print()` that writes to stderr instead of stdout.
+  /// Use this throughout the codebase to ensure JSON output on stdout remains clean.
+  public static func print(_ message: String) {
+    if let data = (message + "\n").data(using: .utf8) {
+      FileHandle.standardError.write(data)
+    }
+  }
+
   /// Print verbose message only when verbose mode is enabled
   public static func verbose(_ message: String) {
-    guard isVerbose else {
-      return
-    }
-    print("  \(message)")
+    guard isVerbose else { return }
+    ConsoleOutput.print("  \(message)")
   }
 
   /// Print standard informational message
   public static func info(_ message: String) {
-    print(message)
+    ConsoleOutput.print(message)
   }
 
   /// Print success message
   public static func success(_ message: String) {
-    print("  ✓ \(message)")
+    ConsoleOutput.print("  ✓ \(message)")
   }
 
   /// Print warning message
   public static func warning(_ message: String) {
-    print("  ⚠️  \(message)")
+    ConsoleOutput.print("  ⚠️  \(message)")
   }
 
   /// Print error message
   public static func error(_ message: String) {
-    print("  ❌ \(message)")
+    ConsoleOutput.print("  ❌ \(message)")
   }
 }

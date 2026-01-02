@@ -43,7 +43,7 @@ public struct SyncConfiguration: Sendable {
   public var force: Bool
   public var minInterval: Int?
   public var source: String?
-  public var jsonOutput: Bool
+  public var jsonOutputFile: String?
 
   public init(
     dryRun: Bool = false,
@@ -56,7 +56,7 @@ public struct SyncConfiguration: Sendable {
     force: Bool = false,
     minInterval: Int? = nil,
     source: String? = nil,
-    jsonOutput: Bool = false
+    jsonOutputFile: String? = nil
   ) {
     self.dryRun = dryRun
     self.restoreImagesOnly = restoreImagesOnly
@@ -68,7 +68,7 @@ public struct SyncConfiguration: Sendable {
     self.force = force
     self.minInterval = minInterval
     self.source = source
-    self.jsonOutput = jsonOutput
+    self.jsonOutputFile = jsonOutputFile
   }
 }
 

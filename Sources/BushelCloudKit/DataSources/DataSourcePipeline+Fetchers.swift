@@ -50,7 +50,7 @@ extension DataSourcePipeline {
     // Deduplicate by build number (keep first occurrence)
     let preDedupeCount = allImages.count
     let deduped = deduplicateRestoreImages(allImages)
-    print("   📦 Deduplicated: \(preDedupeCount) → \(deduped.count) images")
+    ConsoleOutput.print("   📦 Deduplicated: \(preDedupeCount) → \(deduped.count) images")
     return deduped
   }
 
