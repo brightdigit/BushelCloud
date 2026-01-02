@@ -71,12 +71,12 @@ public actor ConfigurationLoader {
   // MARK: - Helper Methods
 
   /// Read a string value from configuration
-  func readString(forKey key: String) -> String? {
+  internal func readString(forKey key: String) -> String? {
     configReader.string(forKey: ConfigKey(key))
   }
 
   /// Read an integer value from configuration
-  func readInt(forKey key: String) -> Int? {
+  internal func readInt(forKey key: String) -> Int? {
     guard let stringValue = configReader.string(forKey: ConfigKey(key)) else {
       return nil
     }
@@ -84,7 +84,7 @@ public actor ConfigurationLoader {
   }
 
   /// Read a double value from configuration
-  func readDouble(forKey key: String) -> Double? {
+  internal func readDouble(forKey key: String) -> Double? {
     guard let stringValue = configReader.string(forKey: ConfigKey(key)) else {
       return nil
     }
@@ -95,7 +95,7 @@ public actor ConfigurationLoader {
 
   /// Read a string value with automatic CLI → ENV → default fallback
   /// Returns non-optional since ConfigKey has a required default
-  func read(_ key: ConfigKeyKit.ConfigKey<String>) -> String {
+  internal func read(_ key: ConfigKeyKit.ConfigKey<String>) -> String {
     for source in ConfigKeySource.allCases {
       guard let keyString = key.key(for: source) else { continue }
       if let value = readString(forKey: keyString) {
@@ -116,7 +116,7 @@ public actor ConfigurationLoader {
   ///
   /// - Parameter key: Configuration key with boolean type
   /// - Returns: Boolean value from CLI/ENV or the key's default
-  func read(_ key: ConfigKeyKit.ConfigKey<Bool>) -> Bool {
+  internal func read(_ key: ConfigKeyKit.ConfigKey<Bool>) -> Bool {
     // Try CLI first (presence-based for flags)
     if let cliKey = key.key(for: .commandLine),
       configReader.string(forKey: ConfigKey(cliKey)) != nil
@@ -140,7 +140,7 @@ public actor ConfigurationLoader {
 
   /// Read a string value with automatic CLI → ENV fallback
   /// Returns optional since OptionalConfigKey has no default
-  func read(_ key: ConfigKeyKit.OptionalConfigKey<String>) -> String? {
+  internal func read(_ key: ConfigKeyKit.OptionalConfigKey<String>) -> String? {
     for source in ConfigKeySource.allCases {
       guard let keyString = key.key(for: source) else { continue }
       if let value = readString(forKey: keyString) {
@@ -152,7 +152,7 @@ public actor ConfigurationLoader {
 
   /// Read an integer value with automatic CLI → ENV fallback
   /// Returns optional since OptionalConfigKey has no default
-  func read(_ key: ConfigKeyKit.OptionalConfigKey<Int>) -> Int? {
+  internal func read(_ key: ConfigKeyKit.OptionalConfigKey<Int>) -> Int? {
     for source in ConfigKeySource.allCases {
       guard let keyString = key.key(for: source) else { continue }
       if let value = readInt(forKey: keyString) {
@@ -164,7 +164,7 @@ public actor ConfigurationLoader {
 
   /// Read a double value with automatic CLI → ENV fallback
   /// Returns optional since OptionalConfigKey has no default
-  func read(_ key: ConfigKeyKit.OptionalConfigKey<Double>) -> Double? {
+  internal func read(_ key: ConfigKeyKit.OptionalConfigKey<Double>) -> Double? {
     for source in ConfigKeySource.allCases {
       guard let keyString = key.key(for: source) else { continue }
       if let value = readDouble(forKey: keyString) {

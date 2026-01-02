@@ -66,7 +66,8 @@ public struct MESUFetcher: DataSourceFetcher, Sendable {
     }
 
     // Navigate to the firmware data
-    // Structure: MobileDeviceSoftwareVersionsByVersion -> "1" -> MobileDeviceSoftwareVersions -> VirtualMac2,1 -> BuildVersion -> Restore
+    // Structure: MobileDeviceSoftwareVersionsByVersion -> "1" ->
+    // MobileDeviceSoftwareVersions -> VirtualMac2,1 -> BuildVersion -> Restore
     guard let versionsByVersion = plist["MobileDeviceSoftwareVersionsByVersion"] as? [String: Any],
       let version1 = versionsByVersion["1"] as? [String: Any],
       let softwareVersions = version1["MobileDeviceSoftwareVersions"] as? [String: Any],
@@ -114,7 +115,7 @@ public struct MESUFetcher: DataSourceFetcher, Sendable {
 
   // MARK: - Error Types
 
-  enum FetchError: Error {
+  internal enum FetchError: Error {
     case invalidURL
     case parsingFailed
   }

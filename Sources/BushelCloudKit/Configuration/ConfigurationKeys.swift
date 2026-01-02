@@ -98,7 +98,8 @@ internal enum ConfigurationKeys {
   internal enum Sync {
     internal static let dryRun = ConfigKey<Bool>(bushelPrefixed: "sync.dry_run")
     internal static let restoreImagesOnly = ConfigKey<Bool>(
-      bushelPrefixed: "sync.restore_images_only")
+      bushelPrefixed: "sync.restore_images_only"
+    )
     internal static let xcodeOnly = ConfigKey<Bool>(bushelPrefixed: "sync.xcode_only")
     internal static let swiftOnly = ConfigKey<Bool>(bushelPrefixed: "sync.swift_only")
     internal static let noBetas = ConfigKey<Bool>(bushelPrefixed: "sync.no_betas")

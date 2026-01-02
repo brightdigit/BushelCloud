@@ -391,7 +391,6 @@ public struct SyncEngine: Sendable {
     print(String(repeating: "=", count: 60))
     Self.logger.info("Clear completed successfully")
   }
-
 }
 
 // MARK: - Loggable Conformance

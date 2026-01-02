@@ -30,7 +30,7 @@
 import Foundation
 
 /// Validates PEM format for CloudKit Server-to-Server private keys
-enum PEMValidator {
+internal enum PEMValidator {
   /// Validates a PEM string has proper structure and encoding
   ///
   /// **Checks performed:**
@@ -46,15 +46,17 @@ enum PEMValidator {
   ///
   /// - Parameter pemString: The PEM-formatted private key string
   /// - Throws: BushelCloudKitError.invalidPEMFormat with specific reason and recovery suggestion
-  static func validate(_ pemString: String) throws {
+  internal static func validate(_ pemString: String) throws {
     let trimmed = pemString.trimmingCharacters(in: .whitespacesAndNewlines)
 
     // Check for BEGIN header
     guard trimmed.contains("-----BEGIN") && trimmed.contains("PRIVATE KEY-----") else {
       throw BushelCloudKitError.invalidPEMFormat(
         reason: "Missing '-----BEGIN PRIVATE KEY-----' header",
-        suggestion:
-          "Ensure you copied the entire PEM file including the header line. Re-download from CloudKit Dashboard if needed."
+        suggestion: """
+          Ensure you copied the entire PEM file including the header line. \
+          Re-download from CloudKit Dashboard if needed.
+          """
       )
     }
 
@@ -62,8 +64,10 @@ enum PEMValidator {
     guard trimmed.contains("-----END") && trimmed.contains("PRIVATE KEY-----") else {
       throw BushelCloudKitError.invalidPEMFormat(
         reason: "Missing '-----END PRIVATE KEY-----' footer",
-        suggestion:
-          "The PEM file may have been truncated during copy/paste. Ensure you copied the entire file including the footer line."
+        suggestion: """
+          The PEM file may have been truncated during copy/paste. \
+          Ensure you copied the entire file including the footer line.
+          """
       )
     }
 
@@ -85,8 +89,10 @@ enum PEMValidator {
     guard Data(base64Encoded: base64Content) != nil else {
       throw BushelCloudKitError.invalidPEMFormat(
         reason: "PEM content is not valid base64 encoding",
-        suggestion:
-          "The key file may be corrupted. Ensure you used a text editor (not binary editor) and the file is UTF-8 encoded."
+        suggestion: """
+          The key file may be corrupted. \
+          Ensure you used a text editor (not binary editor) and the file is UTF-8 encoded.
+          """
       )
     }
   }

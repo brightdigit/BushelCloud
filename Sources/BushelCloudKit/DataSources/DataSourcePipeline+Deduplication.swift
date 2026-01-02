@@ -33,7 +33,7 @@ import Foundation
 // MARK: - Deduplication
 extension DataSourcePipeline {
   /// Deduplicate restore images by build number, keeping the most complete record
-  func deduplicateRestoreImages(_ images: [RestoreImageRecord]) -> [RestoreImageRecord] {
+  internal func deduplicateRestoreImages(_ images: [RestoreImageRecord]) -> [RestoreImageRecord] {
     var uniqueImages: [String: RestoreImageRecord] = [:]
 
     for image in images {
@@ -56,7 +56,7 @@ extension DataSourcePipeline {
   /// - SHA-256 hashes from AppleDB fill in empty values from ipsw.me
   /// - File sizes and SHA-1 hashes are similarly backfilled
   /// - Signing status follows MESU authoritative rules
-  func mergeRestoreImages(
+  internal func mergeRestoreImages(
     _ first: RestoreImageRecord,
     _ second: RestoreImageRecord
   ) -> RestoreImageRecord {
@@ -165,7 +165,7 @@ extension DataSourcePipeline {
   }
 
   /// Deduplicate Xcode versions by build number
-  func deduplicateXcodeVersions(_ versions: [XcodeVersionRecord]) -> [XcodeVersionRecord] {
+  internal func deduplicateXcodeVersions(_ versions: [XcodeVersionRecord]) -> [XcodeVersionRecord] {
     var uniqueVersions: [String: XcodeVersionRecord] = [:]
 
     for version in versions {
@@ -179,7 +179,7 @@ extension DataSourcePipeline {
   }
 
   /// Deduplicate Swift versions by version number
-  func deduplicateSwiftVersions(_ versions: [SwiftVersionRecord]) -> [SwiftVersionRecord] {
+  internal func deduplicateSwiftVersions(_ versions: [SwiftVersionRecord]) -> [SwiftVersionRecord] {
     var uniqueVersions: [String: SwiftVersionRecord] = [:]
 
     for version in versions {

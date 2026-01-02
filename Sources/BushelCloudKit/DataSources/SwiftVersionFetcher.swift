@@ -36,8 +36,8 @@ import SwiftSoup
 #endif
 
 /// Fetcher for Swift compiler versions from swiftversion.net
-struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
-  typealias Record = [SwiftVersionRecord]
+internal struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
+  internal typealias Record = [SwiftVersionRecord]
 
   // swiftlint:disable:next force_unwrapping
   private static let swiftVersionURL = URL(string: "https://swiftversion.net")!
@@ -53,7 +53,7 @@ struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
   // MARK: - Public API
 
   /// Fetch all Swift versions from swiftversion.net
-  func fetch() async throws -> [SwiftVersionRecord] {
+  internal func fetch() async throws -> [SwiftVersionRecord] {
     let (data, _) = try await URLSession.shared.data(from: Self.swiftVersionURL)
     guard let html = String(data: data, encoding: .utf8) else {
       throw FetchError.invalidEncoding
@@ -84,7 +84,8 @@ struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
           date: date,
           swiftVersion: swiftVer,
           xcodeVersion: xcodeVer
-        ))
+        )
+      )
     }
 
     return entries.map { entry in
@@ -101,7 +102,7 @@ struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
 
   // MARK: - Error Types
 
-  enum FetchError: Error {
+  internal enum FetchError: Error {
     case invalidEncoding
   }
 }

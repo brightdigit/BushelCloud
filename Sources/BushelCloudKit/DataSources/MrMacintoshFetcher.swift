@@ -95,7 +95,9 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
   {
     do {
       let cells = try row.select("td")
-      guard cells.count >= 3 else { return nil }
+      guard cells.count >= 3 else {
+        return nil
+      }
 
       // Expected columns: Download Link | Version | Date | [Optional: Signed Status]
       // Extract filename and URL from first cell
@@ -111,11 +113,15 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
 
       // Parse filename like "UniversalMac_26.1_25B78_Restore.ipsw"
       // Extract version and build from filename
-      guard filename.contains("UniversalMac") else { return nil }
+      guard filename.contains("UniversalMac") else {
+        return nil
+      }
 
       let components = filename.replacingOccurrences(of: ".ipsw", with: "")
         .components(separatedBy: "_")
-      guard components.count >= 3 else { return nil }
+      guard components.count >= 3 else {
+        return nil
+      }
 
       let version = components[1]
       let buildNumber = components[2]
@@ -224,7 +230,7 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
 
   // MARK: - Error Types
 
-  enum FetchError: Error {
+  internal enum FetchError: Error {
     case invalidURL
     case invalidEncoding
   }
@@ -232,5 +238,5 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
 
 // MARK: - Loggable Conformance
 extension MrMacintoshFetcher: Loggable {
-  static let loggingCategory: BushelLogging.Category = .hub
+  internal static let loggingCategory: BushelLogging.Category = .hub
 }

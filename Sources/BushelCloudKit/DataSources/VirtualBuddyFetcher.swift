@@ -98,8 +98,8 @@ internal struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
         // Validate build number matches
         guard response.build == image.buildNumber else {
           print(
-            "   ⚠️  VirtualBuddy: \(image.buildNumber) - build mismatch: " +
-              "expected \(image.buildNumber), got \(response.build) (\(processedCount)/\(totalCount))"
+            "   ⚠️  VirtualBuddy: \(image.buildNumber) - build mismatch: "
+              + "expected \(image.buildNumber), got \(response.build) (\(processedCount)/\(totalCount))"
           )
           enrichedImages.append(image)
           continue
@@ -116,8 +116,8 @@ internal struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
         let statusEmoji = response.isSigned ? "✅" : "❌"
         let statusText = response.isSigned ? "signed" : "unsigned"
         print(
-          "   \(statusEmoji) VirtualBuddy: \(image.buildNumber) - " +
-            "\(statusText) (\(processedCount)/\(totalCount))"
+          "   \(statusEmoji) VirtualBuddy: \(image.buildNumber) - "
+            + "\(statusText) (\(processedCount)/\(totalCount))"
         )
 
         enrichedImages.append(enriched)

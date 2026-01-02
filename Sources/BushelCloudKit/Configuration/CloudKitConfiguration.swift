@@ -107,7 +107,10 @@ public struct ValidatedCloudKitConfiguration: Sendable {
 
     guard let parsedEnvironment = MistKit.Environment(rawValue: environmentString) else {
       throw ConfigurationError(
-        "Invalid CLOUDKIT_ENVIRONMENT: '\(config.environment ?? "")'. Must be 'development' or 'production'",
+        """
+        Invalid CLOUDKIT_ENVIRONMENT: '\(config.environment ?? "")'. \
+        Must be 'development' or 'production'
+        """,
         key: "cloudkit.environment"
       )
     }

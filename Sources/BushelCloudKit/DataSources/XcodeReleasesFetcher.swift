@@ -47,8 +47,6 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
   // swiftlint:disable:next force_unwrapping
   private static let xcodeReleasesURL = URL(string: "https://xcodereleases.com/data.json")!
 
-  public init() {}
-
   // MARK: - API Models
 
   private struct XcodeRelease: Codable {
@@ -125,6 +123,8 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
     }
   }
 
+  public init() {}
+
   // MARK: - Public API
 
   /// Fetch all Xcode releases from xcodereleases.com
@@ -172,7 +172,9 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
 
       // Convert download URL string to URL if available
       let downloadURL: URL? = {
-        guard let urlString = release.links?.download?.url else { return nil }
+        guard let urlString = release.links?.download?.url else {
+          return nil
+        }
         return URL(string: urlString)
       }()
 

@@ -14,7 +14,7 @@ Fix 7 specific SwiftLint violation types across the codebase:
 
 ## Progress Summary
 
-### ✅ Phase 1: High-Impact Files (3/5 Complete)
+### ✅ Phase 1: High-Impact Files (5/5 Complete) ✨
 
 #### Completed Files:
 
@@ -37,40 +37,91 @@ Fix 7 specific SwiftLint violation types across the codebase:
 - Fixed `multiline_arguments_brackets`: URLComponents initializer now has closing bracket on new line
 - **Key change**: All public-facing types and methods now explicitly `internal`
 
-#### Remaining Phase 1 Files:
+**4. BushelCloudKitService.swift** ✅
+- Fixed `type_contents_order`: Moved `service` instance property after `recordTypes` type property
+- Fixed `line_length`: Line 207-208 split using multi-line string literal with backslash continuation
+- Fixed `multiline_arguments_brackets`: Line 184 executeBatchOperations call now has closing bracket on new line
+- **Key change**: Static properties must come before instance properties
 
-**4. BushelCloudKitService.swift** ⏳
-- Needs: `type_contents_order` (line 52), `line_length` (line 207), `multiline_arguments_brackets` (line 184)
-- Location: `Sources/BushelCloudKit/CloudKit/BushelCloudKitService.swift`
+**5. PEMValidator.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to static func validate
+- Fixed `explicit_top_level_acl`: Added `internal` to PEMValidator enum
+- Fixed `line_length`: Lines 57, 66, 89 all split using multi-line string literals
+- **Key change**: All three error suggestion strings converted to multi-line format for readability
 
-**5. PEMValidator.swift** ⏳
-- Needs: `explicit_acl` (lines 33, 49), `explicit_top_level_acl` (line 33), `line_length` (lines 57, 66, 89)
-- Location: `Sources/BushelCloudKit/CloudKit/PEMValidator.swift`
+### ✅ Phase 2: Data Source Files (5/5 Complete) ✨
 
-### ⏸️ Phase 2: Data Source Files (0/5 Complete)
+#### Completed Files:
 
-Files to fix:
-1. `DataSourcePipeline+Deduplication.swift` - explicit_acl only (skip discouraged_optional_boolean)
-2. `XcodeReleasesFetcher.swift` - type_contents_order, conditional_returns_on_newline
-3. `MrMacintoshFetcher.swift` - explicit_acl, conditional_returns_on_newline
-4. `SwiftVersionFetcher.swift` - type_contents_order, multiline_arguments_brackets
-5. `MESUFetcher.swift` - line_length
+**1. DataSourcePipeline+Deduplication.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to 4 deduplication functions (lines 36, 59, 168, 182)
+- **Skipped**: `discouraged_optional_boolean` (7 violations) - intentional tri-state Bool? for signing status
+- **Key change**: All deduplication methods now have explicit access control
 
-### ⏸️ Phase 3: Configuration Files (0/3 Complete)
+**2. XcodeReleasesFetcher.swift** ✅
+- Fixed `type_contents_order`: Moved `init()` after all nested types (was at line 50, now at line 126)
+- Fixed `conditional_returns_on_newline`: Line 175 guard statement now has return on new line
+- **Key change**: Nested types → init → methods ordering now correct
 
-Files to fix:
-1. `ConfigurationLoader.swift` - explicit_acl (8 violations)
-2. `ConfigurationKeys.swift` - multiline_arguments_brackets
-3. `CloudKitConfiguration.swift` - line_length
+**3. MrMacintoshFetcher.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to FetchError enum (line 227) and loggingCategory (line 235)
+- Fixed `conditional_returns_on_newline`: Three guard statements (lines 98, 114, 118) now have returns on new lines
+- **Key change**: All 5 guard early returns now properly formatted
 
-### ⏸️ Phase 4: CloudKit Extensions (0/5 Complete)
+**4. SwiftVersionFetcher.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to struct, typealias, fetch method, and FetchError enum (lines 39, 40, 56, 104)
+- Fixed `explicit_top_level_acl`: Added `internal` to top-level struct (line 39)
+- Fixed `multiline_arguments_brackets`: Line 87 closing bracket moved to new line
+- **Key change**: Consistent internal access control throughout
 
-Files to fix (all need `type_contents_order`, use `public` for CloudKitRecord conformance):
-1. `RestoreImageRecord+CloudKit.swift`
-2. `XcodeVersionRecord+CloudKit.swift` - also multiline_arguments_brackets
-3. `SwiftVersionRecord+CloudKit.swift`
-4. `DataSourceMetadata+CloudKit.swift`
-5. `FieldValue+URL.swift`
+**5. MESUFetcher.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to FetchError enum (line 117)
+- Fixed `line_length`: Line 69 comment split into two lines
+- **Key change**: Long plist structure comment now readable within line limit
+
+### ✅ Phase 3: Configuration Files (3/3 Complete) ✨
+
+#### Completed Files:
+
+**1. ConfigurationLoader.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to 8 functions (lines 74, 79, 87, 98, 119, 143, 155, 167)
+- **Functions fixed**: readString, readInt, readDouble, read(_:ConfigKey<String>), read(_:ConfigKey<Bool>), read(_:OptionalConfigKey<String>), read(_:OptionalConfigKey<Int>), read(_:OptionalConfigKey<Double>)
+- **Key change**: All configuration reader helper methods now have explicit access control
+
+**2. ConfigurationKeys.swift** ✅
+- Fixed `multiline_arguments_brackets`: Line 101 closing bracket moved to new line
+- **Key change**: Multi-line ConfigKey initialization now properly formatted
+
+**3. CloudKitConfiguration.swift** ✅
+- Fixed `line_length`: Line 110 error message split using multi-line string literal
+- **Key change**: Long error message for invalid CLOUDKIT_ENVIRONMENT now readable
+
+### ✅ Phase 4: CloudKit Extensions (5/5 Complete) ✨
+
+#### Completed Files:
+
+**1. RestoreImageRecord+CloudKit.swift** ✅
+- Fixed `type_contents_order`: Moved `toCloudKitFields()` instance method after static methods
+- **Order now**: cloudKitRecordType (type property) → from/formatForDisplay (static methods) → toCloudKitFields (instance method)
+- **Key change**: Instance methods now properly placed after type methods
+
+**2. XcodeVersionRecord+CloudKit.swift** ✅
+- Fixed `type_contents_order`: Moved `toCloudKitFields()` instance method after static methods
+- Fixed `multiline_arguments_brackets`: Two FieldValue.Reference calls (lines 62, 70) now have closing brackets on new lines
+- **Key change**: Both type order and multiline formatting corrected
+
+**3. SwiftVersionRecord+CloudKit.swift** ✅
+- Fixed `type_contents_order`: Moved `toCloudKitFields()` instance method after static methods
+- **Key change**: Consistent ordering with other CloudKitRecord conformances
+
+**4. DataSourceMetadata+CloudKit.swift** ✅
+- Fixed `type_contents_order`: Moved `toCloudKitFields()` instance method after static methods
+- **Key change**: All CloudKit extension files now follow same pattern
+
+**5. FieldValue+URL.swift** ✅
+- Fixed `type_contents_order`: Moved `urlValue` property before `init(url:)` initializer
+- **Order now**: instance properties → initializers (correct Swift convention)
+- **Key change**: Properties must come before initializers
 
 ### ⏸️ Phase 5: Other Files and Tests (0/~60 Complete)
 
@@ -179,19 +230,46 @@ After each phase:
 
 ## Files Modified So Far
 
+### Phase 1: High-Impact Files
 1. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/CloudKit/SyncEngine.swift`
 2. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudCLI/Commands/ExportCommand.swift`
 3. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/VirtualBuddyFetcher.swift`
+4. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/CloudKit/BushelCloudKitService.swift`
+5. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/CloudKit/PEMValidator.swift`
+
+### Phase 2: Data Source Files
+6. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/DataSourcePipeline+Deduplication.swift`
+7. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/XcodeReleasesFetcher.swift`
+8. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/MrMacintoshFetcher.swift`
+9. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/SwiftVersionFetcher.swift`
+10. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/MESUFetcher.swift`
+
+### Phase 3: Configuration Files
+11. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Configuration/ConfigurationLoader.swift`
+12. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Configuration/ConfigurationKeys.swift`
+13. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Configuration/CloudKitConfiguration.swift`
+
+### Phase 4: CloudKit Extensions
+14. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/RestoreImageRecord+CloudKit.swift`
+15. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/XcodeVersionRecord+CloudKit.swift`
+16. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/SwiftVersionRecord+CloudKit.swift`
+17. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/DataSourceMetadata+CloudKit.swift`
+18. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/FieldValue+URL.swift`
 
 ## Next Steps for Future Session
 
-1. Complete Phase 1:
-   - Fix `BushelCloudKitService.swift`
-   - Fix `PEMValidator.swift`
+1. ✅ **Phase 1 Complete!** All 5 high-impact files have been fixed.
 
-2. Run linting check to verify Phase 1 completion
+2. ✅ **Phase 2 Complete!** All 5 data source files have been fixed.
 
-3. Proceed with Phase 2-5 systematically
+3. ✅ **Phase 3 Complete!** All 3 configuration files have been fixed.
+
+4. ✅ **Phase 4 Complete!** All 5 CloudKit extension files have been fixed.
+
+5. Phase 5: Test files and remaining source files
+   - **Note**: Phase 5 involves ~60 test files that need `internal` access control
+   - Consider using bulk patterns for test files
+   - Focus on remaining high-value source files first
 
 4. For test files (Phase 5), consider using regex patterns to bulk-add `internal` to all test class declarations
 

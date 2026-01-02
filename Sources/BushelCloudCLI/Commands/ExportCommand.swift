@@ -36,17 +36,17 @@ internal enum ExportCommand {
   // MARK: - Export Types
 
   private struct ExportData: Codable {
-    internal let restoreImages: [RecordExport]
-    internal let xcodeVersions: [RecordExport]
-    internal let swiftVersions: [RecordExport]
+    let restoreImages: [RecordExport]
+    let xcodeVersions: [RecordExport]
+    let swiftVersions: [RecordExport]
   }
 
   private struct RecordExport: Codable {
-    internal let recordName: String
-    internal let recordType: String
-    internal let fields: [String: String]
+    let recordName: String
+    let recordType: String
+    let fields: [String: String]
 
-    internal init(from recordInfo: RecordInfo) {
+    init(from recordInfo: RecordInfo) {
       self.recordName = recordInfo.recordName
       self.recordType = recordInfo.recordType
       self.fields = recordInfo.fields.mapValues { fieldValue in
@@ -193,5 +193,4 @@ internal enum ExportCommand {
     print("   • Ensure data has been synced to CloudKit")
     print("   • Run 'bushel-cloud sync' first if needed")
   }
-
 }

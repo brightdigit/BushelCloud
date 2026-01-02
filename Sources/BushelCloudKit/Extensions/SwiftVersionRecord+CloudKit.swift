@@ -37,25 +37,6 @@ public import MistKit
 extension SwiftVersionRecord: @retroactive CloudKitRecord {
   public static var cloudKitRecordType: String { "SwiftVersion" }
 
-  public func toCloudKitFields() -> [String: FieldValue] {
-    var fields: [String: FieldValue] = [
-      "version": .string(version),
-      "releaseDate": .date(releaseDate),
-      "isPrerelease": FieldValue(booleanValue: isPrerelease),
-    ]
-
-    // Optional fields
-    if let downloadURL {
-      fields["downloadURL"] = FieldValue(url: downloadURL)
-    }
-
-    if let notes {
-      fields["notes"] = .string(notes)
-    }
-
-    return fields
-  }
-
   public static func from(recordInfo: RecordInfo) -> Self? {
     guard let version = recordInfo.fields["version"]?.stringValue,
       let releaseDate = recordInfo.fields["releaseDate"]?.dateValue
@@ -81,5 +62,24 @@ extension SwiftVersionRecord: @retroactive CloudKitRecord {
     var output = "\n  Swift \(version)\n"
     output += "    Released: \(dateStr)"
     return output
+  }
+
+  public func toCloudKitFields() -> [String: FieldValue] {
+    var fields: [String: FieldValue] = [
+      "version": .string(version),
+      "releaseDate": .date(releaseDate),
+      "isPrerelease": FieldValue(booleanValue: isPrerelease),
+    ]
+
+    // Optional fields
+    if let downloadURL {
+      fields["downloadURL"] = FieldValue(url: downloadURL)
+    }
+
+    if let notes {
+      fields["notes"] = .string(notes)
+    }
+
+    return fields
   }
 }

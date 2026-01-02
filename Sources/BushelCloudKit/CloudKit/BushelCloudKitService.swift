@@ -49,8 +49,6 @@ public import MistKit
 public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCollection {
   public typealias RecordTypeSetType = RecordTypeSet
 
-  private let service: CloudKitService
-
   // MARK: - CloudKitRecordCollection
 
   /// All CloudKit record types managed by this service (using variadic generics)
@@ -60,6 +58,8 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     SwiftVersionRecord.self,
     DataSourceMetadata.self
   )
+
+  private let service: CloudKitService
 
   // MARK: - Initialization
 
@@ -180,7 +180,9 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   ) async throws {
     // Create empty classification (no tracking)
     let classification = OperationClassification(proposedRecords: [], existingRecords: [])
-    _ = try await executeBatchOperations(operations, recordType: recordType, classification: classification)
+    _ = try await executeBatchOperations(
+      operations, recordType: recordType, classification: classification
+    )
   }
 
   /// Execute operations in batches with detailed create/update tracking
@@ -203,7 +205,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
 
     print("Syncing \(operations.count) \(recordType) record(s) in \(batches.count) batch(es)...")
     Self.logger.debug(
-      "CloudKit batch limit: 200 operations/request. Using \(batches.count) batch(es) for \(operations.count) records."
+      """
+      CloudKit batch limit: 200 operations/request. \
+      Using \(batches.count) batch(es) for \(operations.count) records.
+      """
     )
     Self.logger.debug(
       "Classification: \(classification.creates.count) creates, \(classification.updates.count) updates"

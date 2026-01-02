@@ -37,35 +37,6 @@ public import MistKit
 extension RestoreImageRecord: @retroactive CloudKitRecord {
   public static var cloudKitRecordType: String { "RestoreImage" }
 
-  public func toCloudKitFields() -> [String: FieldValue] {
-    var fields: [String: FieldValue] = [
-      "version": .string(version),
-      "buildNumber": .string(buildNumber),
-      "releaseDate": .date(releaseDate),
-      "downloadURL": FieldValue(url: downloadURL),
-      "fileSize": .int64(fileSize),
-      "sha256Hash": .string(sha256Hash),
-      "sha1Hash": .string(sha1Hash),
-      "isPrerelease": FieldValue(booleanValue: isPrerelease),
-      "source": .string(source),
-    ]
-
-    // Optional fields
-    if let isSigned {
-      fields["isSigned"] = FieldValue(booleanValue: isSigned)
-    }
-
-    if let notes {
-      fields["notes"] = .string(notes)
-    }
-
-    if let sourceUpdatedAt {
-      fields["sourceUpdatedAt"] = .date(sourceUpdatedAt)
-    }
-
-    return fields
-  }
-
   public static func from(recordInfo: RecordInfo) -> Self? {
     guard let version = recordInfo.fields["version"]?.stringValue,
       let buildNumber = recordInfo.fields["buildNumber"]?.stringValue,
@@ -109,5 +80,34 @@ extension RestoreImageRecord: @retroactive CloudKitRecord {
     var output = "    \(build) \(prereleaseStr)\n"
     output += "      \(signedStr) | Size: \(sizeStr) | Source: \(source)"
     return output
+  }
+
+  public func toCloudKitFields() -> [String: FieldValue] {
+    var fields: [String: FieldValue] = [
+      "version": .string(version),
+      "buildNumber": .string(buildNumber),
+      "releaseDate": .date(releaseDate),
+      "downloadURL": FieldValue(url: downloadURL),
+      "fileSize": .int64(fileSize),
+      "sha256Hash": .string(sha256Hash),
+      "sha1Hash": .string(sha1Hash),
+      "isPrerelease": FieldValue(booleanValue: isPrerelease),
+      "source": .string(source),
+    ]
+
+    // Optional fields
+    if let isSigned {
+      fields["isSigned"] = FieldValue(booleanValue: isSigned)
+    }
+
+    if let notes {
+      fields["notes"] = .string(notes)
+    }
+
+    if let sourceUpdatedAt {
+      fields["sourceUpdatedAt"] = .date(sourceUpdatedAt)
+    }
+
+    return fields
   }
 }

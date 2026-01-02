@@ -37,50 +37,6 @@ public import MistKit
 extension XcodeVersionRecord: @retroactive CloudKitRecord {
   public static var cloudKitRecordType: String { "XcodeVersion" }
 
-  public func toCloudKitFields() -> [String: FieldValue] {
-    var fields: [String: FieldValue] = [
-      "version": .string(version),
-      "buildNumber": .string(buildNumber),
-      "releaseDate": .date(releaseDate),
-      "isPrerelease": FieldValue(booleanValue: isPrerelease),
-    ]
-
-    // Optional fields
-    if let downloadURL {
-      fields["downloadURL"] = FieldValue(url: downloadURL)
-    }
-
-    if let fileSize {
-      fields["fileSize"] = .int64(fileSize)
-    }
-
-    if let minimumMacOS {
-      fields["minimumMacOS"] = .reference(
-        FieldValue.Reference(
-          recordName: minimumMacOS,
-          action: nil
-        ))
-    }
-
-    if let includedSwiftVersion {
-      fields["includedSwiftVersion"] = .reference(
-        FieldValue.Reference(
-          recordName: includedSwiftVersion,
-          action: nil
-        ))
-    }
-
-    if let sdkVersions {
-      fields["sdkVersions"] = .string(sdkVersions)
-    }
-
-    if let notes {
-      fields["notes"] = .string(notes)
-    }
-
-    return fields
-  }
-
   public static func from(recordInfo: RecordInfo) -> Self? {
     guard let version = recordInfo.fields["version"]?.stringValue,
       let buildNumber = recordInfo.fields["buildNumber"]?.stringValue,
@@ -115,5 +71,51 @@ extension XcodeVersionRecord: @retroactive CloudKitRecord {
     var output = "\n  \(version) (Build \(build))\n"
     output += "    Released: \(dateStr) | Size: \(sizeStr)"
     return output
+  }
+
+  public func toCloudKitFields() -> [String: FieldValue] {
+    var fields: [String: FieldValue] = [
+      "version": .string(version),
+      "buildNumber": .string(buildNumber),
+      "releaseDate": .date(releaseDate),
+      "isPrerelease": FieldValue(booleanValue: isPrerelease),
+    ]
+
+    // Optional fields
+    if let downloadURL {
+      fields["downloadURL"] = FieldValue(url: downloadURL)
+    }
+
+    if let fileSize {
+      fields["fileSize"] = .int64(fileSize)
+    }
+
+    if let minimumMacOS {
+      fields["minimumMacOS"] = .reference(
+        FieldValue.Reference(
+          recordName: minimumMacOS,
+          action: nil
+        )
+      )
+    }
+
+    if let includedSwiftVersion {
+      fields["includedSwiftVersion"] = .reference(
+        FieldValue.Reference(
+          recordName: includedSwiftVersion,
+          action: nil
+        )
+      )
+    }
+
+    if let sdkVersions {
+      fields["sdkVersions"] = .string(sdkVersions)
+    }
+
+    if let notes {
+      fields["notes"] = .string(notes)
+    }
+
+    return fields
   }
 }

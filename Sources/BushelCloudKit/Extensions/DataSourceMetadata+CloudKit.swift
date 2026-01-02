@@ -37,27 +37,6 @@ public import MistKit
 extension DataSourceMetadata: CloudKitRecord {
   public static var cloudKitRecordType: String { "DataSourceMetadata" }
 
-  public func toCloudKitFields() -> [String: FieldValue] {
-    var fields: [String: FieldValue] = [
-      "sourceName": .string(sourceName),
-      "recordTypeName": .string(recordTypeName),
-      "lastFetchedAt": .date(lastFetchedAt),
-      "recordCount": .int64(recordCount),
-      "fetchDurationSeconds": .double(fetchDurationSeconds),
-    ]
-
-    // Optional fields
-    if let sourceUpdatedAt {
-      fields["sourceUpdatedAt"] = .date(sourceUpdatedAt)
-    }
-
-    if let lastError {
-      fields["lastError"] = .string(lastError)
-    }
-
-    return fields
-  }
-
   public static func from(recordInfo: RecordInfo) -> Self? {
     guard let sourceName = recordInfo.fields["sourceName"]?.stringValue,
       let recordTypeName = recordInfo.fields["recordTypeName"]?.stringValue,
@@ -88,5 +67,26 @@ extension DataSourceMetadata: CloudKitRecord {
     var output = "\n  \(sourceName) → \(recordTypeName)\n"
     output += "    Last fetched: \(dateStr) | Records: \(recordCount)"
     return output
+  }
+
+  public func toCloudKitFields() -> [String: FieldValue] {
+    var fields: [String: FieldValue] = [
+      "sourceName": .string(sourceName),
+      "recordTypeName": .string(recordTypeName),
+      "lastFetchedAt": .date(lastFetchedAt),
+      "recordCount": .int64(recordCount),
+      "fetchDurationSeconds": .double(fetchDurationSeconds),
+    ]
+
+    // Optional fields
+    if let sourceUpdatedAt {
+      fields["sourceUpdatedAt"] = .date(sourceUpdatedAt)
+    }
+
+    if let lastError {
+      fields["lastError"] = .string(lastError)
+    }
+
+    return fields
   }
 }

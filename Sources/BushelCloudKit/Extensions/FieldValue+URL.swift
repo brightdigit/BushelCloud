@@ -31,24 +31,6 @@ public import Foundation
 public import MistKit
 
 extension FieldValue {
-  /// Create a string FieldValue from a URL
-  ///
-  /// This convenience initializer converts a URL to its absolute string representation
-  /// for storage in CloudKit. CloudKit stores URLs as STRING fields, so this provides
-  /// automatic conversion.
-  ///
-  /// ## Usage
-  /// ```swift
-  /// let url = URL(string: "https://example.com/file.dmg")!
-  /// let fieldValue = FieldValue(url: url)
-  /// // Equivalent to: FieldValue.string("https://example.com/file.dmg")
-  /// ```
-  ///
-  /// - Parameter url: The URL to convert to a FieldValue
-  public init(url: URL) {
-    self = .string(url.absoluteString)
-  }
-
   /// Extract a URL from a FieldValue
   ///
   /// This convenience property attempts to convert a string FieldValue back to a URL.
@@ -69,5 +51,23 @@ extension FieldValue {
       return URL(string: value)
     }
     return nil
+  }
+
+  /// Create a string FieldValue from a URL
+  ///
+  /// This convenience initializer converts a URL to its absolute string representation
+  /// for storage in CloudKit. CloudKit stores URLs as STRING fields, so this provides
+  /// automatic conversion.
+  ///
+  /// ## Usage
+  /// ```swift
+  /// let url = URL(string: "https://example.com/file.dmg")!
+  /// let fieldValue = FieldValue(url: url)
+  /// // Equivalent to: FieldValue.string("https://example.com/file.dmg")
+  /// ```
+  ///
+  /// - Parameter url: The URL to convert to a FieldValue
+  public init(url: URL) {
+    self = .string(url.absoluteString)
   }
 }
