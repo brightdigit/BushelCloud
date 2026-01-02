@@ -5,12 +5,11 @@ on:
   push:
     branches:
       - main
-      - 8-scheduled-job  # For development/testing
 
   # Allow manual trigger
   workflow_dispatch:
 
-  # Optional: Build on PRs for validation
+  # Build on PRs for validation
   pull_request:
 
 # Prevent concurrent builds
