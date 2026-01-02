@@ -201,8 +201,8 @@ runs:
       run: |
         echo "Validating PEM format..."
 
-        # Check for required PEM headers/footers
-        if ! echo "$CLOUDKIT_PRIVATE_KEY" | grep -q "BEGIN.*PRIVATE KEY"; then
+        # Check for required PEM headers/footers (using here-string to avoid exposing secrets)
+        if ! grep -q "BEGIN.*PRIVATE KEY" <<< "$CLOUDKIT_PRIVATE_KEY"; then
           echo "❌ Error: PEM header not found"
           echo ""
           echo "Expected format:"
@@ -218,21 +218,21 @@ runs:
           exit 1
         fi
 
-        if ! echo "$CLOUDKIT_PRIVATE_KEY" | grep -q "END.*PRIVATE KEY"; then
+        if ! grep -q "END.*PRIVATE KEY" <<< "$CLOUDKIT_PRIVATE_KEY"; then
           echo "❌ Error: PEM footer not found"
           echo "Ensure the complete PEM file was copied (including footer)"
           exit 1
         fi
 
-        # Check for base64 content between headers
-        PEM_CONTENT=$(echo "$CLOUDKIT_PRIVATE_KEY" | sed -n '/BEGIN/,/END/p' | grep -v "BEGIN\|END")
+        # Check for base64 content between headers (using here-string to avoid exposing secrets)
+        PEM_CONTENT=$(sed -n '/BEGIN/,/END/p' <<< "$CLOUDKIT_PRIVATE_KEY" | grep -v "BEGIN\|END")
         if [ -z "$PEM_CONTENT" ]; then
           echo "❌ Error: PEM file appears empty (no key data between headers)"
           exit 1
         fi
 
-        # Validate base64 encoding
-        if ! echo "$PEM_CONTENT" | base64 -d >/dev/null 2>&1; then
+        # Validate base64 encoding (using here-string to avoid exposing secrets)
+        if ! base64 -d >/dev/null 2>&1 <<< "$PEM_CONTENT"; then
           echo "❌ Error: PEM content is not valid base64"
           echo "The key may be corrupted or in the wrong format"
           exit 1
