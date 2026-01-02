@@ -1,3 +1,18 @@
+# Production CloudKit Sync Workflow
+#
+# Syncs data to CloudKit production environment. Manual trigger only for controlled
+# production deploys. Recommend testing in development first.
+#
+# **Trigger Strategy**:
+# - Manual only (workflow_dispatch) for explicit production control
+# - Optional scheduled sync available (commented out until production ready)
+#
+# **Concurrency**: cancel-in-progress (prevents race conditions)
+#
+# **Export**: Disabled to reduce CI minutes (export is optional for production)
+#
+# For implementation details, see ./.github/actions/cloudkit-sync/action.yml
+
 name: Scheduled CloudKit Sync (Production)
 
 on:
@@ -40,4 +55,4 @@ jobs:
           cloudkit-key-id: ${{ secrets.CLOUDKIT_KEY_ID_PROD }}
           cloudkit-private-key: ${{ secrets.CLOUDKIT_PRIVATE_KEY_PROD }}
           virtualbuddy-api-key: ${{ secrets.VIRTUALBUDDY_API_KEY }}
-          enable-export: 'false'  # Disabled until pagination is implemented (see issue #17)
+          enable-export: 'false'  # Optional: export is only for data audit, summary comes from sync

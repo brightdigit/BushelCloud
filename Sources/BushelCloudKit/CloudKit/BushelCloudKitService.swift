@@ -153,14 +153,51 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     try await service.queryRecords(recordType: recordType, limit: 200)
   }
 
-  /// Execute operations in batches (CloudKit limits to 200 operations per request)
+  /// Fetch existing record names for create/update classification
   ///
-  /// **MistKit Pattern**: CloudKit has a 200 operations/request limit.
-  /// This method chunks operations and calls service.modifyRecords() for each batch.
+  /// This method queries CloudKit to get all existing record names for a given type.
+  /// Used to classify sync operations as creates (new records) vs updates (existing records).
+  ///
+  /// - Parameter recordType: The CloudKit record type to query
+  /// - Returns: Set of existing record names in CloudKit
+  public func fetchExistingRecordNames(recordType: String) async throws -> Set<String> {
+    Self.logger.debug("Pre-fetching existing record names for \(recordType)")
+
+    let records = try await queryRecords(recordType: recordType)
+    let recordNames = Set(records.map(\.recordName))
+
+    Self.logger.debug("Found \(recordNames.count) existing \(recordType) records")
+    return recordNames
+  }
+
+  /// Execute operations in batches without tracking creates/updates
+  ///
+  /// This is the protocol-conforming version that doesn't track create vs update.
+  /// For detailed tracking, use the overload with `classification` parameter.
   public func executeBatchOperations(
     _ operations: [RecordOperation],
     recordType: String
   ) async throws {
+    // Create empty classification (no tracking)
+    let classification = OperationClassification(proposedRecords: [], existingRecords: [])
+    _ = try await executeBatchOperations(operations, recordType: recordType, classification: classification)
+  }
+
+  /// Execute operations in batches with detailed create/update tracking
+  ///
+  /// **MistKit Pattern**: CloudKit has a 200 operations/request limit.
+  /// This method chunks operations and calls service.modifyRecords() for each batch.
+  ///
+  /// - Parameters:
+  ///   - operations: CloudKit operations to execute
+  ///   - recordType: Record type name for logging
+  ///   - classification: Pre-computed classification of operations as creates vs updates
+  /// - Returns: Detailed sync result with creates/updates/failures breakdown
+  public func executeBatchOperations(
+    _ operations: [RecordOperation],
+    recordType: String,
+    classification: OperationClassification
+  ) async throws -> SyncEngine.TypeSyncResult {
     let batchSize = 200
     let batches = operations.chunked(into: batchSize)
 
@@ -168,9 +205,14 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     Self.logger.debug(
       "CloudKit batch limit: 200 operations/request. Using \(batches.count) batch(es) for \(operations.count) records."
     )
+    Self.logger.debug(
+      "Classification: \(classification.creates.count) creates, \(classification.updates.count) updates"
+    )
 
-    var totalSucceeded = 0
+    var totalCreated = 0
+    var totalUpdated = 0
     var totalFailed = 0
+    var failedRecordNames: [String] = []
 
     for (index, batch) in batches.enumerated() {
       print("  Batch \(index + 1)/\(batches.count): \(batch.count) records...")
@@ -184,41 +226,53 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         "Received \(results.count) RecordInfo responses from CloudKit"
       )
 
-      // Filter out error responses using isError property
-      let successfulRecords = results.filter { !$0.isError }
-      let failedCount = results.count - successfulRecords.count
-
-      totalSucceeded += successfulRecords.count
-      totalFailed += failedCount
-
-      if failedCount > 0 {
-        print("   ⚠️  \(failedCount) operations failed (see verbose logs for details)")
-        print("   ✓ \(successfulRecords.count) records confirmed")
-
-        // Log error details in verbose mode
-        let errorRecords = results.filter { $0.isError }
-        for errorRecord in errorRecords {
+      // Track results based on classification
+      for result in results {
+        if result.isError {
+          totalFailed += 1
+          failedRecordNames.append(result.recordName)
           Self.logger.debug(
-            "Error: recordName=\(errorRecord.recordName), reason=\(errorRecord.recordType)"
+            "Error: recordName=\(result.recordName), reason=\(result.recordType)"
           )
+        } else {
+          // Classify as create or update based on pre-fetch
+          if classification.creates.contains(result.recordName) {
+            totalCreated += 1
+          } else if classification.updates.contains(result.recordName) {
+            totalUpdated += 1
+          }
         }
+      }
+
+      let batchSucceeded = results.filter { !$0.isError }.count
+      let batchFailed = results.count - batchSucceeded
+
+      if batchFailed > 0 {
+        print("   ⚠️  \(batchFailed) operations failed (see verbose logs for details)")
+        print("   ✓ \(batchSucceeded) records confirmed")
       } else {
         Self.logger.info(
-          "CloudKit confirmed \(successfulRecords.count) records"
+          "CloudKit confirmed \(batchSucceeded) records"
         )
       }
     }
 
     print("\n📊 \(recordType) Sync Summary:")
-    print("   Attempted: \(operations.count) operations")
-    print("   Succeeded: \(totalSucceeded) records")
-
+    print("   ✨ Created: \(totalCreated) records")
+    print("   🔄 Updated: \(totalUpdated) records")
     if totalFailed > 0 {
       print("   ❌ Failed: \(totalFailed) operations")
       Self.logger.debug(
         "Use --verbose flag to see CloudKit error details (serverErrorCode, reason, etc.)"
       )
     }
+
+    return SyncEngine.TypeSyncResult(
+      created: totalCreated,
+      updated: totalUpdated,
+      failed: totalFailed,
+      failedRecordNames: failedRecordNames
+    )
   }
 }
 

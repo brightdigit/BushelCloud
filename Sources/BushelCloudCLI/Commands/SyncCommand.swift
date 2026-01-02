@@ -68,7 +68,14 @@ internal enum SyncCommand {
     // Execute sync
     do {
       let result = try await syncEngine.sync(options: options)
-      printSuccess(result)
+
+      // Output based on format
+      if config.sync?.jsonOutput == true {
+        let json = try result.toJSON(pretty: true)
+        print(json)
+      } else {
+        printSuccess(result)
+      }
     } catch {
       printError(error)
       Foundation.exit(1)
@@ -116,15 +123,39 @@ internal enum SyncCommand {
     )
   }
 
-  private static func printSuccess(_ result: SyncEngine.SyncResult) {
+  private static func printSuccess(_ result: SyncEngine.DetailedSyncResult) {
     print("\n" + String(repeating: "=", count: 60))
     print("✅ Sync Summary")
     print(String(repeating: "=", count: 60))
-    print("Restore Images: \(result.restoreImagesCount)")
-    print("Xcode Versions: \(result.xcodeVersionsCount)")
-    print("Swift Versions: \(result.swiftVersionsCount)")
+
+    printTypeResult("RestoreImages", result.restoreImages)
+    printTypeResult("XcodeVersions", result.xcodeVersions)
+    printTypeResult("SwiftVersions", result.swiftVersions)
+
+    print(String(repeating: "-", count: 60))
+    print("TOTAL:")
+    print("  ✨ Created: \(result.totalCreated)")
+    print("  🔄 Updated: \(result.totalUpdated)")
+    if result.totalFailed > 0 {
+      print("  ❌ Failed:  \(result.totalFailed)")
+    }
     print(String(repeating: "=", count: 60))
     print("\n💡 Next: Use 'bushel-cloud export' to view the synced data")
+  }
+
+  private static func printTypeResult(_ name: String, _ typeResult: SyncEngine.TypeSyncResult) {
+    print("\n\(name):")
+    print("  ✨ Created: \(typeResult.created)")
+    print("  🔄 Updated: \(typeResult.updated)")
+    if typeResult.failed > 0 {
+      print("  ❌ Failed:  \(typeResult.failed)")
+      if !typeResult.failedRecordNames.isEmpty {
+        print("     Records: \(typeResult.failedRecordNames.prefix(5).joined(separator: ", "))")
+        if typeResult.failedRecordNames.count > 5 {
+          print("     ... and \(typeResult.failedRecordNames.count - 5) more")
+        }
+      }
+    }
   }
 
   private static func printError(_ error: any Error) {

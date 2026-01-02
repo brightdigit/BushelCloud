@@ -116,7 +116,13 @@ public struct SyncEngine: Sendable {
   // MARK: - Sync Operations
 
   /// Execute full sync from all data sources to CloudKit
-  public func sync(options: SyncOptions = SyncOptions()) async throws -> SyncResult {
+  ///
+  /// This method now tracks detailed statistics about creates, updates, and failures
+  /// for each record type, providing better visibility into sync operations.
+  ///
+  /// - Parameter options: Sync options including dry-run mode
+  /// - Returns: Detailed sync result with per-type breakdown
+  public func sync(options: SyncOptions = SyncOptions()) async throws -> DetailedSyncResult {
     print("\n" + String(repeating: "=", count: 60))
     BushelUtilities.ConsoleOutput.info("Starting Bushel CloudKit Sync")
     print(String(repeating: "=", count: 60))
@@ -146,19 +152,13 @@ public struct SyncEngine: Sendable {
       "Multiple data sources may have overlapping data. The pipeline deduplicates by version+build number."
     )
 
-    let stats = SyncResult(
-      restoreImagesCount: fetchResult.restoreImages.count,
-      xcodeVersionsCount: fetchResult.xcodeVersions.count,
-      swiftVersionsCount: fetchResult.swiftVersions.count
-    )
-
     let totalRecords =
-      stats.restoreImagesCount + stats.xcodeVersionsCount + stats.swiftVersionsCount
+      fetchResult.restoreImages.count + fetchResult.xcodeVersions.count + fetchResult.swiftVersions.count
 
     print("\n📊 Data Summary:")
-    print("   RestoreImages: \(stats.restoreImagesCount)")
-    print("   XcodeVersions: \(stats.xcodeVersionsCount)")
-    print("   SwiftVersions: \(stats.swiftVersionsCount)")
+    print("   RestoreImages: \(fetchResult.restoreImages.count)")
+    print("   XcodeVersions: \(fetchResult.xcodeVersions.count)")
+    print("   SwiftVersions: \(fetchResult.swiftVersions.count)")
     print("   ─────────────────────")
     print("   Total: \(totalRecords) records")
 
@@ -172,34 +172,125 @@ public struct SyncEngine: Sendable {
       Self.logger.debug(
         "Using MistKit to batch upload records to CloudKit public database"
       )
-      Self.logger.debug(
-        "MistKit handles authentication, batching (200 records/request), and error handling automatically"
+
+      // Pre-fetch existing records in parallel
+      print("   Pre-fetching existing records for create/update classification...")
+      async let existingSwift = cloudKitService.fetchExistingRecordNames(
+        recordType: SwiftVersionRecord.cloudKitRecordType
+      )
+      async let existingRestore = cloudKitService.fetchExistingRecordNames(
+        recordType: RestoreImageRecord.cloudKitRecordType
+      )
+      async let existingXcode = cloudKitService.fetchExistingRecordNames(
+        recordType: XcodeVersionRecord.cloudKitRecordType
       )
 
-      // Sync in dependency order: SwiftVersion → RestoreImage → XcodeVersion
-      // (Prevents broken CKReference relationships)
-      try await cloudKitService.syncAllRecords(
-        fetchResult.swiftVersions,  // First: no dependencies
-        fetchResult.restoreImages,  // Second: no dependencies
-        fetchResult.xcodeVersions  // Third: references first two
+      let (swiftNames, restoreNames, xcodeNames) = try await (
+        existingSwift, existingRestore, existingXcode
+      )
+
+      Self.logger.debug(
+        "Pre-fetch complete: \(swiftNames.count) Swift, \(restoreNames.count) Restore, \(xcodeNames.count) Xcode"
+      )
+
+      // Classify operations for each type
+      let swiftClassification = OperationClassification(
+        proposedRecords: fetchResult.swiftVersions.map(\.recordName),
+        existingRecords: swiftNames
+      )
+      let restoreClassification = OperationClassification(
+        proposedRecords: fetchResult.restoreImages.map(\.recordName),
+        existingRecords: restoreNames
+      )
+      let xcodeClassification = OperationClassification(
+        proposedRecords: fetchResult.xcodeVersions.map(\.recordName),
+        existingRecords: xcodeNames
+      )
+
+      Self.logger.debug(
+        "Classification complete. Ready to sync in dependency order."
+      )
+
+      // Sync each type with classification tracking (in dependency order)
+      // SwiftVersion and RestoreImage first (no dependencies)
+      // XcodeVersion last (references the other two)
+      let swiftResult = try await syncRecords(
+        fetchResult.swiftVersions,
+        classification: swiftClassification
+      )
+      let restoreResult = try await syncRecords(
+        fetchResult.restoreImages,
+        classification: restoreClassification
+      )
+      let xcodeResult = try await syncRecords(
+        fetchResult.xcodeVersions,
+        classification: xcodeClassification
+      )
+
+      print("\n" + String(repeating: "=", count: 60))
+      BushelUtilities.ConsoleOutput.success("Sync completed successfully!")
+      print(String(repeating: "=", count: 60))
+      Self.logger.info("Sync completed successfully")
+
+      return DetailedSyncResult(
+        restoreImages: restoreResult,
+        xcodeVersions: xcodeResult,
+        swiftVersions: swiftResult
       )
     } else {
       print("\n⏭️  Step 2: Skipped (dry run)")
       print("   Would sync:")
-      print("   • \(stats.restoreImagesCount) restore images")
-      print("   • \(stats.xcodeVersionsCount) Xcode versions")
-      print("   • \(stats.swiftVersionsCount) Swift versions")
+      print("   • \(fetchResult.restoreImages.count) restore images")
+      print("   • \(fetchResult.xcodeVersions.count) Xcode versions")
+      print("   • \(fetchResult.swiftVersions.count) Swift versions")
       Self.logger.debug(
         "Dry run mode: No CloudKit operations performed"
       )
+
+      print("\n" + String(repeating: "=", count: 60))
+      BushelUtilities.ConsoleOutput.success("Dry run completed!")
+      print(String(repeating: "=", count: 60))
+
+      // Return empty result for dry run
+      return DetailedSyncResult(
+        restoreImages: TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: []),
+        xcodeVersions: TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: []),
+        swiftVersions: TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: [])
+      )
+    }
+  }
+
+  /// Helper method to sync one record type
+  ///
+  /// This replaces the use of MistKit's `syncAllRecords()` extension method,
+  /// giving us full control over result tracking.
+  ///
+  /// - Parameters:
+  ///   - records: Records to sync
+  ///   - classification: Classification of operations as creates vs updates
+  /// - Returns: Sync result for this record type
+  private func syncRecords<T: CloudKitRecord>(
+    _ records: [T],
+    classification: OperationClassification
+  ) async throws -> TypeSyncResult {
+    guard !records.isEmpty else {
+      return TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: [])
     }
 
-    print("\n" + String(repeating: "=", count: 60))
-    BushelUtilities.ConsoleOutput.success("Sync completed successfully!")
-    print(String(repeating: "=", count: 60))
-    Self.logger.info("Sync completed successfully")
+    let operations = records.map { record in
+      RecordOperation(
+        operationType: .forceReplace,
+        recordType: T.cloudKitRecordType,
+        recordName: record.recordName,
+        fields: record.toCloudKitFields()
+      )
+    }
 
-    return stats
+    return try await cloudKitService.executeBatchOperations(
+      operations,
+      recordType: T.cloudKitRecordType,
+      classification: classification
+    )
   }
 
   /// Delete all records from CloudKit
@@ -228,6 +319,68 @@ public struct SyncEngine: Sendable {
       self.restoreImagesCount = restoreImagesCount
       self.xcodeVersionsCount = xcodeVersionsCount
       self.swiftVersionsCount = swiftVersionsCount
+    }
+  }
+
+  /// Detailed sync result with per-type breakdown of creates/updates/failures
+  public struct DetailedSyncResult: Sendable, Codable {
+    public let restoreImages: TypeSyncResult
+    public let xcodeVersions: TypeSyncResult
+    public let swiftVersions: TypeSyncResult
+
+    public var totalCreated: Int {
+      restoreImages.created + xcodeVersions.created + swiftVersions.created
+    }
+
+    public var totalUpdated: Int {
+      restoreImages.updated + xcodeVersions.updated + swiftVersions.updated
+    }
+
+    public var totalFailed: Int {
+      restoreImages.failed + xcodeVersions.failed + swiftVersions.failed
+    }
+
+    public var totalRecords: Int {
+      totalCreated + totalUpdated + totalFailed
+    }
+
+    public init(restoreImages: TypeSyncResult, xcodeVersions: TypeSyncResult, swiftVersions: TypeSyncResult) {
+      self.restoreImages = restoreImages
+      self.xcodeVersions = xcodeVersions
+      self.swiftVersions = swiftVersions
+    }
+
+    /// Convert to JSON string
+    public func toJSON(pretty: Bool = false) throws -> String {
+      let encoder = JSONEncoder()
+      if pretty {
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+      }
+      let data = try encoder.encode(self)
+      return String(data: data, encoding: .utf8) ?? ""
+    }
+  }
+
+  /// Per-type sync statistics
+  public struct TypeSyncResult: Sendable, Codable {
+    public let created: Int
+    public let updated: Int
+    public let failed: Int
+    public let failedRecordNames: [String]
+
+    public var total: Int {
+      created + updated + failed
+    }
+
+    public var succeeded: Int {
+      created + updated
+    }
+
+    public init(created: Int, updated: Int, failed: Int, failedRecordNames: [String]) {
+      self.created = created
+      self.updated = updated
+      self.failed = failed
+      self.failedRecordNames = failedRecordNames
     }
   }
 }
