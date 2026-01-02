@@ -47,9 +47,6 @@ public import MistKit
 ///
 /// Use `--verbose` flag to see detailed MistKit API usage.
 public struct SyncEngine: Sendable {
-  let cloudKitService: BushelCloudKitService
-  let pipeline: DataSourcePipeline
-
   // MARK: - Configuration
 
   public struct SyncOptions: Sendable {
@@ -61,6 +58,89 @@ public struct SyncEngine: Sendable {
       self.pipelineOptions = pipelineOptions
     }
   }
+
+  // MARK: - Result Types
+
+  public struct SyncResult: Sendable {
+    public let restoreImagesCount: Int
+    public let xcodeVersionsCount: Int
+    public let swiftVersionsCount: Int
+
+    public init(restoreImagesCount: Int, xcodeVersionsCount: Int, swiftVersionsCount: Int) {
+      self.restoreImagesCount = restoreImagesCount
+      self.xcodeVersionsCount = xcodeVersionsCount
+      self.swiftVersionsCount = swiftVersionsCount
+    }
+  }
+
+  /// Detailed sync result with per-type breakdown of creates/updates/failures
+  public struct DetailedSyncResult: Sendable, Codable {
+    public let restoreImages: TypeSyncResult
+    public let xcodeVersions: TypeSyncResult
+    public let swiftVersions: TypeSyncResult
+
+    public var totalCreated: Int {
+      restoreImages.created + xcodeVersions.created + swiftVersions.created
+    }
+
+    public var totalUpdated: Int {
+      restoreImages.updated + xcodeVersions.updated + swiftVersions.updated
+    }
+
+    public var totalFailed: Int {
+      restoreImages.failed + xcodeVersions.failed + swiftVersions.failed
+    }
+
+    public var totalRecords: Int {
+      totalCreated + totalUpdated + totalFailed
+    }
+
+    public init(
+      restoreImages: TypeSyncResult, xcodeVersions: TypeSyncResult, swiftVersions: TypeSyncResult
+    ) {
+      self.restoreImages = restoreImages
+      self.xcodeVersions = xcodeVersions
+      self.swiftVersions = swiftVersions
+    }
+
+    /// Convert to JSON string
+    public func toJSON(pretty: Bool = false) throws -> String {
+      let encoder = JSONEncoder()
+      if pretty {
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+      }
+      let data = try encoder.encode(self)
+      return String(data: data, encoding: .utf8) ?? ""
+    }
+  }
+
+  /// Per-type sync statistics
+  public struct TypeSyncResult: Sendable, Codable {
+    public let created: Int
+    public let updated: Int
+    public let failed: Int
+    public let failedRecordNames: [String]
+
+    public var total: Int {
+      created + updated + failed
+    }
+
+    public var succeeded: Int {
+      created + updated
+    }
+
+    public init(created: Int, updated: Int, failed: Int, failedRecordNames: [String]) {
+      self.created = created
+      self.updated = updated
+      self.failed = failed
+      self.failedRecordNames = failedRecordNames
+    }
+  }
+
+  // MARK: - Properties
+
+  internal let cloudKitService: BushelCloudKitService
+  internal let pipeline: DataSourcePipeline
 
   // MARK: - Initialization
 
@@ -153,7 +233,8 @@ public struct SyncEngine: Sendable {
     )
 
     let totalRecords =
-      fetchResult.restoreImages.count + fetchResult.xcodeVersions.count + fetchResult.swiftVersions.count
+      fetchResult.restoreImages.count + fetchResult.xcodeVersions.count
+      + fetchResult.swiftVersions.count
 
     print("\n📊 Data Summary:")
     print("   RestoreImages: \(fetchResult.restoreImages.count)")
@@ -190,7 +271,10 @@ public struct SyncEngine: Sendable {
       )
 
       Self.logger.debug(
-        "Pre-fetch complete: \(swiftNames.count) Swift, \(restoreNames.count) Restore, \(xcodeNames.count) Xcode"
+        """
+        Pre-fetch complete: \(swiftNames.count) Swift, \
+        \(restoreNames.count) Restore, \(xcodeNames.count) Xcode
+        """
       )
 
       // Classify operations for each type
@@ -308,81 +392,6 @@ public struct SyncEngine: Sendable {
     Self.logger.info("Clear completed successfully")
   }
 
-  // MARK: - Result Types
-
-  public struct SyncResult: Sendable {
-    public let restoreImagesCount: Int
-    public let xcodeVersionsCount: Int
-    public let swiftVersionsCount: Int
-
-    public init(restoreImagesCount: Int, xcodeVersionsCount: Int, swiftVersionsCount: Int) {
-      self.restoreImagesCount = restoreImagesCount
-      self.xcodeVersionsCount = xcodeVersionsCount
-      self.swiftVersionsCount = swiftVersionsCount
-    }
-  }
-
-  /// Detailed sync result with per-type breakdown of creates/updates/failures
-  public struct DetailedSyncResult: Sendable, Codable {
-    public let restoreImages: TypeSyncResult
-    public let xcodeVersions: TypeSyncResult
-    public let swiftVersions: TypeSyncResult
-
-    public var totalCreated: Int {
-      restoreImages.created + xcodeVersions.created + swiftVersions.created
-    }
-
-    public var totalUpdated: Int {
-      restoreImages.updated + xcodeVersions.updated + swiftVersions.updated
-    }
-
-    public var totalFailed: Int {
-      restoreImages.failed + xcodeVersions.failed + swiftVersions.failed
-    }
-
-    public var totalRecords: Int {
-      totalCreated + totalUpdated + totalFailed
-    }
-
-    public init(restoreImages: TypeSyncResult, xcodeVersions: TypeSyncResult, swiftVersions: TypeSyncResult) {
-      self.restoreImages = restoreImages
-      self.xcodeVersions = xcodeVersions
-      self.swiftVersions = swiftVersions
-    }
-
-    /// Convert to JSON string
-    public func toJSON(pretty: Bool = false) throws -> String {
-      let encoder = JSONEncoder()
-      if pretty {
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-      }
-      let data = try encoder.encode(self)
-      return String(data: data, encoding: .utf8) ?? ""
-    }
-  }
-
-  /// Per-type sync statistics
-  public struct TypeSyncResult: Sendable, Codable {
-    public let created: Int
-    public let updated: Int
-    public let failed: Int
-    public let failedRecordNames: [String]
-
-    public var total: Int {
-      created + updated + failed
-    }
-
-    public var succeeded: Int {
-      created + updated
-    }
-
-    public init(created: Int, updated: Int, failed: Int, failedRecordNames: [String]) {
-      self.created = created
-      self.updated = updated
-      self.failed = failed
-      self.failedRecordNames = failedRecordNames
-    }
-  }
 }
 
 // MARK: - Loggable Conformance

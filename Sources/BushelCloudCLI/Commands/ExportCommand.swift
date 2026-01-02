@@ -33,6 +33,34 @@ import Foundation
 import MistKit
 
 internal enum ExportCommand {
+  // MARK: - Export Types
+
+  private struct ExportData: Codable {
+    internal let restoreImages: [RecordExport]
+    internal let xcodeVersions: [RecordExport]
+    internal let swiftVersions: [RecordExport]
+  }
+
+  private struct RecordExport: Codable {
+    internal let recordName: String
+    internal let recordType: String
+    internal let fields: [String: String]
+
+    internal init(from recordInfo: RecordInfo) {
+      self.recordName = recordInfo.recordName
+      self.recordType = recordInfo.recordType
+      self.fields = recordInfo.fields.mapValues { fieldValue in
+        String(describing: fieldValue)
+      }
+    }
+  }
+
+  private enum ExportError: Error {
+    case encodingFailed
+  }
+
+  // MARK: - Command Implementation
+
   internal static func run(_ args: [String]) async throws {
     // Load configuration using Swift Configuration
     let loader = ConfigurationLoader()
@@ -82,7 +110,9 @@ internal enum ExportCommand {
     to result: SyncEngine.ExportResult,
     with exportConfig: ExportConfiguration?
   ) -> SyncEngine.ExportResult {
-    guard let exportConfig = exportConfig else { return result }
+    guard let exportConfig = exportConfig else {
+      return result
+    }
 
     var restoreImages = result.restoreImages
     var xcodeVersions = result.xcodeVersions
@@ -164,29 +194,4 @@ internal enum ExportCommand {
     print("   • Run 'bushel-cloud sync' first if needed")
   }
 
-  // MARK: - Export Types
-
-  struct ExportData: Codable {
-    let restoreImages: [RecordExport]
-    let xcodeVersions: [RecordExport]
-    let swiftVersions: [RecordExport]
-  }
-
-  struct RecordExport: Codable {
-    let recordName: String
-    let recordType: String
-    let fields: [String: String]
-
-    init(from recordInfo: RecordInfo) {
-      self.recordName = recordInfo.recordName
-      self.recordType = recordInfo.recordType
-      self.fields = recordInfo.fields.mapValues { fieldValue in
-        String(describing: fieldValue)
-      }
-    }
-  }
-
-  enum ExportError: Error {
-    case encodingFailed
-  }
 }
