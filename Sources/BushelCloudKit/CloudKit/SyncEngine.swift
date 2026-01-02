@@ -103,6 +103,26 @@ public struct SyncEngine: Sendable {
       self.swiftVersions = swiftVersions
     }
 
+    /// Custom encoding to include computed properties
+    public func encode(to encoder: Encoder) throws {
+      var container = encoder.container(keyedBy: CodingKeys.self)
+      try container.encode(restoreImages, forKey: .restoreImages)
+      try container.encode(xcodeVersions, forKey: .xcodeVersions)
+      try container.encode(swiftVersions, forKey: .swiftVersions)
+      try container.encode(totalCreated, forKey: .totalCreated)
+      try container.encode(totalUpdated, forKey: .totalUpdated)
+      try container.encode(totalFailed, forKey: .totalFailed)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+      case restoreImages
+      case xcodeVersions
+      case swiftVersions
+      case totalCreated
+      case totalUpdated
+      case totalFailed
+    }
+
     /// Convert to JSON string
     public func toJSON(pretty: Bool = false) throws -> String {
       let encoder = JSONEncoder()
