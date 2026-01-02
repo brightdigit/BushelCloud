@@ -143,6 +143,7 @@ runs:
         workflow_conclusion: success
         name: bushel-cloud-binary
         path: ./binary
+        branch: ${{ github.ref_name }}
 
     - name: Build binary (fallback if artifact unavailable)
       if: steps.download-binary.outcome != 'success'
