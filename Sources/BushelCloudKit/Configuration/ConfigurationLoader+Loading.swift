@@ -94,7 +94,8 @@ extension ConfigurationLoader {
       verbose: read(ConfigurationKeys.Sync.verbose),
       force: read(ConfigurationKeys.Sync.force),
       minInterval: read(ConfigurationKeys.Sync.minInterval),
-      source: read(ConfigurationKeys.Sync.source)
+      source: read(ConfigurationKeys.Sync.source),
+      jsonOutput: read(ConfigurationKeys.Sync.jsonOutput)
     )
 
     // Export command configuration
