@@ -95,7 +95,6 @@ extension ConfigurationLoader {
       force: read(ConfigurationKeys.Sync.force),
       minInterval: read(ConfigurationKeys.Sync.minInterval),
       source: read(ConfigurationKeys.Sync.source),
-      jsonOutput: read(ConfigurationKeys.Sync.jsonOutput),
       jsonOutputFile: read(ConfigurationKeys.Sync.jsonOutputFile)
     )
 
