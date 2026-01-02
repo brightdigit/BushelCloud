@@ -1,0 +1,129 @@
+//
+//  SyncCommand.swift
+//  BushelCloud
+//
+//  Created by Leo Dion.
+//  Copyright © 2025 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+import BushelCloudKit
+import BushelFoundation
+import BushelUtilities
+import Foundation
+
+enum SyncCommand {
+  static func run(args: [String]) async throws {
+    // Load configuration using Swift Configuration
+    let loader = ConfigurationLoader()
+    let rawConfig = try await loader.loadConfiguration()
+    let config = try rawConfig.validated()
+
+    // Enable verbose console output if requested
+    BushelUtilities.ConsoleOutput.isVerbose = config.sync?.verbose ?? false
+
+    // Build sync options from configuration
+    let options = buildSyncOptions(from: config.sync)
+
+    // Get fetch configuration (already loaded by ConfigurationLoader)
+    let fetchConfiguration = config.fetch ?? FetchConfiguration.loadFromEnvironment()
+
+    // Create sync engine
+    let syncEngine = try SyncEngine(
+      containerIdentifier: config.cloudKit.containerID,
+      keyID: config.cloudKit.keyID,
+      privateKeyPath: config.cloudKit.privateKeyPath,
+      configuration: fetchConfiguration
+    )
+
+    // Execute sync
+    do {
+      let result = try await syncEngine.sync(options: options)
+      printSuccess(result)
+    } catch {
+      printError(error)
+      Foundation.exit(1)
+    }
+  }
+
+  // MARK: - Private Helpers
+
+  private static func buildSyncOptions(from syncConfig: SyncConfiguration?)
+    -> SyncEngine.SyncOptions
+  {
+    guard let syncConfig = syncConfig else {
+      return SyncEngine.SyncOptions()
+    }
+
+    var pipelineOptions = DataSourcePipeline.Options()
+
+    // Apply filters based on flags
+    if syncConfig.restoreImagesOnly {
+      pipelineOptions.includeXcodeVersions = false
+      pipelineOptions.includeSwiftVersions = false
+    } else if syncConfig.xcodeOnly {
+      pipelineOptions.includeRestoreImages = false
+      pipelineOptions.includeSwiftVersions = false
+    } else if syncConfig.swiftOnly {
+      pipelineOptions.includeRestoreImages = false
+      pipelineOptions.includeXcodeVersions = false
+    }
+
+    if syncConfig.noBetas {
+      pipelineOptions.includeBetaReleases = false
+    }
+
+    if syncConfig.noAppleWiki {
+      pipelineOptions.includeTheAppleWiki = false
+    }
+
+    // Apply throttling options
+    pipelineOptions.force = syncConfig.force
+    pipelineOptions.specificSource = syncConfig.source
+
+    return SyncEngine.SyncOptions(
+      dryRun: syncConfig.dryRun,
+      pipelineOptions: pipelineOptions
+    )
+  }
+
+  private static func printSuccess(_ result: SyncEngine.SyncResult) {
+    print("\n" + String(repeating: "=", count: 60))
+    print("✅ Sync Summary")
+    print(String(repeating: "=", count: 60))
+    print("Restore Images: \(result.restoreImagesCount)")
+    print("Xcode Versions: \(result.xcodeVersionsCount)")
+    print("Swift Versions: \(result.swiftVersionsCount)")
+    print(String(repeating: "=", count: 60))
+    print("\n💡 Next: Use 'bushel-cloud export' to view the synced data")
+  }
+
+  private static func printError(_ error: Error) {
+    print("\n❌ Sync failed: \(error.localizedDescription)")
+    print("\n💡 Troubleshooting:")
+    print("   • Verify your API token is valid")
+    print("   • Check your internet connection")
+    print("   • Ensure the CloudKit container exists")
+    print("   • Verify external data sources are accessible")
+  }
+}

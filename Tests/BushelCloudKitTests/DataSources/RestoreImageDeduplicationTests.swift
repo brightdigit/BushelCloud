@@ -1,0 +1,103 @@
+//
+//  RestoreImageDeduplicationTests.swift
+//  BushelCloud
+//
+//  Created by Leo Dion.
+//  Copyright © 2025 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+import Foundation
+import Testing
+
+@testable import BushelCloudKit
+@testable import BushelFoundation
+
+// swiftlint:disable file_length type_body_length
+
+// MARK: - Suite 1: RestoreImage Deduplication Tests
+
+@Suite("RestoreImage Deduplication")
+struct RestoreImageDeduplicationTests {
+  let pipeline = DataSourcePipeline()
+
+  @Test("Empty array returns empty")
+  func testDeduplicateEmpty() {
+    let result = pipeline.deduplicateRestoreImages([])
+    #expect(result.isEmpty)
+  }
+
+  @Test("Single record returns unchanged")
+  func testDeduplicateSingle() {
+    let input = [TestFixtures.sonoma14_2_1]
+    let result = pipeline.deduplicateRestoreImages(input)
+
+    #expect(result.count == 1)
+    #expect(result[0].buildNumber == "23C71")
+  }
+
+  @Test("Different builds all preserved")
+  func testDeduplicateDifferentBuilds() {
+    let input = [
+      TestFixtures.sonoma14_2_1,
+      TestFixtures.sequoia15_1,
+      TestFixtures.sonoma14_0,
+    ]
+    let result = pipeline.deduplicateRestoreImages(input)
+
+    #expect(result.count == 3)
+    // Should be sorted by releaseDate descending
+    #expect(result[0].buildNumber == "24B83")  // sequoia15_1 (Nov 2024)
+    #expect(result[1].buildNumber == "23C71")  // sonoma14_2_1 (Dec 2023)
+    #expect(result[2].buildNumber == "23A344")  // sonoma14_0 (Sep 2023)
+  }
+
+  @Test("Duplicate builds merged")
+  func testDeduplicateDuplicateBuilds() {
+    let input = [
+      TestFixtures.sonoma14_2_1,
+      TestFixtures.sonoma14_2_1_mesu,
+      TestFixtures.sonoma14_2_1_appledb,
+    ]
+    let result = pipeline.deduplicateRestoreImages(input)
+
+    // Should have only 1 record after merging
+    #expect(result.count == 1)
+    #expect(result[0].buildNumber == "23C71")
+  }
+
+  @Test("Results sorted by release date descending")
+  func testSortingByReleaseDateDescending() {
+    let input = [
+      TestFixtures.sonoma14_0,  // Oldest: Sep 2023
+      TestFixtures.sonoma14_2_1,  // Middle: Dec 2023
+      TestFixtures.sequoia15_1,  // Newest: Nov 2024
+    ]
+    let result = pipeline.deduplicateRestoreImages(input)
+
+    #expect(result.count == 3)
+    // Verify descending order
+    #expect(result[0].releaseDate > result[1].releaseDate)
+    #expect(result[1].releaseDate > result[2].releaseDate)
+  }
+}
