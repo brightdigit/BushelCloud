@@ -43,7 +43,10 @@ public enum ConsoleOutput {
   nonisolated(unsafe) public static var isVerbose = false
 
   /// Print to stderr (keeping stdout clean for structured output)
-  private static func printToStderr(_ message: String) {
+  ///
+  /// This is a drop-in replacement for Swift's `print()` that writes to stderr instead of stdout.
+  /// Use this throughout the codebase to ensure JSON output on stdout remains clean.
+  public static func print(_ message: String) {
     if let data = (message + "\n").data(using: .utf8) {
       FileHandle.standardError.write(data)
     }
@@ -52,26 +55,26 @@ public enum ConsoleOutput {
   /// Print verbose message only when verbose mode is enabled
   public static func verbose(_ message: String) {
     guard isVerbose else { return }
-    printToStderr("  \(message)")
+    ConsoleOutput.print("  \(message)")
   }
 
   /// Print standard informational message
   public static func info(_ message: String) {
-    printToStderr(message)
+    ConsoleOutput.print(message)
   }
 
   /// Print success message
   public static func success(_ message: String) {
-    printToStderr("  ✓ \(message)")
+    ConsoleOutput.print("  ✓ \(message)")
   }
 
   /// Print warning message
   public static func warning(_ message: String) {
-    printToStderr("  ⚠️  \(message)")
+    ConsoleOutput.print("  ⚠️  \(message)")
   }
 
   /// Print error message
   public static func error(_ message: String) {
-    printToStderr("  ❌ \(message)")
+    ConsoleOutput.print("  ❌ \(message)")
   }
 }

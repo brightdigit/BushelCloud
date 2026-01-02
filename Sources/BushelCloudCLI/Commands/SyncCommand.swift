@@ -72,7 +72,14 @@ internal enum SyncCommand {
       // Output based on format
       if config.sync?.jsonOutput == true {
         let json = try result.toJSON(pretty: true)
-        print(json)
+
+        // Write to file if path specified, otherwise print to stdout
+        if let outputFile = config.sync?.jsonOutputFile {
+          try json.write(toFile: outputFile, atomically: true, encoding: .utf8)
+          BushelCloudKit.ConsoleOutput.info("✅ JSON output written to: \(outputFile)")
+        } else {
+          print(json)
+        }
       } else {
         printSuccess(result)
       }

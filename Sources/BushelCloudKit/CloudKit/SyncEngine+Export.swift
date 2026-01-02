@@ -57,16 +57,16 @@ extension SyncEngine {
 
   /// Export all records from CloudKit to a structured format
   public func export() async throws -> ExportResult {
-    print("\n" + String(repeating: "=", count: 60))
+    ConsoleOutput.print("\n" + String(repeating: "=", count: 60))
     BushelUtilities.ConsoleOutput.info("Exporting data from CloudKit")
-    print(String(repeating: "=", count: 60))
+    ConsoleOutput.print(String(repeating: "=", count: 60))
     Self.logger.info("Exporting CloudKit data")
 
     Self.logger.debug(
       "Using MistKit queryRecords() to fetch all records of each type from the public database"
     )
 
-    print("\n📥 Fetching RestoreImage records...")
+    ConsoleOutput.print("\n📥 Fetching RestoreImage records...")
     Self.logger.debug(
       "Querying CloudKit for recordType: 'RestoreImage' with limit: 200"
     )
@@ -75,7 +75,7 @@ extension SyncEngine {
       "Retrieved \(restoreImages.count) RestoreImage records"
     )
 
-    print("📥 Fetching XcodeVersion records...")
+    ConsoleOutput.print("📥 Fetching XcodeVersion records...")
     Self.logger.debug(
       "Querying CloudKit for recordType: 'XcodeVersion' with limit: 200"
     )
@@ -84,7 +84,7 @@ extension SyncEngine {
       "Retrieved \(xcodeVersions.count) XcodeVersion records"
     )
 
-    print("📥 Fetching SwiftVersion records...")
+    ConsoleOutput.print("📥 Fetching SwiftVersion records...")
     Self.logger.debug(
       "Querying CloudKit for recordType: 'SwiftVersion' with limit: 200"
     )
@@ -93,10 +93,10 @@ extension SyncEngine {
       "Retrieved \(swiftVersions.count) SwiftVersion records"
     )
 
-    print("\n✅ Exported:")
-    print("   • \(restoreImages.count) restore images")
-    print("   • \(xcodeVersions.count) Xcode versions")
-    print("   • \(swiftVersions.count) Swift versions")
+    ConsoleOutput.print("\n✅ Exported:")
+    ConsoleOutput.print("   • \(restoreImages.count) restore images")
+    ConsoleOutput.print("   • \(xcodeVersions.count) Xcode versions")
+    ConsoleOutput.print("   • \(swiftVersions.count) Swift versions")
 
     Self.logger.debug(
       """
