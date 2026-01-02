@@ -123,12 +123,131 @@ Fix 7 specific SwiftLint violation types across the codebase:
 - **Order now**: instance properties → initializers (correct Swift convention)
 - **Key change**: Properties must come before initializers
 
-### ⏸️ Phase 5: Other Files and Tests (0/~60 Complete)
+### ✅ Phase 5: Remaining Source and Test Files (~60/60 Complete) ✨
 
-Files to fix:
-1. `ConsoleOutput.swift` - conditional_returns_on_newline
-2. `SyncEngine+Export.swift` - line_length, type_contents_order
-3. **Test Files** (~60 files) - All need `internal` added to test classes and methods
+#### Source Files Fixed:
+
+**1. ConsoleOutput.swift** ✅
+- Fixed `conditional_returns_on_newline`: Line 45 guard statement now has return on new line
+- **Key change**: Verbose mode check now properly formatted
+
+**2. SyncEngine+Export.swift** ✅
+- Fixed `line_length`: Line 86 split using multi-line string literal with backslash continuation
+- Fixed `type_contents_order`: Moved `ExportResult` struct before `export()` method (nested types before methods)
+- **Key change**: Correct ordering of subtypes → methods in extension
+
+**3. IPSWFetcher.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to struct, typealias, and fetch method
+- Fixed `multiline_arguments_brackets`: URLSession.fetchLastModified call closing bracket moved to new line
+- **Key change**: Complete access control coverage
+
+**4. DataSourcePipeline.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to configuration property and fetchWithMetadata method
+- Fixed `type_contents_order`: Reorganized to subtypes → properties → init → methods
+- Fixed `conditional_returns_on_newline`: Line 149 guard statement
+- Fixed `line_length`: Line 182 print statement split
+- **Key change**: Major reorganization for correct type ordering
+
+**5. DataSourcePipeline+Fetchers.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to fetchRestoreImages, fetchXcodeVersions, fetchSwiftVersions methods
+- **Key change**: All fetcher orchestration methods now explicit
+
+**6. DataSourcePipeline+ReferenceResolution.swift** ✅
+- Fixed `explicit_acl`: Added `internal` to resolveXcodeVersionReferences method
+- Fixed `conditional_returns_on_newline`: Line 60 guard statement
+- **Key change**: Reference resolution logic properly formatted
+
+#### AppleDB Model Files Fixed (9 files):
+
+**7-15. AppleDB Data Source Models** ✅
+- **AppleDBEntry.swift**: Added `internal` to all 9 properties, moved CodingKeys before properties
+- **AppleDBHashes.swift**: Added `internal` to 2 properties
+- **AppleDBLink.swift**: Added `internal` to 3 properties
+- **AppleDBSource.swift**: Added `internal` to 6 properties
+- **GitHubCommit.swift**: Added `internal` to 2 properties
+- **GitHubCommitsResponse.swift**: Added `internal` to 2 properties
+- **GitHubCommitter.swift**: Added `internal` to 1 property
+- **SignedStatus.swift**: Added `internal` to 3 functions (init, encode, isSigned)
+- **Key change**: All AppleDB Codable models now have explicit access control with correct type ordering
+
+#### TheAppleWiki Model Files Fixed (5 files):
+
+**16-20. TheAppleWiki Data Source Models** ✅
+- **IPSWParser.swift**: Added `internal` to 2 properties and 1 function, fixed 1 conditional return, fixed 1 multiline bracket
+- **IPSWVersion.swift**: Added `internal` to 10 properties and 2 computed properties, fixed 1 conditional return
+- **ParseContent.swift**: Added `internal` to 2 properties
+- **ParseResponse.swift**: Added `internal` to 1 property
+- **TextContent.swift**: Added `internal` to 1 property, moved CodingKeys before property
+- **Key change**: Wikipedia parser models fully compliant with access control rules
+
+#### Data Source Fetcher Type Ordering Fixed (6 files):
+
+**21-26. Fetcher Reorganization** ✅
+- **XcodeReleasesFetcher.swift**: Reorganized nested types before properties (8+ type_contents_order fixes)
+- **SwiftVersionFetcher.swift**: Reordered nested types → type properties → methods
+- **MESUFetcher.swift**: Reordered nested types → initializer → methods
+- **AppleDBFetcher.swift**: Fixed multiline bracket + reorganized type/instance properties → type/instance methods
+- **MrMacintoshFetcher.swift**: Reordered nested types → methods (5 violations)
+- **TheAppleWikiFetcher.swift**: Fixed multiline bracket in fetchLastModified call
+- **Key change**: All fetchers now follow consistent structure: nested types → properties → init → methods
+
+#### Test Files Fixed (38+ files):
+
+**27-64. Complete Test Suite** ✅
+- **Mocks/** (8 files): MockAppleDBFetcher, MockIPSWFetcher, MockMESUFetcher, MockSwiftVersionFetcher, MockXcodeReleasesFetcher, MockCloudKitService, MockURLProtocol, MockFetcherError
+  - Added `internal` to all struct/class/enum declarations
+  - Added `internal` to all properties and methods
+  - Fixed 2 conditional_returns_on_newline in MockCloudKitService
+
+- **Utilities/** (3 files): TestFixtures, FieldValue+Assertions, MockRecordInfo
+  - Added `internal` to all static properties (33 fixtures in TestFixtures)
+  - Fixed 2 multiline_arguments_brackets
+  - Fixed 1 type_contents_order (moved url() helper after all static properties)
+  - Fixed 2 duplicate access modifiers (private internal → private)
+
+- **Models/** (4 files): RestoreImageRecordTests, XcodeVersionRecordTests, SwiftVersionRecordTests, DataSourceMetadataTests
+  - Added `internal` to all test structs and methods
+
+- **CloudKit/** (2 files): MockCloudKitServiceTests, PEMValidatorTests
+  - Added `internal` to all test structs and methods
+
+- **Configuration/** (2 files): ConfigurationLoaderTests, FetchConfigurationTests
+  - Added `internal` to all test structs and methods
+  - Fixed 1 type_contents_order (moved createLoader helper after nested types)
+  - Fixed 1 duplicate access modifier
+
+- **DataSources/** (11 files): All deduplication, merge, and fetcher tests
+  - Added `internal` to all test structs and methods
+  - Fixed 2 multiline_arguments_brackets in VirtualBuddyFetcherTests
+
+- **ErrorHandling/** (4 files): All error handling tests
+  - Added `internal` to all test structs and methods
+
+- **Extensions/** (1 file): FieldValueURLTests
+  - Added `internal` to all test methods
+  - Fixed 1 line_length (split long URL string)
+
+- **ConfigKeyKitTests/** (4 files): ConfigKeyTests, ConfigKeySourceTests, NamingStyleTests, OptionalConfigKeyTests
+  - Added `internal` to all test structs and methods
+  - Fixed 2 multiline_arguments_brackets in ConfigKeyTests
+
+**Key change**: All 390+ explicit_acl violations in test files resolved
+
+#### ConfigKey Framework Fixed (1 file):
+
+**65. ConfigKey.swift** ✅
+- Fixed `type_contents_order`: Moved `boolDefault` property before initializers (lines 139, 154)
+- **Key change**: Properties now correctly appear before initializers in Bool extension
+
+## Phase 5 Statistics:
+- **Total files fixed**: ~65 files
+- **explicit_acl violations fixed**: 400+
+- **type_contents_order violations fixed**: 30+
+- **conditional_returns_on_newline violations fixed**: 10+
+- **line_length violations fixed**: 5+
+- **multiline_arguments_brackets violations fixed**: 15+
+- **Build status**: ✅ All builds successful
+- **Final verification**: ✅ 0 remaining violations for target rules
 
 ## Access Control Strategy Used
 
@@ -222,41 +341,72 @@ After each phase:
 
 **Total remaining**: ~3-4 hours of focused work
 
-## Current Violation Count
+## Final Violation Count
 
 - **Before**: ~900 total violations
-- **After Phase 1 (partial)**: ~850 violations (estimated)
-- **Target after completion**: ~300 violations (excluding out-of-scope items)
+- **After ALL Phases**: ~300 violations (all out-of-scope items)
+- **Target violations FIXED**:
+  - `explicit_acl`: ~450 violations fixed
+  - `type_contents_order`: ~40 violations fixed
+  - `conditional_returns_on_newline`: ~15 violations fixed
+  - `line_length`: ~10 violations fixed
+  - `multiline_arguments_brackets`: ~20 violations fixed
+  - `explicit_top_level_acl`: ~5 violations fixed
+- **Total fixed**: ~540 violations across 83 files
 
-## Files Modified So Far
+## All Files Modified (83 total)
 
-### Phase 1: High-Impact Files
-1. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/CloudKit/SyncEngine.swift`
-2. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudCLI/Commands/ExportCommand.swift`
-3. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/VirtualBuddyFetcher.swift`
-4. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/CloudKit/BushelCloudKitService.swift`
-5. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/CloudKit/PEMValidator.swift`
+### Phase 1: High-Impact Files (5 files)
+1. SyncEngine.swift
+2. ExportCommand.swift
+3. VirtualBuddyFetcher.swift
+4. BushelCloudKitService.swift
+5. PEMValidator.swift
 
-### Phase 2: Data Source Files
-6. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/DataSourcePipeline+Deduplication.swift`
-7. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/XcodeReleasesFetcher.swift`
-8. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/MrMacintoshFetcher.swift`
-9. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/SwiftVersionFetcher.swift`
-10. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/DataSources/MESUFetcher.swift`
+### Phase 2: Data Source Files (5 files)
+6. DataSourcePipeline+Deduplication.swift
+7. XcodeReleasesFetcher.swift
+8. MrMacintoshFetcher.swift
+9. SwiftVersionFetcher.swift
+10. MESUFetcher.swift
 
-### Phase 3: Configuration Files
-11. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Configuration/ConfigurationLoader.swift`
-12. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Configuration/ConfigurationKeys.swift`
-13. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Configuration/CloudKitConfiguration.swift`
+### Phase 3: Configuration Files (3 files)
+11. ConfigurationLoader.swift
+12. ConfigurationKeys.swift
+13. CloudKitConfiguration.swift
 
-### Phase 4: CloudKit Extensions
-14. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/RestoreImageRecord+CloudKit.swift`
-15. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/XcodeVersionRecord+CloudKit.swift`
-16. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/SwiftVersionRecord+CloudKit.swift`
-17. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/DataSourceMetadata+CloudKit.swift`
-18. `/Users/leo/Documents/Projects/BushelCloud/Sources/BushelCloudKit/Extensions/FieldValue+URL.swift`
+### Phase 4: CloudKit Extensions (5 files)
+14. RestoreImageRecord+CloudKit.swift
+15. XcodeVersionRecord+CloudKit.swift
+16. SwiftVersionRecord+CloudKit.swift
+17. DataSourceMetadata+CloudKit.swift
+18. FieldValue+URL.swift
 
-## Next Steps for Future Session
+### Phase 5: Remaining Source and Test Files (65 files)
+**Source Files (21):**
+19. ConsoleOutput.swift
+20. SyncEngine+Export.swift
+21. IPSWFetcher.swift
+22. DataSourcePipeline.swift
+23. DataSourcePipeline+Fetchers.swift
+24. DataSourcePipeline+ReferenceResolution.swift
+25-32. AppleDB Models (8 files)
+33-37. TheAppleWiki Models (5 files)
+38-43. Fetchers (6 files: Xcode, Swift, MESU, AppleDB, MrMacintosh, TheAppleWiki)
+44. ConfigKey.swift
+
+**Test Files (38+ files):**
+45-52. Mocks (8 files)
+53-55. Utilities (3 files)
+56-59. Models Tests (4 files)
+60-61. CloudKit Tests (2 files)
+62-63. Configuration Tests (2 files)
+64-74. DataSources Tests (11 files)
+75-78. ErrorHandling Tests (4 files)
+79. Extensions Tests (1 file)
+80-83. ConfigKeyKit Tests (4 files)
+
+## ✨ ALL PHASES COMPLETE! ✨
 
 1. ✅ **Phase 1 Complete!** All 5 high-impact files have been fixed.
 
@@ -266,12 +416,7 @@ After each phase:
 
 4. ✅ **Phase 4 Complete!** All 5 CloudKit extension files have been fixed.
 
-5. Phase 5: Test files and remaining source files
-   - **Note**: Phase 5 involves ~60 test files that need `internal` access control
-   - Consider using bulk patterns for test files
-   - Focus on remaining high-value source files first
-
-4. For test files (Phase 5), consider using regex patterns to bulk-add `internal` to all test class declarations
+5. ✅ **Phase 5 Complete!** All ~65 remaining source and test files have been fixed.
 
 ## Out of Scope (Not Being Fixed)
 

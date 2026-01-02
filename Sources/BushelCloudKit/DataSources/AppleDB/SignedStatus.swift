@@ -31,12 +31,12 @@ import Foundation
 
 /// Represents the signing status for a build
 /// Can be: array of device IDs, boolean true (all signed), or empty array (none signed)
-enum SignedStatus: Codable {
+internal enum SignedStatus: Codable {
   case devices([String])  // Array of signed device IDs
   case all(Bool)  // true = all devices signed
   case none  // Empty array = not signed
 
-  init(from decoder: any Decoder) throws {
+  internal init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
 
     // Try decoding as array first
@@ -57,7 +57,7 @@ enum SignedStatus: Codable {
     }
   }
 
-  func encode(to encoder: any Encoder) throws {
+  internal func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     switch self {
     case .devices(let devices):
@@ -70,7 +70,7 @@ enum SignedStatus: Codable {
   }
 
   /// Check if a specific device identifier is signed
-  func isSigned(for deviceIdentifier: String) -> Bool {
+  internal func isSigned(for deviceIdentifier: String) -> Bool {
     switch self {
     case .devices(let devices):
       return devices.contains(deviceIdentifier)

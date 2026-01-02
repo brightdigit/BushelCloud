@@ -30,6 +30,6 @@
 import Foundation
 
 /// Root response from TheAppleWiki parse API
-struct ParseResponse: Codable, Sendable {
-  let parse: ParseContent
+internal struct ParseResponse: Codable, Sendable {
+  internal let parse: ParseContent
 }

@@ -36,11 +36,11 @@ import Testing
 // MARK: - Suite 3: XcodeVersion Reference Resolution Tests
 
 @Suite("XcodeVersion Reference Resolution")
-struct XcodeVersionReferenceResolutionTests {
-  let pipeline = DataSourcePipeline()
+internal struct XcodeVersionReferenceResolutionTests {
+  internal let pipeline = DataSourcePipeline()
 
   @Test("Resolve exact version match 14.2")
-  func testResolveExactMatch() {
+  internal func testResolveExactMatch() {
     let xcode = TestFixtures.xcodeWithRequires142
     let restoreImages = [TestFixtures.restoreImage142]
 
@@ -51,7 +51,7 @@ struct XcodeVersionReferenceResolutionTests {
   }
 
   @Test("Resolve 3-component version 14.2.1")
-  func testResolveThreeComponentVersion() {
+  internal func testResolveThreeComponentVersion() {
     let xcode = TestFixtures.xcodeWithRequires1421
     let restoreImages = [TestFixtures.sonoma1421]
 
@@ -62,7 +62,7 @@ struct XcodeVersionReferenceResolutionTests {
   }
 
   @Test("Resolve 2-component to 3-component match")
-  func testResolveTwoToThreeComponent() {
+  internal func testResolveTwoToThreeComponent() {
     let xcode = TestFixtures.xcodeWithRequires142
     let restoreImages = [TestFixtures.sonoma1421]  // version="14.2.1"
 
@@ -74,7 +74,7 @@ struct XcodeVersionReferenceResolutionTests {
   }
 
   @Test("No match leaves minimumMacOS nil")
-  func testNoMatchLeavesNil() {
+  internal func testNoMatchLeavesNil() {
     let xcode = TestFixtures.xcodeWithRequires142
     let restoreImages = [TestFixtures.sequoia151]  // Different version
 
@@ -85,7 +85,7 @@ struct XcodeVersionReferenceResolutionTests {
   }
 
   @Test("No REQUIRES field leaves minimumMacOS nil")
-  func testNoRequiresLeavesNil() {
+  internal func testNoRequiresLeavesNil() {
     let xcode = TestFixtures.xcodeNoRequires
     let restoreImages = [TestFixtures.sonoma1421]
 
@@ -96,7 +96,7 @@ struct XcodeVersionReferenceResolutionTests {
   }
 
   @Test("Invalid REQUIRES format leaves minimumMacOS nil")
-  func testInvalidRequiresLeavesNil() {
+  internal func testInvalidRequiresLeavesNil() {
     let xcode = TestFixtures.xcodeInvalidRequires
     let restoreImages = [TestFixtures.sonoma1421]
 
@@ -107,7 +107,7 @@ struct XcodeVersionReferenceResolutionTests {
   }
 
   @Test("NOTES_URL preserved after resolution")
-  func testNotesURLPreserved() {
+  internal func testNotesURLPreserved() {
     let xcode = TestFixtures.xcodeWithRequires142
     let restoreImages = [TestFixtures.restoreImage142]
 
@@ -118,7 +118,7 @@ struct XcodeVersionReferenceResolutionTests {
   }
 
   @Test("Empty restoreImages array leaves all nil")
-  func testEmptyRestoreImagesArray() {
+  internal func testEmptyRestoreImagesArray() {
     let xcode = TestFixtures.xcodeWithRequires142
     let restoreImages: [RestoreImageRecord] = []
 
@@ -129,7 +129,7 @@ struct XcodeVersionReferenceResolutionTests {
   }
 
   @Test("Multiple Xcodes resolved correctly")
-  func testMultipleXcodeResolution() {
+  internal func testMultipleXcodeResolution() {
     let xcodes = [
       TestFixtures.xcodeWithRequires142,
       TestFixtures.xcodeWithRequires1421,

@@ -32,9 +32,9 @@ import Testing
 @testable import BushelCloudKit
 
 @Suite("PEM Validation Tests")
-struct PEMValidatorTests {
+internal struct PEMValidatorTests {
   @Test("Valid PEM passes validation")
-  func testValidPEM() throws {
+  internal func testValidPEM() throws {
     let validPEM = """
       -----BEGIN PRIVATE KEY-----
       MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg
@@ -47,7 +47,7 @@ struct PEMValidatorTests {
   }
 
   @Test("Missing header throws error")
-  func testMissingHeader() {
+  internal func testMissingHeader() {
     let invalidPEM = """
       MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg
       -----END PRIVATE KEY-----
@@ -59,7 +59,7 @@ struct PEMValidatorTests {
   }
 
   @Test("Missing footer throws error")
-  func testMissingFooter() {
+  internal func testMissingFooter() {
     let invalidPEM = """
       -----BEGIN PRIVATE KEY-----
       MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg
@@ -71,7 +71,7 @@ struct PEMValidatorTests {
   }
 
   @Test("Empty content throws error")
-  func testEmptyContent() {
+  internal func testEmptyContent() {
     let invalidPEM = """
       -----BEGIN PRIVATE KEY-----
       -----END PRIVATE KEY-----
@@ -83,7 +83,7 @@ struct PEMValidatorTests {
   }
 
   @Test("Invalid base64 throws error")
-  func testInvalidBase64() {
+  internal func testInvalidBase64() {
     let invalidPEM = """
       -----BEGIN PRIVATE KEY-----
       not-valid-base64-content!!!
@@ -96,7 +96,7 @@ struct PEMValidatorTests {
   }
 
   @Test("Error messages are helpful")
-  func testErrorMessages() {
+  internal func testErrorMessages() {
     let invalidPEM = "invalid"
 
     do {

@@ -32,18 +32,18 @@ import Foundation
 @testable import BushelFoundation
 
 /// Mock fetcher for MESU data source
-struct MockMESUFetcher: DataSourceFetcher, Sendable {
-  typealias Record = RestoreImageRecord?
+internal struct MockMESUFetcher: DataSourceFetcher, Sendable {
+  internal typealias Record = RestoreImageRecord?
 
-  let recordToReturn: RestoreImageRecord?
-  let errorToThrow: (any Error)?
+  internal let recordToReturn: RestoreImageRecord?
+  internal let errorToThrow: (any Error)?
 
-  init(recordToReturn: RestoreImageRecord? = nil, errorToThrow: (any Error)? = nil) {
+  internal init(recordToReturn: RestoreImageRecord? = nil, errorToThrow: (any Error)? = nil) {
     self.recordToReturn = recordToReturn
     self.errorToThrow = errorToThrow
   }
 
-  func fetch() async throws -> RestoreImageRecord? {
+  internal func fetch() async throws -> RestoreImageRecord? {
     if let error = errorToThrow {
       throw error
     }

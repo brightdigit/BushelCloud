@@ -45,7 +45,7 @@ import Logging
 public struct AppleDBFetcher: DataSourceFetcher, Sendable {
   public typealias Record = [RestoreImageRecord]
 
-  private let deviceIdentifier = "VirtualMac2,1"
+  // MARK: - Type Properties
 
   // swiftlint:disable:next force_unwrapping
   private static let githubCommitsURL = URL(
@@ -56,27 +56,15 @@ public struct AppleDBFetcher: DataSourceFetcher, Sendable {
   // swiftlint:disable:next force_unwrapping
   private static let appleDBURL = URL(string: "https://api.appledb.dev/ios/macOS/main.json")!
 
+  // MARK: - Instance Properties
+
+  private let deviceIdentifier = "VirtualMac2,1"
+
+  // MARK: - Initializers
+
   public init() {}
 
-  /// Fetch all VirtualMac2,1 restore images from AppleDB
-  public func fetch() async throws -> [RestoreImageRecord] {
-    // Fetch when macOS data was last updated using GitHub API
-    let sourceUpdatedAt = await Self.fetchGitHubLastCommitDate()
-
-    // Fetch AppleDB data
-    let entries = try await Self.fetchAppleDBData()
-
-    // Filter for VirtualMac2,1 and map to RestoreImageRecord
-    return
-      entries
-      .filter { $0.deviceMap.contains(deviceIdentifier) }
-      .compactMap { entry in
-        Self.mapToRestoreImage(
-          entry: entry, sourceUpdatedAt: sourceUpdatedAt, deviceIdentifier: deviceIdentifier)
-      }
-  }
-
-  // MARK: - Private Methods
+  // MARK: - Private Type Methods
 
   /// Fetch the last commit date for macOS data from GitHub API
   private static func fetchGitHubLastCommitDate() async -> Date? {
@@ -129,9 +117,36 @@ public struct AppleDBFetcher: DataSourceFetcher, Sendable {
     return entries
   }
 
+  // MARK: - Public Methods
+
+  /// Fetch all VirtualMac2,1 restore images from AppleDB
+  public func fetch() async throws -> [RestoreImageRecord] {
+    // Fetch when macOS data was last updated using GitHub API
+    let sourceUpdatedAt = await Self.fetchGitHubLastCommitDate()
+
+    // Fetch AppleDB data
+    let entries = try await Self.fetchAppleDBData()
+
+    // Filter for VirtualMac2,1 and map to RestoreImageRecord
+    return
+      entries
+      .filter { $0.deviceMap.contains(deviceIdentifier) }
+      .compactMap { entry in
+        mapToRestoreImage(
+          entry: entry,
+          sourceUpdatedAt: sourceUpdatedAt,
+          deviceIdentifier: deviceIdentifier
+        )
+      }
+  }
+
+  // MARK: - Private Instance Methods
+
   /// Map an AppleDB entry to RestoreImageRecord
-  private static func mapToRestoreImage(
-    entry: AppleDBEntry, sourceUpdatedAt: Date?, deviceIdentifier: String
+  private func mapToRestoreImage(
+    entry: AppleDBEntry,
+    sourceUpdatedAt: Date?,
+    deviceIdentifier: String
   ) -> RestoreImageRecord? {
     // Skip entries without a build number (required for unique identification)
     guard let build = entry.build else {

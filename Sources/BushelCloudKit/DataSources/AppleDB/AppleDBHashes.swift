@@ -30,12 +30,12 @@
 import Foundation
 
 /// Represents file hashes for verification
-struct AppleDBHashes: Codable {
-  let sha1: String?
-  let sha2256: String?  // JSON key is "sha2-256"
-
-  enum CodingKeys: String, CodingKey {
+internal struct AppleDBHashes: Codable {
+  internal enum CodingKeys: String, CodingKey {
     case sha1
     case sha2256 = "sha2-256"
   }
+
+  internal let sha1: String?
+  internal let sha2256: String?  // JSON key is "sha2-256"
 }

@@ -44,40 +44,19 @@ import Logging
 public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
   public typealias Record = [XcodeVersionRecord]
 
-  // swiftlint:disable:next force_unwrapping
-  private static let xcodeReleasesURL = URL(string: "https://xcodereleases.com/data.json")!
-
   // MARK: - API Models
 
   private struct XcodeRelease: Codable {
-    let checksums: Checksums?
-    let compilers: Compilers?
-    let date: ReleaseDate
-    let links: Links?
-    let name: String
-    let requires: String
-    let sdks: SDKs?
-    let version: Version
-
     struct Checksums: Codable {
       // API provides checksums but we don't use them currently
     }
 
     struct Compilers: Codable {
-      let swift: [Compiler]?
-    }
-
-    struct Compiler: Codable {
-      let number: String?
-    }
-
-    struct Release: Codable {
-      let beta: Int?
-      let rc: Int?
-
-      var isPrerelease: Bool {
-        beta != nil || rc != nil
+      struct Compiler: Codable {
+        let number: String?
       }
+
+      let swift: [Compiler]?
     }
 
     struct ReleaseDate: Codable {
@@ -92,9 +71,6 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
     }
 
     struct Links: Codable {
-      let download: Download?
-      let notes: Notes?
-
       struct Download: Codable {
         let url: String
       }
@@ -102,26 +78,54 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
       struct Notes: Codable {
         let url: String
       }
+
+      let download: Download?
+      let notes: Notes?
     }
 
     struct SDKs: Codable {
+      struct SDK: Codable {
+        let number: String?
+      }
+
       let iOS: [SDK]?
       let macOS: [SDK]?
       let tvOS: [SDK]?
       let visionOS: [SDK]?
       let watchOS: [SDK]?
-
-      struct SDK: Codable {
-        let number: String?
-      }
     }
 
     struct Version: Codable {
+      struct Release: Codable {
+        let beta: Int?
+        let rc: Int?
+
+        var isPrerelease: Bool {
+          beta != nil || rc != nil
+        }
+      }
+
       let build: String
       let number: String
       let release: Release
     }
+
+    let checksums: Checksums?
+    let compilers: Compilers?
+    let date: ReleaseDate
+    let links: Links?
+    let name: String
+    let requires: String
+    let sdks: SDKs?
+    let version: Version
   }
+
+  // MARK: - Type Properties
+
+  // swiftlint:disable:next force_unwrapping
+  private static let xcodeReleasesURL = URL(string: "https://xcodereleases.com/data.json")!
+
+  // MARK: - Initializers
 
   public init() {}
 

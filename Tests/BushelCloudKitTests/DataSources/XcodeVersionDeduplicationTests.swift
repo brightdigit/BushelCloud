@@ -36,17 +36,17 @@ import Testing
 // MARK: - Suite 4: XcodeVersion Deduplication Tests
 
 @Suite("XcodeVersion Deduplication")
-struct XcodeVersionDeduplicationTests {
-  let pipeline = DataSourcePipeline()
+internal struct XcodeVersionDeduplicationTests {
+  internal let pipeline = DataSourcePipeline()
 
   @Test("Empty array returns empty")
-  func testDeduplicateEmpty() {
+  internal func testDeduplicateEmpty() {
     let result = pipeline.deduplicateXcodeVersions([])
     #expect(result.isEmpty)
   }
 
   @Test("Single record returns unchanged")
-  func testDeduplicateSingle() {
+  internal func testDeduplicateSingle() {
     let input = [TestFixtures.xcode151]
     let result = pipeline.deduplicateXcodeVersions(input)
 
@@ -55,7 +55,7 @@ struct XcodeVersionDeduplicationTests {
   }
 
   @Test("Duplicate builds keep first occurrence")
-  func testDuplicateBuildsKeepFirst() {
+  internal func testDuplicateBuildsKeepFirst() {
     let input = [
       TestFixtures.xcode151,
       TestFixtures.xcode151Duplicate,
@@ -69,7 +69,7 @@ struct XcodeVersionDeduplicationTests {
   }
 
   @Test("Results sorted by release date descending")
-  func testSortingByReleaseDateDescending() {
+  internal func testSortingByReleaseDateDescending() {
     let input = [
       TestFixtures.xcode151,  // Dec 2023
       TestFixtures.xcode160,  // Sep 2024

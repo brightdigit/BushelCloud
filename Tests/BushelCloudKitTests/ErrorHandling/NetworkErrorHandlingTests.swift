@@ -33,9 +33,9 @@ import Testing
 // MARK: - Network Error Handling Tests
 
 @Suite("Network Error Handling Tests")
-struct NetworkErrorHandlingTests {
+internal struct NetworkErrorHandlingTests {
   @Test("Handle network timeout gracefully")
-  func testNetworkTimeout() async {
+  internal func testNetworkTimeout() async {
     let fetcher = MockIPSWFetcher(errorToThrow: MockFetcherError.timeout)
 
     do {
@@ -53,7 +53,7 @@ struct NetworkErrorHandlingTests {
   }
 
   @Test("Handle connection failure")
-  func testConnectionFailure() async {
+  internal func testConnectionFailure() async {
     let fetcher = MockAppleDBFetcher(
       errorToThrow: MockFetcherError.networkError("Connection refused")
     )
@@ -73,7 +73,7 @@ struct NetworkErrorHandlingTests {
   }
 
   @Test("Handle DNS resolution failure")
-  func testDNSFailure() async {
+  internal func testDNSFailure() async {
     let fetcher = MockXcodeReleasesFetcher(
       errorToThrow: MockFetcherError.networkError("DNS resolution failed")
     )
@@ -93,7 +93,7 @@ struct NetworkErrorHandlingTests {
   }
 
   @Test("Handle server errors (5xx)")
-  func testServerErrors() async {
+  internal func testServerErrors() async {
     for errorCode in [500, 502, 503, 504] {
       let fetcher = MockAppleDBFetcher(
         errorToThrow: MockFetcherError.serverError(code: errorCode)
@@ -115,7 +115,7 @@ struct NetworkErrorHandlingTests {
   }
 
   @Test("Handle client errors (4xx)")
-  func testClientErrors() async {
+  internal func testClientErrors() async {
     for errorCode in [400, 401, 403, 404, 429] {
       let fetcher = MockIPSWFetcher(
         errorToThrow: MockFetcherError.serverError(code: errorCode)
@@ -137,7 +137,7 @@ struct NetworkErrorHandlingTests {
   }
 
   @Test("Handle invalid response data")
-  func testInvalidResponse() async {
+  internal func testInvalidResponse() async {
     let fetcher = MockMESUFetcher(errorToThrow: MockFetcherError.invalidResponse)
 
     do {

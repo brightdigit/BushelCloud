@@ -40,9 +40,18 @@ import Foundation
 public struct MESUFetcher: DataSourceFetcher, Sendable {
   public typealias Record = RestoreImageRecord?
 
+  // MARK: - Error Types
+
+  internal enum FetchError: Error {
+    case invalidURL
+    case parsingFailed
+  }
+
+  // MARK: - Initializers
+
   public init() {}
 
-  // MARK: - Public API
+  // MARK: - Public Methods
 
   /// Fetch the latest signed restore image from Apple's MESU service
   public func fetch() async throws -> RestoreImageRecord? {
@@ -111,12 +120,5 @@ public struct MESUFetcher: DataSourceFetcher, Sendable {
 
     // No restore images found in the plist
     return nil
-  }
-
-  // MARK: - Error Types
-
-  internal enum FetchError: Error {
-    case invalidURL
-    case parsingFailed
   }
 }

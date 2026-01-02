@@ -13,9 +13,9 @@ import Testing
 @testable import BushelFoundation
 
 @Suite("XcodeVersionRecord CloudKit Mapping")
-struct XcodeVersionRecordTests {
+internal struct XcodeVersionRecordTests {
   @Test("Convert to CloudKit fields with all data")
-  func testToCloudKitFieldsComplete() {
+  internal func testToCloudKitFieldsComplete() {
     let record = TestFixtures.xcode151
     let fields = record.toCloudKitFields()
 
@@ -42,7 +42,7 @@ struct XcodeVersionRecordTests {
   }
 
   @Test("Convert beta record to CloudKit fields")
-  func testToCloudKitFieldsBeta() {
+  internal func testToCloudKitFieldsBeta() {
     let record = TestFixtures.xcode160Beta
     let fields = record.toCloudKitFields()
 
@@ -58,7 +58,7 @@ struct XcodeVersionRecordTests {
   }
 
   @Test("Roundtrip conversion preserves data")
-  func testRoundtripConversion() {
+  internal func testRoundtripConversion() {
     let original = TestFixtures.xcode151
     let fields = original.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
@@ -82,7 +82,7 @@ struct XcodeVersionRecordTests {
   }
 
   @Test("From RecordInfo with missing required fields returns nil")
-  func testFromRecordInfoMissingFields() {
+  internal func testFromRecordInfoMissingFields() {
     let recordInfo = MockRecordInfo.create(
       recordType: "XcodeVersion",
       recordName: "test",
@@ -96,18 +96,18 @@ struct XcodeVersionRecordTests {
   }
 
   @Test("RecordName generation format")
-  func testRecordNameFormat() {
+  internal func testRecordNameFormat() {
     #expect(TestFixtures.xcode151.recordName == "XcodeVersion-15C65")
     #expect(TestFixtures.xcode160Beta.recordName == "XcodeVersion-16A5171c")
   }
 
   @Test("CloudKit record type is correct")
-  func testCloudKitRecordType() {
+  internal func testCloudKitRecordType() {
     #expect(XcodeVersionRecord.cloudKitRecordType == "XcodeVersion")
   }
 
   @Test("Reference fields are optional")
-  func testOptionalReferences() {
+  internal func testOptionalReferences() {
     let record = TestFixtures.minimalXcode
     let fields = record.toCloudKitFields()
 

@@ -48,15 +48,16 @@ import Testing
       #else
         return false
       #endif
-    }())
+    }()
+  )
 )
-struct VirtualBuddyFetcherTests {
+internal struct VirtualBuddyFetcherTests {
   // MARK: - Initialization Tests
 
   @Suite("Initialization")
-  struct InitializationTests {
+  internal struct InitializationTests {
     @Test("Initialize with environment variable")
-    func testInitWithEnvironmentVariable() throws {
+    internal func testInitWithEnvironmentVariable() throws {
       // Set environment variable
       setenv("VIRTUALBUDDY_API_KEY", "test-api-key-123", 1)
       defer { unsetenv("VIRTUALBUDDY_API_KEY") }
@@ -69,7 +70,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Initialize fails without environment variable")
-    func testInitFailsWithoutEnvironmentVariable() throws {
+    internal func testInitFailsWithoutEnvironmentVariable() throws {
       // Ensure environment variable is not set
       unsetenv("VIRTUALBUDDY_API_KEY")
 
@@ -81,7 +82,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Initialize fails with empty environment variable")
-    func testInitFailsWithEmptyEnvironmentVariable() throws {
+    internal func testInitFailsWithEmptyEnvironmentVariable() throws {
       // Set empty environment variable
       setenv("VIRTUALBUDDY_API_KEY", "", 1)
       defer { unsetenv("VIRTUALBUDDY_API_KEY") }
@@ -94,7 +95,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Initialize with explicit API key")
-    func testExplicitInit() throws {
+    internal func testExplicitInit() throws {
       // Initialize with explicit API key
       let fetcher = VirtualBuddyFetcher(apiKey: "explicit-api-key")
 
@@ -104,7 +105,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Initialize with custom dependencies")
-    func testCustomDependencies() throws {
+    internal func testCustomDependencies() throws {
       let customDecoder = JSONDecoder()
       customDecoder.dateDecodingStrategy = .iso8601
 
@@ -128,9 +129,9 @@ struct VirtualBuddyFetcherTests {
   // MARK: - Empty Fetch Tests
 
   @Suite("Empty Fetch")
-  struct EmptyFetchTests {
+  internal struct EmptyFetchTests {
     @Test("fetch() returns empty array")
-    func testFetchReturnsEmptyArray() async throws {
+    internal func testFetchReturnsEmptyArray() async throws {
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key")
 
       let result = try await fetcher.fetch()
@@ -142,9 +143,9 @@ struct VirtualBuddyFetcherTests {
   // MARK: - Enrichment Success Tests
 
   @Suite("Enrichment Success")
-  struct EnrichmentSuccessTests {
+  internal struct EnrichmentSuccessTests {
     @Test("Enrich single signed image")
-    func testEnrichSingleSignedImage() async throws {
+    internal func testEnrichSingleSignedImage() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -182,7 +183,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Enrich single unsigned image")
-    func testEnrichSingleUnsignedImage() async throws {
+    internal func testEnrichSingleUnsignedImage() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -233,7 +234,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Skip file URL images")
-    func testSkipsFileURLImages() async throws {
+    internal func testSkipsFileURLImages() async throws {
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key")
 
       // Create image with file:// URL
@@ -262,7 +263,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Return empty for empty input")
-    func testEmptyImageList() async throws {
+    internal func testEmptyImageList() async throws {
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key")
 
       let result = try await fetcher.fetch(existingImages: [])
@@ -271,7 +272,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Mixed HTTP and file URLs")
-    func testMixedHTTPAndFileURLs() async throws {
+    internal func testMixedHTTPAndFileURLs() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -321,9 +322,9 @@ struct VirtualBuddyFetcherTests {
   // MARK: - Error Handling Tests
 
   @Suite("Error Handling")
-  struct ErrorHandlingTests {
+  internal struct ErrorHandlingTests {
     @Test("Build number mismatch preserves original")
-    func testBuildNumberMismatch() async throws {
+    internal func testBuildNumberMismatch() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -355,7 +356,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("HTTP 400 error preserves original")
-    func testHTTP400Error() async throws {
+    internal func testHTTP400Error() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -385,7 +386,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("HTTP 429 rate limit error preserves original")
-    func testHTTP429RateLimitError() async throws {
+    internal func testHTTP429RateLimitError() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -414,7 +415,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("HTTP 500 server error preserves original")
-    func testHTTP500Error() async throws {
+    internal func testHTTP500Error() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -443,7 +444,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Network error preserves original")
-    func testNetworkError() async throws {
+    internal func testNetworkError() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -452,7 +453,8 @@ struct VirtualBuddyFetcherTests {
       // Simulate network error
       MockURLProtocol.requestHandler = { _ in
         throw NSError(
-          domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet, userInfo: nil)
+          domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet, userInfo: nil
+        )
       }
 
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key", urlSession: mockSession)
@@ -466,7 +468,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Invalid JSON response preserves original")
-    func testInvalidJSONResponse() async throws {
+    internal func testInvalidJSONResponse() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -499,9 +501,9 @@ struct VirtualBuddyFetcherTests {
   // MARK: - Rate Limiting Tests
 
   @Suite("Rate Limiting")
-  struct RateLimitingTests {
+  internal struct RateLimitingTests {
     @Test("No delay for single image")
-    func testNoDelayForSingleImage() async throws {
+    internal func testNoDelayForSingleImage() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -531,7 +533,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Delay between multiple images")
-    func testDelayBetweenRequests() async throws {
+    internal func testDelayBetweenRequests() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -578,7 +580,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("No delay for file URLs")
-    func testNoDelayForFileURLs() async throws {
+    internal func testNoDelayForFileURLs() async throws {
       let fetcher = VirtualBuddyFetcher(apiKey: "test-key")
 
       let fileImage1 = RestoreImageRecord(
@@ -623,9 +625,9 @@ struct VirtualBuddyFetcherTests {
   // MARK: - API Response Parsing Tests
 
   @Suite("API Response Parsing")
-  struct APIResponseParsingTests {
+  internal struct APIResponseParsingTests {
     @Test("Parse signed response correctly")
-    func testParseSignedResponse() async throws {
+    internal func testParseSignedResponse() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -669,7 +671,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("Parse unsigned response correctly")
-    func testParseUnsignedResponse() async throws {
+    internal func testParseUnsignedResponse() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]
@@ -713,7 +715,7 @@ struct VirtualBuddyFetcherTests {
     }
 
     @Test("URL construction includes API key and IPSW parameter")
-    func testURLConstruction() async throws {
+    internal func testURLConstruction() async throws {
       // Configure mock URLSession
       let config = URLSessionConfiguration.ephemeral
       config.protocolClasses = [MockURLProtocol.self]

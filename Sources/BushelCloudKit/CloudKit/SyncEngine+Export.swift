@@ -39,6 +39,22 @@ public import MistKit
 // MARK: - Export Operations
 
 extension SyncEngine {
+  // MARK: - Export Result Type
+
+  public struct ExportResult {
+    public let restoreImages: [RecordInfo]
+    public let xcodeVersions: [RecordInfo]
+    public let swiftVersions: [RecordInfo]
+
+    public init(
+      restoreImages: [RecordInfo], xcodeVersions: [RecordInfo], swiftVersions: [RecordInfo]
+    ) {
+      self.restoreImages = restoreImages
+      self.xcodeVersions = xcodeVersions
+      self.swiftVersions = swiftVersions
+    }
+  }
+
   /// Export all records from CloudKit to a structured format
   public func export() async throws -> ExportResult {
     print("\n" + String(repeating: "=", count: 60))
@@ -83,7 +99,10 @@ extension SyncEngine {
     print("   • \(swiftVersions.count) Swift versions")
 
     Self.logger.debug(
-      "MistKit returns RecordInfo structs with record metadata. Use .fields to access CloudKit field values."
+      """
+      MistKit returns RecordInfo structs with record metadata. \
+      Use .fields to access CloudKit field values.
+      """
     )
 
     return ExportResult(
@@ -91,21 +110,5 @@ extension SyncEngine {
       xcodeVersions: xcodeVersions,
       swiftVersions: swiftVersions
     )
-  }
-
-  // MARK: - Export Result Type
-
-  public struct ExportResult {
-    public let restoreImages: [RecordInfo]
-    public let xcodeVersions: [RecordInfo]
-    public let swiftVersions: [RecordInfo]
-
-    public init(
-      restoreImages: [RecordInfo], xcodeVersions: [RecordInfo], swiftVersions: [RecordInfo]
-    ) {
-      self.restoreImages = restoreImages
-      self.xcodeVersions = xcodeVersions
-      self.swiftVersions = swiftVersions
-    }
   }
 }

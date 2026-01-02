@@ -36,17 +36,17 @@ import Testing
 // MARK: - Suite 1: RestoreImage Deduplication Tests
 
 @Suite("RestoreImage Deduplication")
-struct RestoreImageDeduplicationTests {
-  let pipeline = DataSourcePipeline()
+internal struct RestoreImageDeduplicationTests {
+  internal let pipeline = DataSourcePipeline()
 
   @Test("Empty array returns empty")
-  func testDeduplicateEmpty() {
+  internal func testDeduplicateEmpty() {
     let result = pipeline.deduplicateRestoreImages([])
     #expect(result.isEmpty)
   }
 
   @Test("Single record returns unchanged")
-  func testDeduplicateSingle() {
+  internal func testDeduplicateSingle() {
     let input = [TestFixtures.sonoma1421]
     let result = pipeline.deduplicateRestoreImages(input)
 
@@ -55,7 +55,7 @@ struct RestoreImageDeduplicationTests {
   }
 
   @Test("Different builds all preserved")
-  func testDeduplicateDifferentBuilds() {
+  internal func testDeduplicateDifferentBuilds() {
     let input = [
       TestFixtures.sonoma1421,
       TestFixtures.sequoia151,
@@ -71,7 +71,7 @@ struct RestoreImageDeduplicationTests {
   }
 
   @Test("Duplicate builds merged")
-  func testDeduplicateDuplicateBuilds() {
+  internal func testDeduplicateDuplicateBuilds() {
     let input = [
       TestFixtures.sonoma1421,
       TestFixtures.sonoma1421Mesu,
@@ -85,7 +85,7 @@ struct RestoreImageDeduplicationTests {
   }
 
   @Test("Results sorted by release date descending")
-  func testSortingByReleaseDateDescending() {
+  internal func testSortingByReleaseDateDescending() {
     let input = [
       TestFixtures.sonoma140,  // Oldest: Sep 2023
       TestFixtures.sonoma1421,  // Middle: Dec 2023

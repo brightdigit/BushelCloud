@@ -131,6 +131,12 @@ extension ConfigKey {
 // MARK: - Specialized Initializers for Booleans
 
 extension ConfigKey where Value == Bool {
+  /// Non-optional default value accessor for booleans
+  @available(*, deprecated, message: "Use defaultValue directly instead")
+  public var boolDefault: Bool {
+    defaultValue  // Already non-optional!
+  }
+
   /// Initialize a boolean configuration key with non-optional default
   /// - Parameters:
   ///   - cli: Command-line argument name
@@ -159,12 +165,6 @@ extension ConfigKey where Value == Bool {
     ]
     self.explicitKeys = [:]
     self.defaultValue = defaultVal
-  }
-
-  /// Non-optional default value accessor for booleans
-  @available(*, deprecated, message: "Use defaultValue directly instead")
-  public var boolDefault: Bool {
-    defaultValue  // Already non-optional!
   }
 }
 

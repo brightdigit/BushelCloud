@@ -39,9 +39,6 @@ import SwiftSoup
 internal struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
   internal typealias Record = [SwiftVersionRecord]
 
-  // swiftlint:disable:next force_unwrapping
-  private static let swiftVersionURL = URL(string: "https://swiftversion.net")!
-
   // MARK: - Internal Models
 
   private struct SwiftVersionEntry {
@@ -50,7 +47,16 @@ internal struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
     let xcodeVersion: String
   }
 
-  // MARK: - Public API
+  internal enum FetchError: Error {
+    case invalidEncoding
+  }
+
+  // MARK: - Type Properties
+
+  // swiftlint:disable:next force_unwrapping
+  private static let swiftVersionURL = URL(string: "https://swiftversion.net")!
+
+  // MARK: - Internal Methods
 
   /// Fetch all Swift versions from swiftversion.net
   internal func fetch() async throws -> [SwiftVersionRecord] {
@@ -98,11 +104,5 @@ internal struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
         notes: "Bundled with Xcode \(entry.xcodeVersion)"
       )
     }
-  }
-
-  // MARK: - Error Types
-
-  internal enum FetchError: Error {
-    case invalidEncoding
   }
 }

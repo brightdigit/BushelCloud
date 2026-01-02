@@ -30,8 +30,8 @@
 import Foundation
 
 /// Represents a download link for a source
-struct AppleDBLink: Codable {
-  let url: String
-  let preferred: Bool?
-  let active: Bool?
+internal struct AppleDBLink: Codable {
+  internal let url: String
+  internal let preferred: Bool?
+  internal let active: Bool?
 }

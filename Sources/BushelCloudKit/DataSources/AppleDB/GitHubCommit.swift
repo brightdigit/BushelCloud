@@ -30,7 +30,7 @@
 import Foundation
 
 /// Represents a commit in GitHub API response
-struct GitHubCommit: Codable {
-  let committer: GitHubCommitter
-  let message: String
+internal struct GitHubCommit: Codable {
+  internal let committer: GitHubCommitter
+  internal let message: String
 }

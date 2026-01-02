@@ -36,13 +36,13 @@ import Testing
 // MARK: - Suite 2: RestoreImage Merge Tests
 
 @Suite("RestoreImage Merge Logic")
-struct RestoreImageMergeTests {
-  let pipeline = DataSourcePipeline()
+internal struct RestoreImageMergeTests {
+  internal let pipeline = DataSourcePipeline()
 
   // MARK: Backfill Tests
 
   @Test("Backfill SHA256 hash from second record")
-  func testBackfillSHA256() {
+  internal func testBackfillSHA256() {
     let incomplete = TestFixtures.sonoma1421Incomplete
     let complete = TestFixtures.sonoma1421
 
@@ -53,7 +53,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("Backfill SHA1 hash from second record")
-  func testBackfillSHA1() {
+  internal func testBackfillSHA1() {
     let incomplete = TestFixtures.sonoma1421Incomplete
     let complete = TestFixtures.sonoma1421
 
@@ -64,7 +64,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("Backfill file size from second record")
-  func testBackfillFileSize() {
+  internal func testBackfillFileSize() {
     let incomplete = TestFixtures.sonoma1421Incomplete
     let complete = TestFixtures.sonoma1421
 
@@ -77,7 +77,7 @@ struct RestoreImageMergeTests {
   // MARK: MESU Authority Tests
 
   @Test("MESU first takes precedence for isSigned")
-  func testMESUFirstAuthoritative() {
+  internal func testMESUFirstAuthoritative() {
     let mesu = TestFixtures.sonoma1421Mesu  // isSigned=false
     let ipsw = TestFixtures.sonoma1421  // isSigned=true
 
@@ -88,7 +88,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("MESU second takes precedence for isSigned")
-  func testMESUSecondAuthoritative() {
+  internal func testMESUSecondAuthoritative() {
     let ipsw = TestFixtures.sonoma1421  // isSigned=true
     let mesu = TestFixtures.sonoma1421Mesu  // isSigned=false
 
@@ -99,7 +99,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("MESU authority overrides newer timestamp")
-  func testMESUOverridesNewerTimestamp() {
+  internal func testMESUOverridesNewerTimestamp() {
     let appledb = TestFixtures.sonoma1421Appledb  // newer timestamp, isSigned=true
     let mesu = TestFixtures.sonoma1421Mesu  // MESU, isSigned=false
 
@@ -110,7 +110,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("MESU with nil isSigned does not override")
-  func testMESUWithNilDoesNotOverride() {
+  internal func testMESUWithNilDoesNotOverride() {
     // Create MESU record with nil isSigned
     let mesuNil = RestoreImageRecord(
       version: "14.2.1",
@@ -135,7 +135,7 @@ struct RestoreImageMergeTests {
   // MARK: Timestamp Comparison Tests
 
   @Test("Newer sourceUpdatedAt wins when both non-MESU")
-  func testNewerTimestampWins() {
+  internal func testNewerTimestampWins() {
     let older = TestFixtures.signedOld  // isSigned=true, older timestamp
     let newer = TestFixtures.unsignedNewer  // isSigned=false, newer timestamp
 
@@ -146,7 +146,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("Older timestamp loses when both non-MESU")
-  func testOlderTimestampLoses() {
+  internal func testOlderTimestampLoses() {
     let newer = TestFixtures.unsignedNewer  // isSigned=false, newer timestamp
     let older = TestFixtures.signedOld  // isSigned=true, older timestamp
 
@@ -157,7 +157,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("First with timestamp wins when second has no timestamp")
-  func testFirstTimestampWinsWhenSecondNil() {
+  internal func testFirstTimestampWinsWhenSecondNil() {
     let withTimestamp = RestoreImageRecord(
       version: "14.3",
       buildNumber: "23D56",
@@ -194,7 +194,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("Second with timestamp wins when first has no timestamp")
-  func testSecondTimestampWinsWhenFirstNil() {
+  internal func testSecondTimestampWinsWhenFirstNil() {
     let withoutTimestamp = RestoreImageRecord(
       version: "14.3",
       buildNumber: "23D56",
@@ -231,7 +231,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("Equal timestamps prefer first value when set")
-  func testEqualTimestampsPreferFirst() {
+  internal func testEqualTimestampsPreferFirst() {
     let sameDate = Date(timeIntervalSince1970: 1_705_000_000)
     let first = RestoreImageRecord(
       version: "14.3",
@@ -271,7 +271,7 @@ struct RestoreImageMergeTests {
   // MARK: Nil Handling Tests
 
   @Test("Both nil timestamps and values disagree prefers false")
-  func testBothNilTimestampsPrefersFalse() {
+  internal func testBothNilTimestampsPrefersFalse() {
     let signedNilTimestamp = RestoreImageRecord(
       version: "14.3",
       buildNumber: "23D56",
@@ -308,7 +308,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("Second isSigned nil preserves first value")
-  func testSecondNilPreservesFirst() {
+  internal func testSecondNilPreservesFirst() {
     let signed = TestFixtures.sonoma1421  // isSigned=true
     let incomplete = TestFixtures.sonoma1421Incomplete  // isSigned=nil
 
@@ -318,7 +318,7 @@ struct RestoreImageMergeTests {
   }
 
   @Test("First isSigned nil uses second value")
-  func testFirstNilUsesSecond() {
+  internal func testFirstNilUsesSecond() {
     let incomplete = TestFixtures.sonoma1421Incomplete  // isSigned=nil
     let signed = TestFixtures.sonoma1421  // isSigned=true
 
@@ -330,7 +330,7 @@ struct RestoreImageMergeTests {
   // MARK: Notes Combination Test
 
   @Test("Notes combined with semicolon separator")
-  func testNotesCombination() {
+  internal func testNotesCombination() {
     let first = RestoreImageRecord(
       version: "14.2.1",
       buildNumber: "23C71",

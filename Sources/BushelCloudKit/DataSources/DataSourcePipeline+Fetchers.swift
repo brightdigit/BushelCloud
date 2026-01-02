@@ -32,7 +32,7 @@ import Foundation
 
 // MARK: - Private Fetching Methods
 extension DataSourcePipeline {
-  func fetchRestoreImages(options: Options) async throws -> [RestoreImageRecord] {
+  internal func fetchRestoreImages(options: Options) async throws -> [RestoreImageRecord] {
     guard options.includeRestoreImages else {
       return []
     }
@@ -191,7 +191,7 @@ extension DataSourcePipeline {
     }
   }
 
-  func fetchXcodeVersions(options: Options) async throws -> [XcodeVersionRecord] {
+  internal func fetchXcodeVersions(options: Options) async throws -> [XcodeVersionRecord] {
     guard options.includeXcodeVersions else {
       return []
     }
@@ -211,7 +211,7 @@ extension DataSourcePipeline {
     return deduplicateXcodeVersions(versions)
   }
 
-  func fetchSwiftVersions(options: Options) async throws -> [SwiftVersionRecord] {
+  internal func fetchSwiftVersions(options: Options) async throws -> [SwiftVersionRecord] {
     guard options.includeSwiftVersions else {
       return []
     }

@@ -36,9 +36,9 @@ import Testing
 // MARK: - CloudKit-Specific Error Handling Tests
 
 @Suite("CloudKit Error Handling Tests")
-struct CloudKitErrorHandlingTests {
+internal struct CloudKitErrorHandlingTests {
   @Test("Quota exceeded error")
-  func testQuotaExceeded() async {
+  internal func testQuotaExceeded() async {
     let service = MockCloudKitService()
     await service.setShouldFailModify(true)
     await service.setModifyError(MockCloudKitError.quotaExceeded)
@@ -65,7 +65,7 @@ struct CloudKitErrorHandlingTests {
   }
 
   @Test("Reference validation error")
-  func testValidatingReferenceError() async {
+  internal func testValidatingReferenceError() async {
     let service = MockCloudKitService()
     await service.setShouldFailModify(true)
     await service.setModifyError(MockCloudKitError.validatingReferenceError)
@@ -92,7 +92,7 @@ struct CloudKitErrorHandlingTests {
   }
 
   @Test("Conflict error on duplicate create")
-  func testConflictError() async {
+  internal func testConflictError() async {
     let service = MockCloudKitService()
     await service.setShouldFailModify(true)
     await service.setModifyError(MockCloudKitError.conflict)
@@ -119,7 +119,7 @@ struct CloudKitErrorHandlingTests {
   }
 
   @Test("Unknown CloudKit error")
-  func testUnknownError() async {
+  internal func testUnknownError() async {
     let service = MockCloudKitService()
     await service.setShouldFailQuery(true)
     await service.setQueryError(MockCloudKitError.unknownError("Something went wrong"))

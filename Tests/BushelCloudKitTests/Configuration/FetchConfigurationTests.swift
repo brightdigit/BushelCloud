@@ -12,11 +12,11 @@ import Testing
 @testable import BushelFoundation
 
 @Suite("FetchConfiguration Logic")
-struct FetchConfigurationTests {
+internal struct FetchConfigurationTests {
   // MARK: - Minimum Interval Tests
 
   @Test("Per-source interval overrides global")
-  func testPerSourceOverridesGlobal() {
+  internal func testPerSourceOverridesGlobal() {
     let config = FetchConfiguration(
       globalMinimumFetchInterval: 3_600,  // 1 hour
       perSourceIntervals: ["appledb.dev": 7_200]  // 2 hours
@@ -27,7 +27,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Global interval used when no per-source interval")
-  func testGlobalInterval() {
+  internal func testGlobalInterval() {
     let config = FetchConfiguration(
       globalMinimumFetchInterval: 5_400  // 1.5 hours
     )
@@ -37,7 +37,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Default intervals used when enabled")
-  func testDefaultIntervals() {
+  internal func testDefaultIntervals() {
     let config = FetchConfiguration(useDefaults: true)
 
     // 6 hours
@@ -51,7 +51,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Default intervals not used when disabled")
-  func testDefaultIntervalsDisabled() {
+  internal func testDefaultIntervalsDisabled() {
     let config = FetchConfiguration(useDefaults: false)
 
     #expect(config.minimumInterval(for: "appledb.dev") == nil)
@@ -59,7 +59,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Per-source overrides defaults")
-  func testPerSourceOverridesDefaults() {
+  internal func testPerSourceOverridesDefaults() {
     let config = FetchConfiguration(
       perSourceIntervals: ["appledb.dev": 1_800],  // 30 minutes
       useDefaults: true
@@ -72,7 +72,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Global overrides defaults")
-  func testGlobalOverridesDefaults() {
+  internal func testGlobalOverridesDefaults() {
     let config = FetchConfiguration(
       globalMinimumFetchInterval: 7_200,  // 2 hours
       useDefaults: true
@@ -84,7 +84,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Unknown source with no configuration returns nil")
-  func testUnknownSourceNoConfig() {
+  internal func testUnknownSourceNoConfig() {
     let config = FetchConfiguration(useDefaults: false)
 
     #expect(config.minimumInterval(for: "unknown.source") == nil)
@@ -93,7 +93,7 @@ struct FetchConfigurationTests {
   // MARK: - Should Fetch Tests
 
   @Test("Should fetch when force is true")
-  func testForceFetch() {
+  internal func testForceFetch() {
     let config = FetchConfiguration(globalMinimumFetchInterval: 3_600)
     let lastFetch = Date(timeIntervalSinceNow: -1_800)  // 30 min ago (less than 1 hour)
 
@@ -107,7 +107,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Should fetch when never fetched before")
-  func testNeverFetchedBefore() {
+  internal func testNeverFetchedBefore() {
     let config = FetchConfiguration(globalMinimumFetchInterval: 3_600)
 
     let result = config.shouldFetch(
@@ -120,7 +120,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Should not fetch when interval not elapsed")
-  func testThrottling() {
+  internal func testThrottling() {
     let config = FetchConfiguration(globalMinimumFetchInterval: 3_600)  // 1 hour
     let lastFetch = Date(timeIntervalSinceNow: -1_800)  // 30 min ago (less than 1 hour)
 
@@ -134,7 +134,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Should fetch when interval has elapsed")
-  func testFetchWhenIntervalElapsed() {
+  internal func testFetchWhenIntervalElapsed() {
     let config = FetchConfiguration(globalMinimumFetchInterval: 3_600)  // 1 hour
     let lastFetch = Date(timeIntervalSinceNow: -7_200)  // 2 hours ago (more than 1 hour)
 
@@ -148,7 +148,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Should fetch when no interval configured")
-  func testNoIntervalConfigured() {
+  internal func testNoIntervalConfigured() {
     let config = FetchConfiguration(useDefaults: false)
     let lastFetch = Date(timeIntervalSinceNow: -60)  // 1 minute ago
 
@@ -162,7 +162,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Should respect per-source intervals in shouldFetch")
-  func testPerSourceIntervalInShouldFetch() {
+  internal func testPerSourceIntervalInShouldFetch() {
     let config = FetchConfiguration(
       globalMinimumFetchInterval: 3_600,  // 1 hour
       perSourceIntervals: ["appledb.dev": 7_200]  // 2 hours
@@ -180,7 +180,7 @@ struct FetchConfigurationTests {
   // MARK: - Default Intervals Tests
 
   @Test("Default intervals contain expected sources")
-  func testDefaultIntervalsExist() {
+  internal func testDefaultIntervalsExist() {
     let defaults = FetchConfiguration.defaultIntervals
 
     #expect(defaults["appledb.dev"] != nil)
@@ -192,7 +192,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Default intervals have reasonable values")
-  func testDefaultIntervalValues() {
+  internal func testDefaultIntervalValues() {
     let defaults = FetchConfiguration.defaultIntervals
 
     // All intervals should be positive
@@ -214,7 +214,7 @@ struct FetchConfigurationTests {
   // MARK: - Codable Tests
 
   @Test("Configuration is encodable and decodable")
-  func testCodable() throws {
+  internal func testCodable() throws {
     let original = FetchConfiguration(
       globalMinimumFetchInterval: 5_400,
       perSourceIntervals: ["appledb.dev": 7_200, "ipsw.me": 10_800],
@@ -235,7 +235,7 @@ struct FetchConfigurationTests {
   // MARK: - Edge Cases
 
   @Test("Zero interval allows immediate refetch")
-  func testZeroInterval() {
+  internal func testZeroInterval() {
     let config = FetchConfiguration(globalMinimumFetchInterval: 0)
     let lastFetch = Date(timeIntervalSinceNow: -1)  // 1 second ago
 
@@ -243,7 +243,7 @@ struct FetchConfigurationTests {
   }
 
   @Test("Boundary condition: exactly at interval")
-  func testExactlyAtInterval() {
+  internal func testExactlyAtInterval() {
     let config = FetchConfiguration(globalMinimumFetchInterval: 3_600)  // 1 hour
     let lastFetch = Date(timeIntervalSinceNow: -3_600)  // exactly 1 hour ago
 

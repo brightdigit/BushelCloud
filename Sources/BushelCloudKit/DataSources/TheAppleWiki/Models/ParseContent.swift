@@ -30,7 +30,7 @@
 import Foundation
 
 /// Parse content container
-struct ParseContent: Codable, Sendable {
-  let title: String
-  let text: TextContent
+internal struct ParseContent: Codable, Sendable {
+  internal let title: String
+  internal let text: TextContent
 }

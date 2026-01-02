@@ -69,18 +69,6 @@ public struct DataSourcePipeline: Sendable {
     }
   }
 
-  // MARK: - Dependencies
-
-  let configuration: FetchConfiguration
-
-  // MARK: - Initialization
-
-  public init(
-    configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
-  ) {
-    self.configuration = configuration
-  }
-
   // MARK: - Results
 
   public struct FetchResult: Sendable {
@@ -97,6 +85,18 @@ public struct DataSourcePipeline: Sendable {
       self.xcodeVersions = xcodeVersions
       self.swiftVersions = swiftVersions
     }
+  }
+
+  // MARK: - Dependencies
+
+  internal let configuration: FetchConfiguration
+
+  // MARK: - Initialization
+
+  public init(
+    configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
+  ) {
+    self.configuration = configuration
   }
 
   // MARK: - Public API
@@ -146,7 +146,9 @@ public struct DataSourcePipeline: Sendable {
     force: Bool
   ) async -> (shouldFetch: Bool, metadata: DataSourceMetadata?) {
     // If force flag is set, always fetch
-    guard !force else { return (true, nil) }
+    guard !force else {
+      return (true, nil)
+    }
 
     // No CloudKit service in BushelCloudData - always fetch
     // CloudKit metadata checking will be re-added in Phase 4
@@ -154,7 +156,7 @@ public struct DataSourcePipeline: Sendable {
   }
 
   /// Wrap a fetch operation with metadata tracking
-  func fetchWithMetadata<T>(
+  internal func fetchWithMetadata<T>(
     source: String,
     recordType: String,
     options: Options,
@@ -178,9 +180,10 @@ public struct DataSourcePipeline: Sendable {
         let timeSinceLastFetch = Date().timeIntervalSince(metadata.lastFetchedAt)
         let minInterval = configuration.minimumInterval(for: source) ?? 0
         let timeRemaining = minInterval - timeSinceLastFetch
-        print(
-          "   ⏰ Skipping \(source) (last fetched \(Int(timeSinceLastFetch / 60))m ago, wait \(Int(timeRemaining / 60))m)"
-        )
+        let message =
+          "⏰ Skipping \(source) " + "(last fetched \(Int(timeSinceLastFetch / 60))m ago, "
+          + "wait \(Int(timeRemaining / 60))m)"
+        print("   \(message)")
       }
       return []
     }

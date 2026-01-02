@@ -11,11 +11,11 @@ import Testing
 
 @testable import BushelCloudKit
 
-struct FieldValueURLTests {
+internal struct FieldValueURLTests {
   // MARK: - URL → FieldValue Conversion Tests
 
   @Test("Create FieldValue from URL")
-  func testCreateFieldValueFromURL() throws {
+  internal func testCreateFieldValueFromURL() throws {
     let url = URL(string: "https://example.com/file.dmg")!
     let fieldValue = FieldValue(url: url)
 
@@ -27,7 +27,7 @@ struct FieldValueURLTests {
   }
 
   @Test("Create FieldValue from URL with path")
-  func testCreateFieldValueFromURLWithPath() throws {
+  internal func testCreateFieldValueFromURLWithPath() throws {
     let url = URL(string: "https://example.com/path/to/file.ipsw")!
     let fieldValue = FieldValue(url: url)
 
@@ -39,7 +39,7 @@ struct FieldValueURLTests {
   }
 
   @Test("Create FieldValue from URL with query parameters")
-  func testCreateFieldValueFromURLWithQueryParams() throws {
+  internal func testCreateFieldValueFromURLWithQueryParams() throws {
     let url = URL(string: "https://example.com/file.dmg?version=1.0&platform=mac")!
     let fieldValue = FieldValue(url: url)
 
@@ -51,7 +51,7 @@ struct FieldValueURLTests {
   }
 
   @Test("Create FieldValue from file URL")
-  func testCreateFieldValueFromFileURL() throws {
+  internal func testCreateFieldValueFromFileURL() throws {
     let url = URL(fileURLWithPath: "/Users/test/file.dmg")
     let fieldValue = FieldValue(url: url)
 
@@ -65,7 +65,7 @@ struct FieldValueURLTests {
   // MARK: - FieldValue → URL Extraction Tests
 
   @Test("Extract URL from string FieldValue")
-  func testExtractURLFromStringFieldValue() throws {
+  internal func testExtractURLFromStringFieldValue() throws {
     let fieldValue: FieldValue = .string("https://example.com/file.dmg")
     let url = fieldValue.urlValue
 
@@ -74,7 +74,7 @@ struct FieldValueURLTests {
   }
 
   @Test("Extract URL from string FieldValue with path")
-  func testExtractURLFromStringFieldValueWithPath() throws {
+  internal func testExtractURLFromStringFieldValueWithPath() throws {
     let fieldValue: FieldValue = .string("https://downloads.apple.com/restore/macOS/23C71.ipsw")
     let url = fieldValue.urlValue
 
@@ -83,7 +83,7 @@ struct FieldValueURLTests {
   }
 
   @Test("Extract nil from invalid URL string")
-  func testExtractNilFromInvalidURLString() throws {
+  internal func testExtractNilFromInvalidURLString() throws {
     // URL(string:) is lenient - even "not a valid url" parses successfully
     // as a relative URL with no scheme. Test actual parsing behavior:
     let fieldValue: FieldValue = .string("not a valid url")
@@ -103,7 +103,7 @@ struct FieldValueURLTests {
   }
 
   @Test("Extract nil from empty string")
-  func testExtractNilFromEmptyString() throws {
+  internal func testExtractNilFromEmptyString() throws {
     let fieldValue: FieldValue = .string("")
     let url = fieldValue.urlValue
 
@@ -112,7 +112,7 @@ struct FieldValueURLTests {
   }
 
   @Test("Extract nil from non-string FieldValue")
-  func testExtractNilFromNonStringFieldValue() throws {
+  internal func testExtractNilFromNonStringFieldValue() throws {
     let intFieldValue: FieldValue = .int64(42)
     #expect(intFieldValue.urlValue == nil)
 
@@ -126,7 +126,7 @@ struct FieldValueURLTests {
   // MARK: - Round-Trip Tests
 
   @Test("Round-trip URL through FieldValue")
-  func testRoundTripURLThroughFieldValue() throws {
+  internal func testRoundTripURLThroughFieldValue() throws {
     let originalURL = URL(string: "https://example.com/file.dmg")!
     let fieldValue = FieldValue(url: originalURL)
     let extractedURL = fieldValue.urlValue
@@ -136,10 +136,11 @@ struct FieldValueURLTests {
   }
 
   @Test("Round-trip complex URL through FieldValue")
-  func testRoundTripComplexURLThroughFieldValue() throws {
+  internal func testRoundTripComplexURLThroughFieldValue() throws {
     let originalURL = URL(
       string:
-        "https://updates.cdn-apple.com/2024/restore/macOS/052-49876-20241103-B6C6AA6A-D39E-4F6C-B43C-15C3B8A4CB1A/UniversalMac_15.1.1_24B91_Restore.ipsw"
+        "https://updates.cdn-apple.com/2024/restore/macOS/"
+        + "052-49876-20241103-B6C6AA6A-D39E-4F6C-B43C-15C3B8A4CB1A/UniversalMac_15.1.1_24B91_Restore.ipsw"
     )!
     let fieldValue = FieldValue(url: originalURL)
     let extractedURL = fieldValue.urlValue
@@ -149,7 +150,7 @@ struct FieldValueURLTests {
   }
 
   @Test("Round-trip file URL through FieldValue")
-  func testRoundTripFileURLThroughFieldValue() throws {
+  internal func testRoundTripFileURLThroughFieldValue() throws {
     let originalURL = URL(fileURLWithPath: "/System/Library/Frameworks/Virtualization.framework")
     let fieldValue = FieldValue(url: originalURL)
     let extractedURL = fieldValue.urlValue
@@ -162,7 +163,7 @@ struct FieldValueURLTests {
   // MARK: - Type Safety Tests
 
   @Test("FieldValue from URL is string type")
-  func testFieldValueFromURLIsStringType() throws {
+  internal func testFieldValueFromURLIsStringType() throws {
     let url = URL(string: "https://example.com")!
     let fieldValue = FieldValue(url: url)
 
@@ -175,7 +176,7 @@ struct FieldValueURLTests {
   }
 
   @Test("URL extraction preserves scheme")
-  func testURLExtractionPreservesScheme() throws {
+  internal func testURLExtractionPreservesScheme() throws {
     let httpsFieldValue = FieldValue(url: URL(string: "https://example.com")!)
     let httpFieldValue = FieldValue(url: URL(string: "http://example.com")!)
     let fileFieldValue = FieldValue(url: URL(fileURLWithPath: "/tmp/file"))
@@ -188,7 +189,7 @@ struct FieldValueURLTests {
   // MARK: - CloudKit Integration Tests
 
   @Test("FieldValue URL matches CloudKit STRING field format")
-  func testFieldValueURLMatchesCloudKitStringFormat() throws {
+  internal func testFieldValueURLMatchesCloudKitStringFormat() throws {
     // CloudKit stores URLs as STRING fields
     // This test verifies the format is compatible
     let url = URL(string: "https://downloads.apple.com/restore/macOS/23C71.ipsw")!

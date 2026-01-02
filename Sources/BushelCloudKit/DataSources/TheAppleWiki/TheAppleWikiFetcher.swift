@@ -61,7 +61,8 @@ internal struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
     #if canImport(FoundationNetworking)
       // Use FoundationNetworking.URLSession directly on Linux
       let lastModified = await FoundationNetworking.URLSession.shared.fetchLastModified(
-        from: apiURL)
+        from: apiURL
+      )
     #else
       let lastModified = await URLSession.shared.fetchLastModified(from: apiURL)
     #endif

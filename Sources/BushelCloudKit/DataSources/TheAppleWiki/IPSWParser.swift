@@ -35,13 +35,13 @@ import Foundation
 
 // MARK: - Errors
 
-enum TheAppleWikiError: LocalizedError {
+internal enum TheAppleWikiError: LocalizedError {
   case invalidURL(String)
   case networkError(underlying: any Error)
   case parsingError(String)
   case noDataFound
 
-  var errorDescription: String? {
+  internal var errorDescription: String? {
     switch self {
     case .invalidURL(let url):
       return "Invalid URL: \(url)"
@@ -59,7 +59,7 @@ enum TheAppleWikiError: LocalizedError {
 
 /// Fetches macOS IPSW metadata from TheAppleWiki.com
 @available(macOS 12.0, *)
-struct IPSWParser: Sendable {
+internal struct IPSWParser: Sendable {
   private let baseURL = "https://theapplewiki.com"
   private let apiEndpoint = "/api.php"
 
@@ -67,7 +67,7 @@ struct IPSWParser: Sendable {
   /// - Parameter deviceFilter: Optional device identifier to filter by (e.g., "VirtualMac2,1")
   /// - Returns: Array of IPSW versions matching the filter
   /// - Throws: Network errors, decoding errors, or if URL construction fails
-  func fetchAllIPSWVersions(deviceFilter: String? = nil) async throws -> [IPSWVersion] {
+  internal func fetchAllIPSWVersions(deviceFilter: String? = nil) async throws -> [IPSWVersion] {
     // Get list of Mac firmware pages
     let pagesURL = try buildPagesURL()
     let pagesData = try await fetchData(from: pagesURL)
@@ -163,7 +163,10 @@ struct IPSWParser: Sendable {
         .dropFirst()  // Skip first empty component
         .compactMap { cell -> String? in
           // Extract text between td tags, removing HTML
-          guard let endIndex = cell.range(of: "</td>")?.lowerBound else { return nil }
+          guard let endIndex = cell.range(of: "</td>")?.lowerBound
+          else {
+            return nil
+          }
           let content = cell[..<endIndex].trimmingCharacters(in: .whitespacesAndNewlines)
           return content.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
         }
@@ -199,7 +202,8 @@ struct IPSWParser: Sendable {
           sha1: sha1,
           releaseDate: releaseDate,
           url: url
-        ))
+        )
+      )
     }
 
     return versions

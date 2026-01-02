@@ -10,9 +10,9 @@ import Testing
 @testable import ConfigKeyKit
 
 @Suite("ConfigKey Tests")
-struct ConfigKeyTests {
+internal struct ConfigKeyTests {
   @Test("ConfigKey with explicit keys and default")
-  func explicitKeys() {
+  internal func explicitKeys() {
     let key = ConfigKey<String>(cli: "test.key", env: "TEST_KEY", default: "default-value")
 
     #expect(key.key(for: .commandLine) == "test.key")
@@ -21,9 +21,10 @@ struct ConfigKeyTests {
   }
 
   @Test("ConfigKey with base string and default prefix")
-  func baseStringWithDefaultPrefix() {
+  internal func baseStringWithDefaultPrefix() {
     let key = ConfigKey<String>(
-      bushelPrefixed: "cloudkit.container_id", default: "iCloud.com.example.App")
+      bushelPrefixed: "cloudkit.container_id", default: "iCloud.com.example.App"
+    )
 
     #expect(key.key(for: .commandLine) == "cloudkit.container_id")
     #expect(key.key(for: .environment) == "BUSHEL_CLOUDKIT_CONTAINER_ID")
@@ -31,9 +32,10 @@ struct ConfigKeyTests {
   }
 
   @Test("ConfigKey with base string and no prefix")
-  func baseStringNoPrefix() {
+  internal func baseStringNoPrefix() {
     let key = ConfigKey<String>(
-      "cloudkit.container_id", envPrefix: nil, default: "iCloud.com.example.App")
+      "cloudkit.container_id", envPrefix: nil, default: "iCloud.com.example.App"
+    )
 
     #expect(key.key(for: .commandLine) == "cloudkit.container_id")
     #expect(key.key(for: .environment) == "CLOUDKIT_CONTAINER_ID")
@@ -41,14 +43,14 @@ struct ConfigKeyTests {
   }
 
   @Test("ConfigKey with default value")
-  func defaultValue() {
+  internal func defaultValue() {
     let key = ConfigKey<String>(cli: "test.key", env: "TEST_KEY", default: "default-value")
 
     #expect(key.defaultValue == "default-value")
   }
 
   @Test("Boolean ConfigKey with default")
-  func booleanDefaultValue() {
+  internal func booleanDefaultValue() {
     let key = ConfigKey<Bool>(bushelPrefixed: "sync.verbose", default: false)
 
     #expect(key.defaultValue == false)

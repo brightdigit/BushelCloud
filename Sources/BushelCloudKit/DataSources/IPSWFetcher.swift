@@ -39,8 +39,8 @@ import OSVer
 #endif
 
 /// Fetcher for macOS restore images using the IPSWDownloads package
-struct IPSWFetcher: DataSourceFetcher, Sendable {
-  typealias Record = [RestoreImageRecord]
+internal struct IPSWFetcher: DataSourceFetcher, Sendable {
+  internal typealias Record = [RestoreImageRecord]
   /// Static base URL for IPSW API
   private static let ipswBaseURL: URL = {
     guard let url = URL(string: "https://api.ipsw.me/v4/device/VirtualMac2,1?type=ipsw") else {
@@ -50,13 +50,14 @@ struct IPSWFetcher: DataSourceFetcher, Sendable {
   }()
 
   /// Fetch all VirtualMac2,1 restore images from ipsw.me
-  func fetch() async throws -> [RestoreImageRecord] {
+  internal func fetch() async throws -> [RestoreImageRecord] {
     // Fetch Last-Modified header to know when ipsw.me data was updated
     let ipswURL = Self.ipswBaseURL
     #if canImport(FoundationNetworking)
       // Use FoundationNetworking.URLSession directly on Linux
       let lastModified = await FoundationNetworking.URLSession.shared.fetchLastModified(
-        from: ipswURL)
+        from: ipswURL
+      )
     #else
       let lastModified = await URLSession.shared.fetchLastModified(from: ipswURL)
     #endif

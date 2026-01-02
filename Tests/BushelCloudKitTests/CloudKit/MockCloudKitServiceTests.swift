@@ -37,9 +37,9 @@ import Testing
 // MARK: - Mock CloudKit Service Tests
 
 @Suite("Mock CloudKit Service Tests")
-struct MockCloudKitServiceTests {
+internal struct MockCloudKitServiceTests {
   @Test("Query returns empty array initially")
-  func testQueryEmptyInitially() async throws {
+  internal func testQueryEmptyInitially() async throws {
     let service = MockCloudKitService()
 
     let results = try await service.queryRecords(recordType: "RestoreImage")
@@ -48,7 +48,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Create operation stores record")
-  func testCreateOperationStoresRecord() async throws {
+  internal func testCreateOperationStoresRecord() async throws {
     let service = MockCloudKitService()
     let record = TestFixtures.sonoma1421
 
@@ -67,7 +67,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("ForceReplace operation replaces existing record")
-  func testForceReplaceOperation() async throws {
+  internal func testForceReplaceOperation() async throws {
     let service = MockCloudKitService()
     let recordName = "RestoreImage-23C71"
 
@@ -118,7 +118,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Delete operation removes record")
-  func testDeleteOperation() async throws {
+  internal func testDeleteOperation() async throws {
     let service = MockCloudKitService()
     let recordName = "RestoreImage-23C71"
 
@@ -146,7 +146,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Batch operations process multiple records")
-  func testBatchOperations() async throws {
+  internal func testBatchOperations() async throws {
     let service = MockCloudKitService()
 
     let operations = [
@@ -184,7 +184,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Query error throws expected error")
-  func testQueryError() async {
+  internal func testQueryError() async {
     let service = MockCloudKitService()
     await service.setShouldFailQuery(true)
     await service.setQueryError(MockCloudKitError.networkError)
@@ -200,7 +200,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Modify error throws expected error")
-  func testModifyError() async {
+  internal func testModifyError() async {
     let service = MockCloudKitService()
     await service.setShouldFailModify(true)
     await service.setModifyError(MockCloudKitError.authenticationFailed)
@@ -223,7 +223,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Operation history tracks all operations")
-  func testOperationHistory() async throws {
+  internal func testOperationHistory() async throws {
     let service = MockCloudKitService()
 
     let batch1 = [
@@ -254,7 +254,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Clear storage removes all records")
-  func testClearStorage() async throws {
+  internal func testClearStorage() async throws {
     let service = MockCloudKitService()
 
     // Add some records
@@ -281,19 +281,19 @@ struct MockCloudKitServiceTests {
 // MARK: - Helper Extensions for Actor
 
 extension MockCloudKitService {
-  func setShouldFailQuery(_ value: Bool) {
+  internal func setShouldFailQuery(_ value: Bool) {
     self.shouldFailQuery = value
   }
 
-  func setShouldFailModify(_ value: Bool) {
+  internal func setShouldFailModify(_ value: Bool) {
     self.shouldFailModify = value
   }
 
-  func setQueryError(_ error: (any Error)?) {
+  internal func setQueryError(_ error: (any Error)?) {
     self.queryError = error
   }
 
-  func setModifyError(_ error: (any Error)?) {
+  internal func setModifyError(_ error: (any Error)?) {
     self.modifyError = error
   }
 }

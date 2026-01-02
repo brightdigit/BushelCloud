@@ -44,7 +44,15 @@ import SwiftSoup
 /// Fetcher for macOS beta/RC restore images from Mr. Macintosh database
 internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
   internal typealias Record = [RestoreImageRecord]
-  // MARK: - Public API
+
+  // MARK: - Error Types
+
+  internal enum FetchError: Error {
+    case invalidURL
+    case invalidEncoding
+  }
+
+  // MARK: - Internal Methods
 
   /// Fetch beta and RC restore images from Mr. Macintosh
   internal func fetch() async throws -> [RestoreImageRecord] {
@@ -88,7 +96,7 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
     return records
   }
 
-  // MARK: - Helpers
+  // MARK: - Private Methods
 
   /// Parse a table row into a RestoreImageRecord
   private func parseTableRow(_ row: SwiftSoup.Element, pageUpdatedAt: Date?) -> RestoreImageRecord?
@@ -226,13 +234,6 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
     formatter.dateFormat = format
     formatter.locale = Locale(identifier: "en_US_POSIX")
     return formatter
-  }
-
-  // MARK: - Error Types
-
-  internal enum FetchError: Error {
-    case invalidURL
-    case invalidEncoding
   }
 }
 

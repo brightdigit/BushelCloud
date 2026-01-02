@@ -34,7 +34,7 @@ extension DataSourcePipeline {
   /// Resolve XcodeVersion → RestoreImage references by mapping version strings to record names
   ///
   /// Parses the temporary REQUIRES field in notes and matches it to RestoreImage versions
-  func resolveXcodeVersionReferences(
+  internal func resolveXcodeVersionReferences(
     _ versions: [XcodeVersionRecord],
     restoreImages: [RestoreImageRecord]
   ) -> [XcodeVersionRecord] {
@@ -57,7 +57,9 @@ extension DataSourcePipeline {
       var resolved = version
 
       // Parse notes field to extract requires string
-      guard let notes = version.notes else { return resolved }
+      guard let notes = version.notes else {
+        return resolved
+      }
 
       let parts = notes.split(separator: "|")
       var requiresString: String?

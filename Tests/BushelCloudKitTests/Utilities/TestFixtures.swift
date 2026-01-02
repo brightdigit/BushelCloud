@@ -33,20 +33,11 @@ public import Foundation
 @testable public import BushelFoundation
 
 /// Centralized test data fixtures for all record types
-public enum TestFixtures: Sendable {
-  // MARK: - Helpers
-
-  /// Create a URL from a string, force unwrapping for test fixtures
-  /// Test URLs are known to be valid, so force unwrap is acceptable here
-  private static func url(_ string: String) -> URL {
-    // swiftlint:disable:next force_unwrapping
-    URL(string: string)!
-  }
-
+internal enum TestFixtures: Sendable {
   // MARK: - RestoreImage Fixtures
 
   /// Stable macOS 14.2.1 release (Sonoma)
-  public static let sonoma1421 = RestoreImageRecord(
+  internal static let sonoma1421 = RestoreImageRecord(
     version: "14.2.1",
     buildNumber: "23C71",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),  // Dec 12, 2023
@@ -62,7 +53,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Beta macOS 15.0 (Sequoia)
-  public static let sequoia150Beta = RestoreImageRecord(
+  internal static let sequoia150Beta = RestoreImageRecord(
     version: "15.0 Beta 3",
     buildNumber: "24A5264n",
     releaseDate: Date(timeIntervalSince1970: 1_720_000_000),  // Jul 3, 2024
@@ -78,7 +69,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Minimal RestoreImage with no optional fields
-  public static let minimalRestoreImage = RestoreImageRecord(
+  internal static let minimalRestoreImage = RestoreImageRecord(
     version: "14.0",
     buildNumber: "23A344",
     releaseDate: Date(timeIntervalSince1970: 1_695_657_600),  // Sep 26, 2023
@@ -96,12 +87,13 @@ public enum TestFixtures: Sendable {
   // MARK: - XcodeVersion Fixtures
 
   /// Xcode 15.1 stable release
-  public static let xcode151 = XcodeVersionRecord(
+  internal static let xcode151 = XcodeVersionRecord(
     version: "15.1",
     buildNumber: "15C65",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),  // Dec 12, 2023
     downloadURL: URL(
-      string: "https://download.developer.apple.com/Developer_Tools/Xcode_15.1/Xcode_15.1.xip"),
+      string: "https://download.developer.apple.com/Developer_Tools/Xcode_15.1/Xcode_15.1.xip"
+    ),
     fileSize: 8_000_000_000,
     isPrerelease: false,
     minimumMacOS: "RestoreImage-23C71",
@@ -111,7 +103,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Xcode 16.0 beta
-  public static let xcode160Beta = XcodeVersionRecord(
+  internal static let xcode160Beta = XcodeVersionRecord(
     version: "16.0 Beta 1",
     buildNumber: "16A5171c",
     releaseDate: Date(timeIntervalSince1970: 1_717_977_600),  // Jun 10, 2024
@@ -125,7 +117,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Minimal Xcode with no optional fields
-  public static let minimalXcode = XcodeVersionRecord(
+  internal static let minimalXcode = XcodeVersionRecord(
     version: "15.0",
     buildNumber: "15A240d",
     releaseDate: Date(timeIntervalSince1970: 1_695_657_600),
@@ -141,17 +133,18 @@ public enum TestFixtures: Sendable {
   // MARK: - SwiftVersion Fixtures
 
   /// Swift 5.9.2 stable
-  public static let swift592 = SwiftVersionRecord(
+  internal static let swift592 = SwiftVersionRecord(
     version: "5.9.2",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),  // Dec 12, 2023
     downloadURL: URL(
-      string: "https://download.swift.org/swift-5.9.2-release/xcode/swift-5.9.2-RELEASE-osx.pkg"),
+      string: "https://download.swift.org/swift-5.9.2-release/xcode/swift-5.9.2-RELEASE-osx.pkg"
+    ),
     isPrerelease: false,
     notes: "Stable Swift release bundled with Xcode 15.1"
   )
 
   /// Swift 6.0 development snapshot
-  public static let swift60Snapshot = SwiftVersionRecord(
+  internal static let swift60Snapshot = SwiftVersionRecord(
     version: "6.0",
     releaseDate: Date(timeIntervalSince1970: 1_717_977_600),  // Jun 10, 2024
     downloadURL: nil,
@@ -160,7 +153,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Minimal Swift version
-  public static let minimalSwift = SwiftVersionRecord(
+  internal static let minimalSwift = SwiftVersionRecord(
     version: "5.9",
     releaseDate: Date(timeIntervalSince1970: 1_695_657_600),
     downloadURL: nil,
@@ -171,7 +164,7 @@ public enum TestFixtures: Sendable {
   // MARK: - DataSourceMetadata Fixtures
 
   /// IPSW.me metadata - successful fetch
-  public static let metadataIPSWSuccess = DataSourceMetadata(
+  internal static let metadataIPSWSuccess = DataSourceMetadata(
     sourceName: "ipsw.me",
     recordTypeName: "RestoreImage",
     lastFetchedAt: Date(timeIntervalSince1970: 1_702_339_200),
@@ -182,7 +175,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// AppleDB metadata - with error
-  public static let metadataAppleDBError = DataSourceMetadata(
+  internal static let metadataAppleDBError = DataSourceMetadata(
     sourceName: "appledb.dev",
     recordTypeName: "RestoreImage",
     lastFetchedAt: Date(timeIntervalSince1970: 1_702_339_200),
@@ -193,7 +186,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Xcode Releases metadata
-  public static let metadataXcodeReleases = DataSourceMetadata(
+  internal static let metadataXcodeReleases = DataSourceMetadata(
     sourceName: "xcodereleases.com",
     recordTypeName: "XcodeVersion",
     lastFetchedAt: Date(timeIntervalSince1970: 1_702_339_200),
@@ -204,7 +197,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Minimal metadata
-  public static let minimalMetadata = DataSourceMetadata(
+  internal static let minimalMetadata = DataSourceMetadata(
     sourceName: "swift.org",
     recordTypeName: "SwiftVersion",
     lastFetchedAt: Date(timeIntervalSince1970: 1_702_339_200),
@@ -219,7 +212,7 @@ public enum TestFixtures: Sendable {
   // MARK: RestoreImage Merge Scenarios
 
   /// Same build as sonoma1421, MESU source (authoritative for isSigned)
-  public static let sonoma1421Mesu = RestoreImageRecord(
+  internal static let sonoma1421Mesu = RestoreImageRecord(
     version: "14.2.1",
     buildNumber: "23C71",  // Same as sonoma1421
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
@@ -235,7 +228,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Same build as sonoma1421, AppleDB source with hashes
-  public static let sonoma1421Appledb = RestoreImageRecord(
+  internal static let sonoma1421Appledb = RestoreImageRecord(
     version: "14.2.1",
     buildNumber: "23C71",  // Same as sonoma1421
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
@@ -251,7 +244,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Same build as sonoma1421, incomplete data (missing hashes)
-  public static let sonoma1421Incomplete = RestoreImageRecord(
+  internal static let sonoma1421Incomplete = RestoreImageRecord(
     version: "14.2.1",
     buildNumber: "23C71",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
@@ -267,7 +260,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Sequoia 15.1 for sorting tests (newer)
-  public static let sequoia151 = RestoreImageRecord(
+  internal static let sequoia151 = RestoreImageRecord(
     version: "15.1",
     buildNumber: "24B83",
     releaseDate: Date(timeIntervalSince1970: 1_730_000_000),  // Nov 2024
@@ -283,7 +276,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Sonoma 14.0 for sorting tests (older)
-  public static let sonoma140 = RestoreImageRecord(
+  internal static let sonoma140 = RestoreImageRecord(
     version: "14.0",
     buildNumber: "23A344",
     releaseDate: Date(timeIntervalSince1970: 1_695_657_600),  // Sep 2023
@@ -299,7 +292,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Record with isSigned=true, old timestamp
-  public static let signedOld = RestoreImageRecord(
+  internal static let signedOld = RestoreImageRecord(
     version: "14.3",
     buildNumber: "23D56",
     releaseDate: Date(timeIntervalSince1970: 1_705_000_000),
@@ -315,7 +308,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Record with isSigned=false, newer timestamp (should win)
-  public static let unsignedNewer = RestoreImageRecord(
+  internal static let unsignedNewer = RestoreImageRecord(
     version: "14.3",
     buildNumber: "23D56",  // Same build as signedOld
     releaseDate: Date(timeIntervalSince1970: 1_705_000_000),
@@ -331,7 +324,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// RestoreImage for version 14.2 (matches 14.2 and 14.2.x)
-  public static let restoreImage142 = RestoreImageRecord(
+  internal static let restoreImage142 = RestoreImageRecord(
     version: "14.2",
     buildNumber: "23C64",
     releaseDate: Date(timeIntervalSince1970: 1_700_000_000),
@@ -349,7 +342,7 @@ public enum TestFixtures: Sendable {
   // MARK: XcodeVersion Reference Resolution Fixtures
 
   /// Xcode with REQUIRES in notes (to be resolved)
-  public static let xcodeWithRequires142 = XcodeVersionRecord(
+  internal static let xcodeWithRequires142 = XcodeVersionRecord(
     version: "15.1",
     buildNumber: "15C65",
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
@@ -363,7 +356,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Xcode with REQUIRES using 3-component version
-  public static let xcodeWithRequires1421 = XcodeVersionRecord(
+  internal static let xcodeWithRequires1421 = XcodeVersionRecord(
     version: "15.2",
     buildNumber: "15C500b",
     releaseDate: Date(timeIntervalSince1970: 1_710_000_000),
@@ -377,7 +370,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Xcode with no REQUIRES (should remain nil)
-  public static let xcodeNoRequires = XcodeVersionRecord(
+  internal static let xcodeNoRequires = XcodeVersionRecord(
     version: "14.0",
     buildNumber: "14A309",
     releaseDate: Date(timeIntervalSince1970: 1_660_000_000),
@@ -391,7 +384,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Xcode with unparseable REQUIRES
-  public static let xcodeInvalidRequires = XcodeVersionRecord(
+  internal static let xcodeInvalidRequires = XcodeVersionRecord(
     version: "15.0",
     buildNumber: "15A240d",
     releaseDate: Date(timeIntervalSince1970: 1_695_657_600),
@@ -407,7 +400,7 @@ public enum TestFixtures: Sendable {
   // MARK: Xcode/Swift Deduplication Fixtures
 
   /// Duplicate Xcode build (for deduplication)
-  public static let xcode151Duplicate = XcodeVersionRecord(
+  internal static let xcode151Duplicate = XcodeVersionRecord(
     version: "15.1",
     buildNumber: "15C65",  // Same build as xcode151
     releaseDate: Date(timeIntervalSince1970: 1_702_339_200),
@@ -421,7 +414,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Xcode 16.0 for sorting tests
-  public static let xcode160 = XcodeVersionRecord(
+  internal static let xcode160 = XcodeVersionRecord(
     version: "16.0",
     buildNumber: "16A242d",
     releaseDate: Date(timeIntervalSince1970: 1_725_000_000),  // Sep 2024
@@ -435,7 +428,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Duplicate Swift version
-  public static let swift592Duplicate = SwiftVersionRecord(
+  internal static let swift592Duplicate = SwiftVersionRecord(
     version: "5.9.2",  // Same as swift592
     releaseDate: Date(timeIntervalSince1970: 1_702_400_000),  // Different date
     downloadURL: URL(string: "https://different-swift-url.com/swift-5.9.2.pkg"),
@@ -444,7 +437,7 @@ public enum TestFixtures: Sendable {
   )
 
   /// Swift 6.1 for sorting tests
-  public static let swift61 = SwiftVersionRecord(
+  internal static let swift61 = SwiftVersionRecord(
     version: "6.1",
     releaseDate: Date(timeIntervalSince1970: 1_730_000_000),  // Nov 2024
     downloadURL: nil,
@@ -455,7 +448,7 @@ public enum TestFixtures: Sendable {
   // MARK: - VirtualBuddy API Response Fixtures
 
   /// VirtualBuddy API response for a signed macOS build
-  public static let virtualBuddySignedResponse = """
+  internal static let virtualBuddySignedResponse = """
     {
       "uuid": "67919BEC-F793-4544-A5E6-152EE435DCA6",
       "version": "15.0",
@@ -467,7 +460,7 @@ public enum TestFixtures: Sendable {
     """
 
   /// VirtualBuddy API response for an unsigned macOS build
-  public static let virtualBuddyUnsignedResponse = """
+  internal static let virtualBuddyUnsignedResponse = """
     {
       "uuid": "02A12F2F-CE0E-4FBF-8155-884B8D9FD5CB",
       "version": "15.1",
@@ -479,7 +472,7 @@ public enum TestFixtures: Sendable {
     """
 
   /// VirtualBuddy API response for Sonoma 14.2.1 (signed)
-  public static let virtualBuddySonoma1421Response = """
+  internal static let virtualBuddySonoma1421Response = """
     {
       "uuid": "A1B2C3D4-E5F6-7890-1234-567890ABCDEF",
       "version": "14.2.1",
@@ -491,7 +484,7 @@ public enum TestFixtures: Sendable {
     """
 
   /// VirtualBuddy API response with build number mismatch
-  public static let virtualBuddyBuildMismatchResponse = """
+  internal static let virtualBuddyBuildMismatchResponse = """
     {
       "uuid": "MISMATCH-UUID-1234-5678-9ABC-DEF123456789",
       "version": "15.0",
@@ -501,5 +494,14 @@ public enum TestFixtures: Sendable {
       "isSigned": true
     }
     """
+
+  // MARK: - Helpers
+
+  /// Create a URL from a string, force unwrapping for test fixtures
+  /// Test URLs are known to be valid, so force unwrap is acceptable here
+  private static func url(_ string: String) -> URL {
+    // swiftlint:disable:next force_unwrapping
+    URL(string: string)!
+  }
 }
 // swiftlint:enable identifier_name file_length type_body_length
