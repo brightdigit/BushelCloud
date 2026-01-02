@@ -255,10 +255,11 @@ runs:
         echo "Environment: $CLOUDKIT_ENVIRONMENT"
 
         # Run sync with JSON output (captures create/update/failure statistics)
+        # Redirect stderr to preserve verbose logs while keeping stdout clean for JSON
         ./binary/bushel-cloud sync \
           --verbose \
           --container-identifier "$CLOUDKIT_CONTAINER_ID" \
-          > sync-result.json
+          > sync-result.json 2> sync.log
 
         # Parse sync results using jq
         RESTORE_CREATED=$(jq '.restoreImages.created' sync-result.json)
@@ -303,6 +304,13 @@ runs:
 
         # Append to GitHub Actions summary
         cat sync-summary.md >> $GITHUB_STEP_SUMMARY
+
+        # Display sync logs for debugging (last 50 lines)
+        if [ -f sync.log ]; then
+          echo ""
+          echo "📋 Sync logs (last 50 lines):"
+          tail -n 50 sync.log
+        fi
 
         echo "✅ Sync complete"
 
@@ -365,6 +373,17 @@ runs:
         cat export-summary.md >> $GITHUB_STEP_SUMMARY
 
         echo "✅ Export complete with ${TOTAL_COUNT} total records"
+
+    - name: Upload sync logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: sync-logs-${{ inputs.environment }}
+        path: |
+          sync.log
+          sync-result.json
+          sync-summary.md
+        retention-days: 7
 
     - name: Upload export artifacts
       if: inputs.enable-export == 'true'
