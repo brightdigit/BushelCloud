@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -32,19 +32,30 @@ import BushelFoundation
 import Foundation
 internal import MistKit
 
-enum StatusCommand {
-  static func run(args: [String]) async throws {
+internal enum StatusCommand {
+  internal static func run(_ args: [String]) async throws {
     // Load configuration using Swift Configuration
     let loader = ConfigurationLoader()
     let rawConfig = try await loader.loadConfiguration()
     let config = try rawConfig.validated()
 
     // Create CloudKit service
-    let cloudKitService = try BushelCloudKitService(
-      containerIdentifier: config.cloudKit.containerID,
-      keyID: config.cloudKit.keyID,
-      privateKeyPath: config.cloudKit.privateKeyPath
-    )
+    let cloudKitService: BushelCloudKitService
+    if let pemString = config.cloudKit.privateKey {
+      cloudKitService = try BushelCloudKitService(
+        containerIdentifier: config.cloudKit.containerID,
+        keyID: config.cloudKit.keyID,
+        pemString: pemString,
+        environment: config.cloudKit.environment
+      )
+    } else {
+      cloudKitService = try BushelCloudKitService(
+        containerIdentifier: config.cloudKit.containerID,
+        keyID: config.cloudKit.keyID,
+        privateKeyPath: config.cloudKit.privateKeyPath,
+        environment: config.cloudKit.environment
+      )
+    }
 
     // Load configuration to show intervals
     let configuration = config.fetch ?? FetchConfiguration.loadFromEnvironment()

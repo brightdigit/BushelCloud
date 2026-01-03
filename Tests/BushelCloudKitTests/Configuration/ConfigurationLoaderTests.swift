@@ -7,72 +7,24 @@
 
 import Configuration
 import Foundation
+import MistKit
 import Testing
 
 @testable import BushelCloudKit
 @testable import BushelFoundation
-@testable import ConfigKeyKit
-
-// swiftlint:disable file_length type_body_length
 
 /// Comprehensive tests for ConfigurationLoader
 ///
 /// Tests the configuration loading pipeline from CLI arguments and environment
 /// variables through to the final BushelConfiguration structure.
 @Suite("ConfigurationLoader Tests")
-struct ConfigurationLoaderTests {
-  // MARK: - Test Utilities
-
-  #if DEBUG
-    /// Create a ConfigurationLoader with simulated CLI args and environment variables
-    ///
-    /// - Parameters:
-    ///   - cliArgs: Simulated CLI arguments (format: "key=value" or "key" for flags)
-    ///   - env: Simulated environment variables
-    /// - Returns: ConfigurationLoader with controlled inputs
-    private static func createLoader(
-      cliArgs: [String],
-      env: [String: String]
-    ) -> ConfigurationLoader {
-      // Parse CLI args: "key=value" or "key" for flags
-      var cliValues: [AbsoluteConfigKey: ConfigValue] = [:]
-      for arg in cliArgs {
-        if arg.contains("=") {
-          let parts = arg.split(separator: "=", maxSplits: 1)
-          if parts.count == 2 {
-            let key = AbsoluteConfigKey(stringLiteral: String(parts[0]))
-            cliValues[key] = .init(.string(String(parts[1])), isSecret: false)
-          }
-        } else {
-          // Flag presence (boolean)
-          let key = AbsoluteConfigKey(stringLiteral: arg)
-          cliValues[key] = .init(.string("true"), isSecret: false)
-        }
-      }
-
-      // ENV vars as-is
-      var envValues: [AbsoluteConfigKey: ConfigValue] = [:]
-      for (key, value) in env {
-        let configKey = AbsoluteConfigKey(stringLiteral: key)
-        envValues[configKey] = .init(.string(value), isSecret: false)
-      }
-
-      let providers: [any ConfigProvider] = [
-        InMemoryProvider(values: cliValues),  // Priority 1: CLI
-        InMemoryProvider(values: envValues),  // Priority 2: ENV
-      ]
-
-      let configReader = ConfigReader(providers: providers)
-      return ConfigurationLoader(configReader: configReader)
-    }
-  #endif
-
+internal struct ConfigurationLoaderTests {
   // MARK: - Boolean Parsing Tests
 
   @Suite("Boolean Parsing")
-  struct BooleanParsingTests {
+  internal struct BooleanParsingTests {
     @Test("CLI flag presence sets boolean to true")
-    func testCLIFlagPresence() async throws {
+    internal func testCLIFlagPresence() async throws {
       // Simulate: bushel-cloud sync --verbose
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: ["sync.verbose"],
@@ -84,7 +36,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("ENV var 'true' sets boolean to true")
-    func testEnvTrue() async throws {
+    internal func testEnvTrue() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "true"]
@@ -95,7 +47,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("ENV var '1' sets boolean to true")
-    func testEnvOne() async throws {
+    internal func testEnvOne() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "1"]
@@ -109,7 +61,7 @@ struct ConfigurationLoaderTests {
       "ENV var 'yes' (case-insensitive) sets boolean to true",
       arguments: ["yes", "YES", "Yes", "yEs"]
     )
-    func testEnvYes(value: String) async throws {
+    internal func testEnvYes(value: String) async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": value]
@@ -120,7 +72,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("ENV var 'false' sets boolean to false")
-    func testEnvFalse() async throws {
+    internal func testEnvFalse() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "false"]
@@ -131,7 +83,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("ENV var '0' sets boolean to false")
-    func testEnvZero() async throws {
+    internal func testEnvZero() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "0"]
@@ -142,7 +94,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("ENV var 'no' sets boolean to false")
-    func testEnvNo() async throws {
+    internal func testEnvNo() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "no"]
@@ -153,7 +105,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Empty ENV var uses default value")
-    func testEnvEmpty() async throws {
+    internal func testEnvEmpty() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": ""]
@@ -164,7 +116,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Invalid ENV var value uses default")
-    func testEnvInvalid() async throws {
+    internal func testEnvInvalid() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "maybe"]
@@ -175,7 +127,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("ENV var with whitespace is trimmed and parsed")
-    func testEnvWhitespace() async throws {
+    internal func testEnvWhitespace() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "  true  "]
@@ -189,9 +141,9 @@ struct ConfigurationLoaderTests {
   // MARK: - Source Precedence Tests
 
   @Suite("Source Precedence")
-  struct SourcePrecedenceTests {
+  internal struct SourcePrecedenceTests {
     @Test("CLI flag overrides ENV false")
-    func testCLIOverridesEnvFalse() async throws {
+    internal func testCLIOverridesEnvFalse() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: ["sync.verbose"],
         env: ["BUSHEL_SYNC_VERBOSE": "false"]
@@ -202,7 +154,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Absence of CLI flag respects ENV true")
-    func testNoCLIRespectsEnvTrue() async throws {
+    internal func testNoCLIRespectsEnvTrue() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "true"]
@@ -216,9 +168,9 @@ struct ConfigurationLoaderTests {
   // MARK: - String Parsing Tests
 
   @Suite("String Parsing")
-  struct StringParsingTests {
+  internal struct StringParsingTests {
     @Test("String value from CLI arguments")
-    func testStringFromCLI() async throws {
+    internal func testStringFromCLI() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: ["cloudkit.container_id=iCloud.com.test.App"],
         env: [:]
@@ -229,7 +181,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("String value from environment variable")
-    func testStringFromEnv() async throws {
+    internal func testStringFromEnv() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["CLOUDKIT_CONTAINER_ID": "iCloud.com.env.App"]
@@ -240,7 +192,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("CLI string overrides ENV string")
-    func testStringCLIPrecedence() async throws {
+    internal func testStringCLIPrecedence() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: ["cloudkit.container_id=iCloud.com.cli.App"],
         env: ["CLOUDKIT_CONTAINER_ID": "iCloud.com.env.App"]
@@ -251,7 +203,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("String uses default when not provided")
-    func testStringDefault() async throws {
+    internal func testStringDefault() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: [:]
@@ -265,9 +217,9 @@ struct ConfigurationLoaderTests {
   // MARK: - Integer Parsing Tests
 
   @Suite("Integer Parsing")
-  struct IntegerParsingTests {
+  internal struct IntegerParsingTests {
     @Test("Valid integer from CLI")
-    func testValidIntFromCLI() async throws {
+    internal func testValidIntFromCLI() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: ["sync.min_interval=3600"],
         env: [:]
@@ -278,7 +230,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Valid integer from ENV")
-    func testValidIntFromEnv() async throws {
+    internal func testValidIntFromEnv() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_MIN_INTERVAL": "7200"]
@@ -289,7 +241,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Invalid integer string returns nil")
-    func testInvalidInt() async throws {
+    internal func testInvalidInt() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_MIN_INTERVAL": "not-a-number"]
@@ -300,7 +252,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Empty string for integer returns nil")
-    func testEmptyInt() async throws {
+    internal func testEmptyInt() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_MIN_INTERVAL": ""]
@@ -314,9 +266,9 @@ struct ConfigurationLoaderTests {
   // MARK: - Double Parsing Tests
 
   @Suite("Double Parsing")
-  struct DoubleParsingTests {
+  internal struct DoubleParsingTests {
     @Test("Valid double from CLI")
-    func testValidDoubleFromCLI() async throws {
+    internal func testValidDoubleFromCLI() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: ["fetch.interval.appledb_dev=3600.5"],
         env: [:]
@@ -328,7 +280,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Invalid double string returns nil")
-    func testInvalidDouble() async throws {
+    internal func testInvalidDouble() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["FETCH_INTERVAL_APPLEDB_DEV": "invalid"]
@@ -343,9 +295,9 @@ struct ConfigurationLoaderTests {
   // MARK: - CloudKit Configuration Tests
 
   @Suite("CloudKit Configuration")
-  struct CloudKitConfigurationTests {
+  internal struct CloudKitConfigurationTests {
     @Test("Missing CloudKit key ID throws error")
-    func testMissingKeyID() async throws {
+    internal func testMissingKeyID() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: [
@@ -364,7 +316,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Missing CloudKit private key path throws error")
-    func testMissingPrivateKeyPath() async throws {
+    internal func testMissingPrivateKeyPath() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: [
@@ -382,7 +334,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("All CloudKit fields present passes validation")
-    func testAllCloudKitFieldsPresent() async throws {
+    internal func testAllCloudKitFieldsPresent() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: [
@@ -399,14 +351,173 @@ struct ConfigurationLoaderTests {
       #expect(validated.cloudKit.keyID == "test-key-id")
       #expect(validated.cloudKit.privateKeyPath == "/path/to/key.pem")
     }
+
+    @Test("CloudKit privateKey from environment variable")
+    internal func testPrivateKeyFromEnv() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY":
+            "-----BEGIN PRIVATE KEY-----\nMIGH...\n-----END PRIVATE KEY-----",
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      #expect(validated.cloudKit.privateKey != nil)
+      #expect(validated.cloudKit.privateKey?.contains("BEGIN PRIVATE KEY") == true)
+    }
+
+    @Test(
+      "CloudKit environment from environment variable",
+      arguments: ["development", "production"]
+    )
+    internal func testEnvironmentFromEnv(environment: String) async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+          "CLOUDKIT_ENVIRONMENT": environment,
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      #expect(validated.cloudKit.environment.rawValue == environment)
+    }
+
+    @Test("Invalid CloudKit environment throws error")
+    internal func testInvalidEnvironment() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+          "CLOUDKIT_ENVIRONMENT": "staging",  // Invalid
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+
+      #expect(throws: ConfigurationError.self) {
+        try config.validated()
+      }
+    }
+
+    @Test("Missing both privateKey and privateKeyPath throws error")
+    internal func testMissingBothCredentials() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+            // Missing both CLOUDKIT_PRIVATE_KEY and CLOUDKIT_PRIVATE_KEY_PATH
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+
+      #expect(throws: ConfigurationError.self) {
+        try config.validated()
+      }
+    }
+
+    @Test("privateKey takes precedence over privateKeyPath when both are set")
+    internal func testPrivateKeyPrecedence() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY":
+            "-----BEGIN PRIVATE KEY-----\nfrom-env\n-----END PRIVATE KEY-----",
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      // Both should be set in validated config
+      #expect(validated.cloudKit.privateKey != nil)
+      #expect(!validated.cloudKit.privateKeyPath.isEmpty)
+      // SyncEngine will prefer privateKey when initializing
+    }
+
+    @Test("Empty CLOUDKIT_PRIVATE_KEY is treated as absent")
+    internal func testEmptyPrivateKeyIsAbsent() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY": "   ",  // Whitespace only
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      // Should use privateKeyPath since privateKey is effectively empty
+      #expect(validated.cloudKit.privateKey == nil)
+      #expect(!validated.cloudKit.privateKeyPath.isEmpty)
+    }
+
+    @Test("Environment parsing is case-insensitive")
+    internal func testEnvironmentCaseInsensitive() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
+          "CLOUDKIT_ENVIRONMENT": "Production",  // Mixed case
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      #expect(validated.cloudKit.environment == .production)
+    }
+
+    @Test("All CloudKit fields present with privateKey passes validation")
+    internal func testAllCloudKitFieldsWithPrivateKey() async throws {
+      let loader = ConfigurationLoaderTests.createLoader(
+        cliArgs: [],
+        env: [
+          "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
+          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_PRIVATE_KEY":
+            "-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----",
+          "CLOUDKIT_ENVIRONMENT": "production",
+        ]
+      )
+
+      let config = try await loader.loadConfiguration()
+      let validated = try config.validated()
+
+      #expect(validated.cloudKit.containerID == "iCloud.com.test.App")
+      #expect(validated.cloudKit.keyID == "test-key-id")
+      #expect(validated.cloudKit.privateKey != nil)
+      #expect(validated.cloudKit.environment == .production)
+    }
   }
 
   // MARK: - Command Configuration Tests
 
   @Suite("Command Configurations")
-  struct CommandConfigurationTests {
+  internal struct CommandConfigurationTests {
     @Test("Sync configuration uses defaults when not provided")
-    func testSyncDefaults() async throws {
+    internal func testSyncDefaults() async throws {
       let loader = ConfigurationLoaderTests.createLoader(cliArgs: [], env: [:])
 
       let config = try await loader.loadConfiguration()
@@ -418,7 +529,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Export configuration from CLI arguments")
-    func testExportFromCLI() async throws {
+    internal func testExportFromCLI() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [
           "export.output=/tmp/export.json",
@@ -436,7 +547,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Multiple command configurations coexist")
-    func testMultipleCommandConfigs() async throws {
+    internal func testMultipleCommandConfigs() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [
           "sync.verbose",
@@ -457,9 +568,9 @@ struct ConfigurationLoaderTests {
   // MARK: - Integration Tests
 
   @Suite("Integration Tests")
-  struct IntegrationTests {
+  internal struct IntegrationTests {
     @Test("Complete sync configuration from multiple sources")
-    func testCompleteSyncConfig() async throws {
+    internal func testCompleteSyncConfig() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [
           "sync.verbose",
@@ -491,7 +602,7 @@ struct ConfigurationLoaderTests {
     }
 
     @Test("Fetch configuration with per-source intervals")
-    func testFetchPerSourceIntervals() async throws {
+    internal func testFetchPerSourceIntervals() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: [
@@ -505,5 +616,49 @@ struct ConfigurationLoaderTests {
       #expect(config.fetch?.perSourceIntervals["appledb.dev"] == 7_200)
       #expect(config.fetch?.perSourceIntervals["ipsw.me"] == 10_800)
     }
+  }
+
+  // MARK: - Test Utilities
+
+  /// Create a ConfigurationLoader with simulated CLI args and environment variables
+  ///
+  /// - Parameters:
+  ///   - cliArgs: Simulated CLI arguments (format: "key=value" or "key" for flags)
+  ///   - env: Simulated environment variables
+  /// - Returns: ConfigurationLoader with controlled inputs
+  private static func createLoader(
+    cliArgs: [String],
+    env: [String: String]
+  ) -> ConfigurationLoader {
+    // Parse CLI args: "key=value" or "key" for flags
+    var cliValues: [AbsoluteConfigKey: ConfigValue] = [:]
+    for arg in cliArgs {
+      if arg.contains("=") {
+        let parts = arg.split(separator: "=", maxSplits: 1)
+        if parts.count == 2 {
+          let key = AbsoluteConfigKey(stringLiteral: String(parts[0]))
+          cliValues[key] = .init(.string(String(parts[1])), isSecret: false)
+        }
+      } else {
+        // Flag presence (boolean)
+        let key = AbsoluteConfigKey(stringLiteral: arg)
+        cliValues[key] = .init(.string("true"), isSecret: false)
+      }
+    }
+
+    // ENV vars as-is
+    var envValues: [AbsoluteConfigKey: ConfigValue] = [:]
+    for (key, value) in env {
+      let configKey = AbsoluteConfigKey(stringLiteral: key)
+      envValues[configKey] = .init(.string(value), isSecret: false)
+    }
+
+    let providers: [any ConfigProvider] = [
+      InMemoryProvider(values: cliValues),  // Priority 1: CLI
+      InMemoryProvider(values: envValues),  // Priority 2: ENV
+    ]
+
+    let configReader = ConfigReader(providers: providers)
+    return ConfigurationLoader(configReader: configReader)
   }
 }

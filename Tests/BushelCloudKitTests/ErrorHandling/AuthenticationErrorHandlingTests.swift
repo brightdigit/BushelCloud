@@ -30,14 +30,12 @@
 import Foundation
 import Testing
 
-@testable import BushelCloudKit
-
 // MARK: - Authentication Error Handling Tests
 
 @Suite("Authentication Error Handling Tests")
-struct AuthenticationErrorHandlingTests {
+internal struct AuthenticationErrorHandlingTests {
   @Test("CloudKit authentication failure")
-  func testCloudKitAuthFailure() async {
+  internal func testCloudKitAuthFailure() async {
     let service = MockCloudKitService()
     await service.setShouldFailQuery(true)
     await service.setQueryError(MockCloudKitError.authenticationFailed)
@@ -57,7 +55,7 @@ struct AuthenticationErrorHandlingTests {
   }
 
   @Test("CloudKit access denied")
-  func testCloudKitAccessDenied() async {
+  internal func testCloudKitAccessDenied() async {
     let service = MockCloudKitService()
     await service.setShouldFailQuery(true)
     await service.setQueryError(MockCloudKitError.accessDenied)
@@ -77,7 +75,7 @@ struct AuthenticationErrorHandlingTests {
   }
 
   @Test("Data source authentication failure")
-  func testDataSourceAuthFailure() async {
+  internal func testDataSourceAuthFailure() async {
     let fetcher = MockXcodeReleasesFetcher(
       errorToThrow: MockFetcherError.authenticationFailed
     )

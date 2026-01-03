@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -47,9 +47,6 @@ public import MistKit
 ///
 /// Use `--verbose` flag to see detailed MistKit API usage.
 public struct SyncEngine: Sendable {
-  let cloudKitService: BushelCloudKitService
-  let pipeline: DataSourcePipeline
-
   // MARK: - Configuration
 
   public struct SyncOptions: Sendable {
@@ -60,183 +57,6 @@ public struct SyncEngine: Sendable {
       self.dryRun = dryRun
       self.pipelineOptions = pipelineOptions
     }
-  }
-
-  // MARK: - Initialization
-
-  public init(
-    containerIdentifier: String,
-    keyID: String,
-    privateKeyPath: String,
-    configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
-  ) throws {
-    let service = try BushelCloudKitService(
-      containerIdentifier: containerIdentifier,
-      keyID: keyID,
-      privateKeyPath: privateKeyPath
-    )
-    self.cloudKitService = service
-    self.pipeline = DataSourcePipeline(
-      configuration: configuration
-    )
-  }
-
-  // MARK: - Sync Operations
-
-  /// Execute full sync from all data sources to CloudKit
-  public func sync(options: SyncOptions = SyncOptions()) async throws -> SyncResult {
-    print("\n" + String(repeating: "=", count: 60))
-    BushelUtilities.ConsoleOutput.info("Starting Bushel CloudKit Sync")
-    print(String(repeating: "=", count: 60))
-    Self.logger.info("Sync started")
-
-    if options.dryRun {
-      BushelUtilities.ConsoleOutput.info("DRY RUN MODE - No changes will be made to CloudKit")
-      Self.logger.info("Sync running in dry-run mode")
-    }
-
-    Self.logger.debug(
-      "Using MistKit Server-to-Server authentication for bulk record operations"
-    )
-
-    // Step 1: Fetch from all data sources
-    print("\n📥 Step 1: Fetching data from external sources...")
-    Self.logger.debug(
-      "Initializing data source pipeline to fetch from ipsw.me, TheAppleWiki, MESU, and other sources"
-    )
-
-    let fetchResult = try await pipeline.fetch(options: options.pipelineOptions)
-
-    Self.logger.debug(
-      "Data fetch complete. Beginning deduplication and merge phase."
-    )
-    Self.logger.debug(
-      "Multiple data sources may have overlapping data. The pipeline deduplicates by version+build number."
-    )
-
-    let stats = SyncResult(
-      restoreImagesCount: fetchResult.restoreImages.count,
-      xcodeVersionsCount: fetchResult.xcodeVersions.count,
-      swiftVersionsCount: fetchResult.swiftVersions.count
-    )
-
-    let totalRecords =
-      stats.restoreImagesCount + stats.xcodeVersionsCount + stats.swiftVersionsCount
-
-    print("\n📊 Data Summary:")
-    print("   RestoreImages: \(stats.restoreImagesCount)")
-    print("   XcodeVersions: \(stats.xcodeVersionsCount)")
-    print("   SwiftVersions: \(stats.swiftVersionsCount)")
-    print("   ─────────────────────")
-    print("   Total: \(totalRecords) records")
-
-    Self.logger.debug(
-      "Records ready for CloudKit upload: \(totalRecords) total"
-    )
-
-    // Step 2: Sync to CloudKit (unless dry run)
-    if !options.dryRun {
-      print("\n☁️  Step 2: Syncing to CloudKit...")
-      Self.logger.debug(
-        "Using MistKit to batch upload records to CloudKit public database"
-      )
-      Self.logger.debug(
-        "MistKit handles authentication, batching (200 records/request), and error handling automatically"
-      )
-
-      // Sync in dependency order: SwiftVersion → RestoreImage → XcodeVersion
-      // (Prevents broken CKReference relationships)
-      try await cloudKitService.syncAllRecords(
-        fetchResult.swiftVersions,  // First: no dependencies
-        fetchResult.restoreImages,  // Second: no dependencies
-        fetchResult.xcodeVersions  // Third: references first two
-      )
-    } else {
-      print("\n⏭️  Step 2: Skipped (dry run)")
-      print("   Would sync:")
-      print("   • \(stats.restoreImagesCount) restore images")
-      print("   • \(stats.xcodeVersionsCount) Xcode versions")
-      print("   • \(stats.swiftVersionsCount) Swift versions")
-      Self.logger.debug(
-        "Dry run mode: No CloudKit operations performed"
-      )
-    }
-
-    print("\n" + String(repeating: "=", count: 60))
-    BushelUtilities.ConsoleOutput.success("Sync completed successfully!")
-    print(String(repeating: "=", count: 60))
-    Self.logger.info("Sync completed successfully")
-
-    return stats
-  }
-
-  /// Delete all records from CloudKit
-  public func clear() async throws {
-    print("\n" + String(repeating: "=", count: 60))
-    BushelUtilities.ConsoleOutput.info("Clearing all CloudKit data")
-    print(String(repeating: "=", count: 60))
-    Self.logger.info("Clearing all CloudKit records")
-
-    try await cloudKitService.deleteAllRecords()
-
-    print("\n" + String(repeating: "=", count: 60))
-    BushelUtilities.ConsoleOutput.success("Clear completed successfully!")
-    print(String(repeating: "=", count: 60))
-    Self.logger.info("Clear completed successfully")
-  }
-
-  /// Export all records from CloudKit to a structured format
-  public func export() async throws -> ExportResult {
-    print("\n" + String(repeating: "=", count: 60))
-    BushelUtilities.ConsoleOutput.info("Exporting data from CloudKit")
-    print(String(repeating: "=", count: 60))
-    Self.logger.info("Exporting CloudKit data")
-
-    Self.logger.debug(
-      "Using MistKit queryRecords() to fetch all records of each type from the public database"
-    )
-
-    print("\n📥 Fetching RestoreImage records...")
-    Self.logger.debug(
-      "Querying CloudKit for recordType: 'RestoreImage' with limit: 200"
-    )
-    let restoreImages = try await cloudKitService.queryRecords(recordType: "RestoreImage")
-    Self.logger.debug(
-      "Retrieved \(restoreImages.count) RestoreImage records"
-    )
-
-    print("📥 Fetching XcodeVersion records...")
-    Self.logger.debug(
-      "Querying CloudKit for recordType: 'XcodeVersion' with limit: 200"
-    )
-    let xcodeVersions = try await cloudKitService.queryRecords(recordType: "XcodeVersion")
-    Self.logger.debug(
-      "Retrieved \(xcodeVersions.count) XcodeVersion records"
-    )
-
-    print("📥 Fetching SwiftVersion records...")
-    Self.logger.debug(
-      "Querying CloudKit for recordType: 'SwiftVersion' with limit: 200"
-    )
-    let swiftVersions = try await cloudKitService.queryRecords(recordType: "SwiftVersion")
-    Self.logger.debug(
-      "Retrieved \(swiftVersions.count) SwiftVersion records"
-    )
-
-    print("\n✅ Exported:")
-    print("   • \(restoreImages.count) restore images")
-    print("   • \(xcodeVersions.count) Xcode versions")
-    print("   • \(swiftVersions.count) Swift versions")
-
-    Self.logger.debug(
-      "MistKit returns RecordInfo structs with record metadata. Use .fields to access CloudKit field values."
-    )
-
-    return ExportResult(
-      restoreImages: restoreImages,
-      xcodeVersions: xcodeVersions,
-      swiftVersions: swiftVersions
-    )
   }
 
   // MARK: - Result Types
@@ -253,18 +73,307 @@ public struct SyncEngine: Sendable {
     }
   }
 
-  public struct ExportResult {
-    public let restoreImages: [RecordInfo]
-    public let xcodeVersions: [RecordInfo]
-    public let swiftVersions: [RecordInfo]
+  /// Detailed sync result with per-type breakdown of creates/updates/failures
+  public struct DetailedSyncResult: Sendable, Codable {
+    public let restoreImages: TypeSyncResult
+    public let xcodeVersions: TypeSyncResult
+    public let swiftVersions: TypeSyncResult
 
     public init(
-      restoreImages: [RecordInfo], xcodeVersions: [RecordInfo], swiftVersions: [RecordInfo]
+      restoreImages: TypeSyncResult, xcodeVersions: TypeSyncResult, swiftVersions: TypeSyncResult
     ) {
       self.restoreImages = restoreImages
       self.xcodeVersions = xcodeVersions
       self.swiftVersions = swiftVersions
     }
+
+    /// Convert to JSON string
+    public func toJSON(pretty: Bool = false) throws -> String {
+      let encoder = JSONEncoder()
+      if pretty {
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+      }
+      let data = try encoder.encode(self)
+      return String(data: data, encoding: .utf8) ?? ""
+    }
+  }
+
+  /// Per-type sync statistics
+  public struct TypeSyncResult: Sendable, Codable {
+    public let created: Int
+    public let updated: Int
+    public let failed: Int
+    public let failedRecordNames: [String]
+
+    public var total: Int {
+      created + updated + failed
+    }
+
+    public var succeeded: Int {
+      created + updated
+    }
+
+    public init(created: Int, updated: Int, failed: Int, failedRecordNames: [String]) {
+      self.created = created
+      self.updated = updated
+      self.failed = failed
+      self.failedRecordNames = failedRecordNames
+    }
+  }
+
+  // MARK: - Properties
+
+  internal let cloudKitService: BushelCloudKitService
+  internal let pipeline: DataSourcePipeline
+
+  // MARK: - Initialization
+
+  /// Initialize sync engine with CloudKit credentials
+  ///
+  /// **Flexible Authentication**: Supports both file-based and string-based PEM content:
+  /// - `.pemString`: For CI/CD environments (GitHub Actions secrets)
+  /// - `.pemFile`: For local development (file on disk)
+  ///
+  /// **Environment Separation**: Use separate keys for development and production:
+  /// - Development: Safe for testing, free API calls, can clear data freely
+  /// - Production: Real user data, requires careful key management
+  ///
+  /// - Parameters:
+  ///   - containerIdentifier: CloudKit container ID
+  ///   - keyID: Server-to-Server Key ID
+  ///   - authMethod: Authentication method (`.pemString` or `.pemFile`)
+  ///   - environment: CloudKit environment (.development or .production, defaults to .development)
+  ///   - configuration: Fetch configuration for data sources
+  /// - Throws: Error if authentication credentials are invalid or missing
+  public init(
+    containerIdentifier: String,
+    keyID: String,
+    authMethod: CloudKitAuthMethod,
+    environment: Environment = .development,
+    configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
+  ) throws {
+    // Initialize CloudKit service based on auth method
+    let service: BushelCloudKitService
+    switch authMethod {
+    case .pemString(let pem):
+      service = try BushelCloudKitService(
+        containerIdentifier: containerIdentifier,
+        keyID: keyID,
+        pemString: pem,
+        environment: environment
+      )
+    case .pemFile(let path):
+      service = try BushelCloudKitService(
+        containerIdentifier: containerIdentifier,
+        keyID: keyID,
+        privateKeyPath: path,
+        environment: environment
+      )
+    }
+
+    self.cloudKitService = service
+    self.pipeline = DataSourcePipeline(
+      configuration: configuration
+    )
+  }
+
+  // MARK: - Sync Operations
+
+  /// Execute full sync from all data sources to CloudKit
+  ///
+  /// This method now tracks detailed statistics about creates, updates, and failures
+  /// for each record type, providing better visibility into sync operations.
+  ///
+  /// - Parameter options: Sync options including dry-run mode
+  /// - Returns: Detailed sync result with per-type breakdown
+  public func sync(options: SyncOptions = SyncOptions()) async throws -> DetailedSyncResult {
+    ConsoleOutput.print("\n" + String(repeating: "=", count: 60))
+    BushelUtilities.ConsoleOutput.info("Starting Bushel CloudKit Sync")
+    ConsoleOutput.print(String(repeating: "=", count: 60))
+    Self.logger.info("Sync started")
+
+    if options.dryRun {
+      BushelUtilities.ConsoleOutput.info("DRY RUN MODE - No changes will be made to CloudKit")
+      Self.logger.info("Sync running in dry-run mode")
+    }
+
+    Self.logger.debug(
+      "Using MistKit Server-to-Server authentication for bulk record operations"
+    )
+
+    // Step 1: Fetch from all data sources
+    ConsoleOutput.print("\n📥 Step 1: Fetching data from external sources...")
+    Self.logger.debug(
+      "Initializing data source pipeline to fetch from ipsw.me, TheAppleWiki, MESU, and other sources"
+    )
+
+    let fetchResult = try await pipeline.fetch(options: options.pipelineOptions)
+
+    Self.logger.debug(
+      "Data fetch complete. Beginning deduplication and merge phase."
+    )
+    Self.logger.debug(
+      "Multiple data sources may have overlapping data. The pipeline deduplicates by version+build number."
+    )
+
+    let totalRecords =
+      fetchResult.restoreImages.count + fetchResult.xcodeVersions.count
+      + fetchResult.swiftVersions.count
+
+    ConsoleOutput.print("\n📊 Data Summary:")
+    ConsoleOutput.print("   RestoreImages: \(fetchResult.restoreImages.count)")
+    ConsoleOutput.print("   XcodeVersions: \(fetchResult.xcodeVersions.count)")
+    ConsoleOutput.print("   SwiftVersions: \(fetchResult.swiftVersions.count)")
+    ConsoleOutput.print("   ─────────────────────")
+    ConsoleOutput.print("   Total: \(totalRecords) records")
+
+    Self.logger.debug(
+      "Records ready for CloudKit upload: \(totalRecords) total"
+    )
+
+    // Step 2: Sync to CloudKit (unless dry run)
+    if !options.dryRun {
+      print("\n☁️  Step 2: Syncing to CloudKit...")
+      Self.logger.debug(
+        "Using MistKit to batch upload records to CloudKit public database"
+      )
+
+      // Pre-fetch existing records in parallel
+      print("   Pre-fetching existing records for create/update classification...")
+      async let existingSwift = cloudKitService.fetchExistingRecordNames(
+        recordType: SwiftVersionRecord.cloudKitRecordType
+      )
+      async let existingRestore = cloudKitService.fetchExistingRecordNames(
+        recordType: RestoreImageRecord.cloudKitRecordType
+      )
+      async let existingXcode = cloudKitService.fetchExistingRecordNames(
+        recordType: XcodeVersionRecord.cloudKitRecordType
+      )
+
+      let (swiftNames, restoreNames, xcodeNames) = try await (
+        existingSwift, existingRestore, existingXcode
+      )
+
+      Self.logger.debug(
+        """
+        Pre-fetch complete: \(swiftNames.count) Swift, \
+        \(restoreNames.count) Restore, \(xcodeNames.count) Xcode
+        """
+      )
+
+      // Classify operations for each type
+      let swiftClassification = OperationClassification(
+        proposedRecords: fetchResult.swiftVersions.map(\.recordName),
+        existingRecords: swiftNames
+      )
+      let restoreClassification = OperationClassification(
+        proposedRecords: fetchResult.restoreImages.map(\.recordName),
+        existingRecords: restoreNames
+      )
+      let xcodeClassification = OperationClassification(
+        proposedRecords: fetchResult.xcodeVersions.map(\.recordName),
+        existingRecords: xcodeNames
+      )
+
+      Self.logger.debug(
+        "Classification complete. Ready to sync in dependency order."
+      )
+
+      // Sync each type with classification tracking (in dependency order)
+      // SwiftVersion and RestoreImage first (no dependencies)
+      // XcodeVersion last (references the other two)
+      let swiftResult = try await syncRecords(
+        fetchResult.swiftVersions,
+        classification: swiftClassification
+      )
+      let restoreResult = try await syncRecords(
+        fetchResult.restoreImages,
+        classification: restoreClassification
+      )
+      let xcodeResult = try await syncRecords(
+        fetchResult.xcodeVersions,
+        classification: xcodeClassification
+      )
+
+      print("\n" + String(repeating: "=", count: 60))
+      BushelUtilities.ConsoleOutput.success("Sync completed successfully!")
+      print(String(repeating: "=", count: 60))
+      Self.logger.info("Sync completed successfully")
+
+      return DetailedSyncResult(
+        restoreImages: restoreResult,
+        xcodeVersions: xcodeResult,
+        swiftVersions: swiftResult
+      )
+    } else {
+      print("\n⏭️  Step 2: Skipped (dry run)")
+      print("   Would sync:")
+      print("   • \(fetchResult.restoreImages.count) restore images")
+      print("   • \(fetchResult.xcodeVersions.count) Xcode versions")
+      print("   • \(fetchResult.swiftVersions.count) Swift versions")
+      Self.logger.debug(
+        "Dry run mode: No CloudKit operations performed"
+      )
+
+      print("\n" + String(repeating: "=", count: 60))
+      BushelUtilities.ConsoleOutput.success("Dry run completed!")
+      print(String(repeating: "=", count: 60))
+
+      // Return empty result for dry run
+      return DetailedSyncResult(
+        restoreImages: TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: []),
+        xcodeVersions: TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: []),
+        swiftVersions: TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: [])
+      )
+    }
+  }
+
+  /// Helper method to sync one record type
+  ///
+  /// This replaces the use of MistKit's `syncAllRecords()` extension method,
+  /// giving us full control over result tracking.
+  ///
+  /// - Parameters:
+  ///   - records: Records to sync
+  ///   - classification: Classification of operations as creates vs updates
+  /// - Returns: Sync result for this record type
+  private func syncRecords<T: CloudKitRecord>(
+    _ records: [T],
+    classification: OperationClassification
+  ) async throws -> TypeSyncResult {
+    guard !records.isEmpty else {
+      return TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: [])
+    }
+
+    let operations = records.map { record in
+      RecordOperation(
+        operationType: .forceReplace,
+        recordType: T.cloudKitRecordType,
+        recordName: record.recordName,
+        fields: record.toCloudKitFields()
+      )
+    }
+
+    return try await cloudKitService.executeBatchOperations(
+      operations,
+      recordType: T.cloudKitRecordType,
+      classification: classification
+    )
+  }
+
+  /// Delete all records from CloudKit
+  public func clear() async throws {
+    ConsoleOutput.print("\n" + String(repeating: "=", count: 60))
+    BushelUtilities.ConsoleOutput.info("Clearing all CloudKit data")
+    ConsoleOutput.print(String(repeating: "=", count: 60))
+    Self.logger.info("Clearing all CloudKit records")
+
+    try await cloudKitService.deleteAllRecords()
+
+    ConsoleOutput.print("\n" + String(repeating: "=", count: 60))
+    BushelUtilities.ConsoleOutput.success("Clear completed successfully!")
+    ConsoleOutput.print(String(repeating: "=", count: 60))
+    Self.logger.info("Clear completed successfully")
   }
 }
 

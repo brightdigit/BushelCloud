@@ -35,10 +35,10 @@ import Testing
 // MARK: - Mock Xcode Releases Fetcher Tests
 
 @Suite("Mock Xcode Releases Fetcher Tests")
-struct MockXcodeReleasesFetcherTests {
+internal struct MockXcodeReleasesFetcherTests {
   @Test("Successful fetch returns records")
-  func testSuccessfulFetch() async throws {
-    let expectedRecords = [TestFixtures.xcode15_1, TestFixtures.xcode16_0_beta]
+  internal func testSuccessfulFetch() async throws {
+    let expectedRecords = [TestFixtures.xcode151, TestFixtures.xcode160Beta]
     let fetcher = MockXcodeReleasesFetcher(recordsToReturn: expectedRecords)
 
     let result = try await fetcher.fetch()
@@ -49,7 +49,7 @@ struct MockXcodeReleasesFetcherTests {
   }
 
   @Test("Authentication error")
-  func testAuthenticationError() async {
+  internal func testAuthenticationError() async {
     let expectedError = MockFetcherError.authenticationFailed
     let fetcher = MockXcodeReleasesFetcher(errorToThrow: expectedError)
 

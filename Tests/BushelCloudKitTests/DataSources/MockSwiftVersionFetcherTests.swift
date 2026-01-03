@@ -35,10 +35,10 @@ import Testing
 // MARK: - Mock Swift Version Fetcher Tests
 
 @Suite("Mock Swift Version Fetcher Tests")
-struct MockSwiftVersionFetcherTests {
+internal struct MockSwiftVersionFetcherTests {
   @Test("Successful fetch returns records")
-  func testSuccessfulFetch() async throws {
-    let expectedRecords = [TestFixtures.swift5_9_2, TestFixtures.swift6_0_snapshot]
+  internal func testSuccessfulFetch() async throws {
+    let expectedRecords = [TestFixtures.swift592, TestFixtures.swift60Snapshot]
     let fetcher = MockSwiftVersionFetcher(recordsToReturn: expectedRecords)
 
     let result = try await fetcher.fetch()
@@ -49,7 +49,7 @@ struct MockSwiftVersionFetcherTests {
   }
 
   @Test("Timeout error")
-  func testTimeoutError() async {
+  internal func testTimeoutError() async {
     let expectedError = MockFetcherError.timeout
     let fetcher = MockSwiftVersionFetcher(errorToThrow: expectedError)
 

@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -32,8 +32,8 @@ import BushelFoundation
 import BushelUtilities
 import Foundation
 
-enum ClearCommand {
-  static func run(args: [String]) async throws {
+internal enum ClearCommand {
+  internal static func run(_ args: [String]) async throws {
     // Load configuration using Swift Configuration
     let loader = ConfigurationLoader()
     let rawConfig = try await loader.loadConfiguration()
@@ -59,11 +59,20 @@ enum ClearCommand {
       }
     }
 
+    // Determine authentication method
+    let authMethod: CloudKitAuthMethod
+    if let pemString = config.cloudKit.privateKey {
+      authMethod = .pemString(pemString)
+    } else {
+      authMethod = .pemFile(path: config.cloudKit.privateKeyPath)
+    }
+
     // Create sync engine
     let syncEngine = try SyncEngine(
       containerIdentifier: config.cloudKit.containerID,
       keyID: config.cloudKit.keyID,
-      privateKeyPath: config.cloudKit.privateKeyPath
+      authMethod: authMethod,
+      environment: config.cloudKit.environment
     )
 
     // Execute clear
@@ -78,7 +87,7 @@ enum ClearCommand {
 
   // MARK: - Private Helpers
 
-  private static func printError(_ error: Error) {
+  private static func printError(_ error: any Error) {
     print("\n❌ Clear failed: \(error.localizedDescription)")
     print("\n💡 Troubleshooting:")
     print("   • Verify your API token is valid")

@@ -10,9 +10,9 @@ import Testing
 @testable import ConfigKeyKit
 
 @Suite("OptionalConfigKey Tests")
-struct OptionalConfigKeyTests {
+internal struct OptionalConfigKeyTests {
   @Test("OptionalConfigKey with explicit keys")
-  func explicitKeys() {
+  internal func explicitKeys() {
     let key = OptionalConfigKey<String>(cli: "test.key", env: "TEST_KEY")
 
     #expect(key.key(for: .commandLine) == "test.key")
@@ -20,7 +20,7 @@ struct OptionalConfigKeyTests {
   }
 
   @Test("OptionalConfigKey with base string and default prefix")
-  func baseStringWithDefaultPrefix() {
+  internal func baseStringWithDefaultPrefix() {
     let key = OptionalConfigKey<String>(bushelPrefixed: "cloudkit.key_id")
 
     #expect(key.key(for: .commandLine) == "cloudkit.key_id")
@@ -28,7 +28,7 @@ struct OptionalConfigKeyTests {
   }
 
   @Test("OptionalConfigKey with base string and no prefix")
-  func baseStringNoPrefix() {
+  internal func baseStringNoPrefix() {
     let key = OptionalConfigKey<String>("cloudkit.key_id", envPrefix: nil)
 
     #expect(key.key(for: .commandLine) == "cloudkit.key_id")
@@ -36,7 +36,7 @@ struct OptionalConfigKeyTests {
   }
 
   @Test("OptionalConfigKey and ConfigKey generate identical keys")
-  func keyGenerationParity() {
+  internal func keyGenerationParity() {
     let optional = OptionalConfigKey<String>(bushelPrefixed: "test.key")
     let withDefault = ConfigKey<String>(bushelPrefixed: "test.key", default: "default")
 
@@ -45,7 +45,7 @@ struct OptionalConfigKeyTests {
   }
 
   @Test("OptionalConfigKey for Int type")
-  func intOptionalKey() {
+  internal func intOptionalKey() {
     let key = OptionalConfigKey<Int>(bushelPrefixed: "sync.min_interval")
 
     #expect(key.key(for: .commandLine) == "sync.min_interval")
@@ -53,7 +53,7 @@ struct OptionalConfigKeyTests {
   }
 
   @Test("OptionalConfigKey for Double type")
-  func doubleOptionalKey() {
+  internal func doubleOptionalKey() {
     let key = OptionalConfigKey<Double>(bushelPrefixed: "fetch.interval_global")
 
     #expect(key.key(for: .commandLine) == "fetch.interval_global")

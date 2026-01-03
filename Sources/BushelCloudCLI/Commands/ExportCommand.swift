@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -32,8 +32,36 @@ import BushelFoundation
 import Foundation
 import MistKit
 
-enum ExportCommand {
-  static func run(args: [String]) async throws {
+internal enum ExportCommand {
+  // MARK: - Export Types
+
+  private struct ExportData: Codable {
+    let restoreImages: [RecordExport]
+    let xcodeVersions: [RecordExport]
+    let swiftVersions: [RecordExport]
+  }
+
+  private struct RecordExport: Codable {
+    let recordName: String
+    let recordType: String
+    let fields: [String: String]
+
+    init(from recordInfo: RecordInfo) {
+      self.recordName = recordInfo.recordName
+      self.recordType = recordInfo.recordType
+      self.fields = recordInfo.fields.mapValues { fieldValue in
+        String(describing: fieldValue)
+      }
+    }
+  }
+
+  private enum ExportError: Error {
+    case encodingFailed
+  }
+
+  // MARK: - Command Implementation
+
+  internal static func run(_ args: [String]) async throws {
     // Load configuration using Swift Configuration
     let loader = ConfigurationLoader()
     let rawConfig = try await loader.loadConfiguration()
@@ -42,11 +70,20 @@ enum ExportCommand {
     // Enable verbose console output if requested
     ConsoleOutput.isVerbose = config.export?.verbose ?? false
 
+    // Determine authentication method
+    let authMethod: CloudKitAuthMethod
+    if let pemString = config.cloudKit.privateKey {
+      authMethod = .pemString(pemString)
+    } else {
+      authMethod = .pemFile(path: config.cloudKit.privateKeyPath)
+    }
+
     // Create sync engine
     let syncEngine = try SyncEngine(
       containerIdentifier: config.cloudKit.containerID,
       keyID: config.cloudKit.keyID,
-      privateKeyPath: config.cloudKit.privateKeyPath
+      authMethod: authMethod,
+      environment: config.cloudKit.environment
     )
 
     // Execute export
@@ -73,7 +110,9 @@ enum ExportCommand {
     to result: SyncEngine.ExportResult,
     with exportConfig: ExportConfiguration?
   ) -> SyncEngine.ExportResult {
-    guard let exportConfig = exportConfig else { return result }
+    guard let exportConfig = exportConfig else {
+      return result
+    }
 
     var restoreImages = result.restoreImages
     var xcodeVersions = result.xcodeVersions
@@ -146,38 +185,12 @@ enum ExportCommand {
     try content.write(toFile: path, atomically: true, encoding: .utf8)
   }
 
-  private static func printError(_ error: Error) {
+  private static func printError(_ error: any Error) {
     print("\n❌ Export failed: \(error.localizedDescription)")
     print("\n💡 Troubleshooting:")
     print("   • Verify your API token is valid")
     print("   • Check your internet connection")
     print("   • Ensure data has been synced to CloudKit")
     print("   • Run 'bushel-cloud sync' first if needed")
-  }
-
-  // MARK: - Export Types
-
-  struct ExportData: Codable {
-    let restoreImages: [RecordExport]
-    let xcodeVersions: [RecordExport]
-    let swiftVersions: [RecordExport]
-  }
-
-  struct RecordExport: Codable {
-    let recordName: String
-    let recordType: String
-    let fields: [String: String]
-
-    init(from recordInfo: RecordInfo) {
-      self.recordName = recordInfo.recordName
-      self.recordType = recordInfo.recordType
-      self.fields = recordInfo.fields.mapValues { fieldValue in
-        String(describing: fieldValue)
-      }
-    }
-  }
-
-  enum ExportError: Error {
-    case encodingFailed
   }
 }

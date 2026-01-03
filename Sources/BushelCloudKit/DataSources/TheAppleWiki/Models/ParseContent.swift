@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -30,7 +30,7 @@
 import Foundation
 
 /// Parse content container
-struct ParseContent: Codable, Sendable {
-  let title: String
-  let text: TextContent
+internal struct ParseContent: Codable, Sendable {
+  internal let title: String
+  internal let text: TextContent
 }

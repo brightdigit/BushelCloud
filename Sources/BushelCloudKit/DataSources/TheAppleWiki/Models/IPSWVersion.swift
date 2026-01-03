@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -30,21 +30,21 @@
 import Foundation
 
 /// IPSW metadata from TheAppleWiki
-struct IPSWVersion: Codable, Sendable {
-  let version: String
-  let buildNumber: String
-  let deviceModel: String
-  let fileName: String
-  let fileSize: String
-  let sha1: String
-  let releaseDate: Date?
-  let url: URL?
+internal struct IPSWVersion: Codable, Sendable {
+  internal let version: String
+  internal let buildNumber: String
+  internal let deviceModel: String
+  internal let fileName: String
+  internal let fileSize: String
+  internal let sha1: String
+  internal let releaseDate: Date?
+  internal let url: URL?
 
   // MARK: - Computed Properties
 
   /// Parse file size string to Int for CloudKit
   /// Examples: "10.2 GB" -> bytes, "1.5 MB" -> bytes
-  var fileSizeInBytes: Int? {
+  internal var fileSizeInBytes: Int? {
     let components = fileSize.components(separatedBy: " ")
     guard components.count == 2,
       let size = Double(components[0])
@@ -62,12 +62,14 @@ struct IPSWVersion: Codable, Sendable {
       default: 0
       }
 
-    guard multiplier > 0 else { return nil }
+    guard multiplier > 0 else {
+      return nil
+    }
     return Int(size * multiplier)
   }
 
   /// Detect if this is a prerelease version (beta, RC, etc.)
-  var isPrerelease: Bool {
+  internal var isPrerelease: Bool {
     let lowercased = version.lowercased()
     return lowercased.contains("beta")
       || lowercased.contains("rc")
@@ -76,7 +78,7 @@ struct IPSWVersion: Codable, Sendable {
   }
 
   /// Validate that all required fields are present
-  var isValid: Bool {
+  internal var isValid: Bool {
     !version.isEmpty
       && !buildNumber.isEmpty
       && !deviceModel.isEmpty

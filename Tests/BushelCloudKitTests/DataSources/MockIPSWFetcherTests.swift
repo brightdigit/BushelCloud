@@ -35,10 +35,10 @@ import Testing
 // MARK: - Mock IPSW Fetcher Tests
 
 @Suite("Mock IPSW Fetcher Tests")
-struct MockIPSWFetcherTests {
+internal struct MockIPSWFetcherTests {
   @Test("Successful fetch returns records")
-  func testSuccessfulFetch() async throws {
-    let expectedRecords = [TestFixtures.sonoma14_2_1, TestFixtures.sequoia15_0_beta]
+  internal func testSuccessfulFetch() async throws {
+    let expectedRecords = [TestFixtures.sonoma1421, TestFixtures.sequoia150Beta]
     let fetcher = MockIPSWFetcher(recordsToReturn: expectedRecords)
 
     let result = try await fetcher.fetch()
@@ -49,7 +49,7 @@ struct MockIPSWFetcherTests {
   }
 
   @Test("Empty fetch returns empty array")
-  func testEmptyFetch() async throws {
+  internal func testEmptyFetch() async throws {
     let fetcher = MockIPSWFetcher(recordsToReturn: [])
 
     let result = try await fetcher.fetch()
@@ -58,7 +58,7 @@ struct MockIPSWFetcherTests {
   }
 
   @Test("Network error throws expected error")
-  func testNetworkError() async {
+  internal func testNetworkError() async {
     let expectedError = MockFetcherError.networkError("Connection timeout")
     let fetcher = MockIPSWFetcher(errorToThrow: expectedError)
 

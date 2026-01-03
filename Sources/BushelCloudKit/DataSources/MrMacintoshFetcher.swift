@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -44,7 +44,15 @@ import SwiftSoup
 /// Fetcher for macOS beta/RC restore images from Mr. Macintosh database
 internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
   internal typealias Record = [RestoreImageRecord]
-  // MARK: - Public API
+
+  // MARK: - Error Types
+
+  internal enum FetchError: Error {
+    case invalidURL
+    case invalidEncoding
+  }
+
+  // MARK: - Internal Methods
 
   /// Fetch beta and RC restore images from Mr. Macintosh
   internal func fetch() async throws -> [RestoreImageRecord] {
@@ -88,14 +96,16 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
     return records
   }
 
-  // MARK: - Helpers
+  // MARK: - Private Methods
 
   /// Parse a table row into a RestoreImageRecord
   private func parseTableRow(_ row: SwiftSoup.Element, pageUpdatedAt: Date?) -> RestoreImageRecord?
   {
     do {
       let cells = try row.select("td")
-      guard cells.count >= 3 else { return nil }
+      guard cells.count >= 3 else {
+        return nil
+      }
 
       // Expected columns: Download Link | Version | Date | [Optional: Signed Status]
       // Extract filename and URL from first cell
@@ -111,11 +121,15 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
 
       // Parse filename like "UniversalMac_26.1_25B78_Restore.ipsw"
       // Extract version and build from filename
-      guard filename.contains("UniversalMac") else { return nil }
+      guard filename.contains("UniversalMac") else {
+        return nil
+      }
 
       let components = filename.replacingOccurrences(of: ".ipsw", with: "")
         .components(separatedBy: "_")
-      guard components.count >= 3 else { return nil }
+      guard components.count >= 3 else {
+        return nil
+      }
 
       let version = components[1]
       let buildNumber = components[2]
@@ -221,16 +235,9 @@ internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
     formatter.locale = Locale(identifier: "en_US_POSIX")
     return formatter
   }
-
-  // MARK: - Error Types
-
-  enum FetchError: Error {
-    case invalidURL
-    case invalidEncoding
-  }
 }
 
 // MARK: - Loggable Conformance
 extension MrMacintoshFetcher: Loggable {
-  static let loggingCategory: BushelLogging.Category = .hub
+  internal static let loggingCategory: BushelLogging.Category = .hub
 }

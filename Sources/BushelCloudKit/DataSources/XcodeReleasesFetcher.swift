@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -44,43 +44,19 @@ import Logging
 public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
   public typealias Record = [XcodeVersionRecord]
 
-  public init() {}
-
   // MARK: - API Models
 
   private struct XcodeRelease: Codable {
-    let checksums: Checksums?
-    let compilers: Compilers?
-    let date: ReleaseDate
-    let links: Links?
-    let name: String
-    let requires: String
-    let sdks: SDKs?
-    let version: Version
-
     struct Checksums: Codable {
-      let sha1: String
+      // API provides checksums but we don't use them currently
     }
 
     struct Compilers: Codable {
-      let clang: [Compiler]?
-      let swift: [Compiler]?
-    }
-
-    struct Compiler: Codable {
-      let build: String?
-      let number: String?
-      let release: Release?
-    }
-
-    struct Release: Codable {
-      let release: Bool?
-      let beta: Int?
-      let rc: Int?
-
-      var isPrerelease: Bool {
-        beta != nil || rc != nil
+      struct Compiler: Codable {
+        let number: String?
       }
+
+      let swift: [Compiler]?
     }
 
     struct ReleaseDate: Codable {
@@ -95,9 +71,6 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
     }
 
     struct Links: Codable {
-      let download: Download?
-      let notes: Notes?
-
       struct Download: Codable {
         let url: String
       }
@@ -105,35 +78,62 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
       struct Notes: Codable {
         let url: String
       }
+
+      let download: Download?
+      let notes: Notes?
     }
 
     struct SDKs: Codable {
+      struct SDK: Codable {
+        let number: String?
+      }
+
       let iOS: [SDK]?
       let macOS: [SDK]?
       let tvOS: [SDK]?
       let visionOS: [SDK]?
       let watchOS: [SDK]?
-
-      struct SDK: Codable {
-        let build: String?
-        let number: String?
-        let release: Release?
-      }
     }
 
     struct Version: Codable {
+      struct Release: Codable {
+        let beta: Int?
+        let rc: Int?
+
+        var isPrerelease: Bool {
+          beta != nil || rc != nil
+        }
+      }
+
       let build: String
       let number: String
       let release: Release
     }
+
+    let checksums: Checksums?
+    let compilers: Compilers?
+    let date: ReleaseDate
+    let links: Links?
+    let name: String
+    let requires: String
+    let sdks: SDKs?
+    let version: Version
   }
+
+  // MARK: - Type Properties
+
+  // swiftlint:disable:next force_unwrapping
+  private static let xcodeReleasesURL = URL(string: "https://xcodereleases.com/data.json")!
+
+  // MARK: - Initializers
+
+  public init() {}
 
   // MARK: - Public API
 
   /// Fetch all Xcode releases from xcodereleases.com
   public func fetch() async throws -> [XcodeVersionRecord] {
-    let url = URL(string: "https://xcodereleases.com/data.json")!
-    let (data, _) = try await URLSession.shared.data(from: url)
+    let (data, _) = try await URLSession.shared.data(from: Self.xcodeReleasesURL)
     let releases = try JSONDecoder().decode([XcodeRelease].self, from: data)
 
     return releases.map { release in
@@ -176,7 +176,9 @@ public struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
 
       // Convert download URL string to URL if available
       let downloadURL: URL? = {
-        guard let urlString = release.links?.download?.url else { return nil }
+        guard let urlString = release.links?.download?.url else {
+          return nil
+        }
         return URL(string: urlString)
       }()
 

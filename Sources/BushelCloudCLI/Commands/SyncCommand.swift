@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -32,8 +32,8 @@ import BushelFoundation
 import BushelUtilities
 import Foundation
 
-enum SyncCommand {
-  static func run(args: [String]) async throws {
+internal enum SyncCommand {
+  internal static func run(_ args: [String]) async throws {
     // Load configuration using Swift Configuration
     let loader = ConfigurationLoader()
     let rawConfig = try await loader.loadConfiguration()
@@ -48,17 +48,35 @@ enum SyncCommand {
     // Get fetch configuration (already loaded by ConfigurationLoader)
     let fetchConfiguration = config.fetch ?? FetchConfiguration.loadFromEnvironment()
 
+    // Determine authentication method
+    let authMethod: CloudKitAuthMethod
+    if let pemString = config.cloudKit.privateKey {
+      authMethod = .pemString(pemString)
+    } else {
+      authMethod = .pemFile(path: config.cloudKit.privateKeyPath)
+    }
+
     // Create sync engine
     let syncEngine = try SyncEngine(
       containerIdentifier: config.cloudKit.containerID,
       keyID: config.cloudKit.keyID,
-      privateKeyPath: config.cloudKit.privateKeyPath,
+      authMethod: authMethod,
+      environment: config.cloudKit.environment,
       configuration: fetchConfiguration
     )
 
     // Execute sync
     do {
       let result = try await syncEngine.sync(options: options)
+
+      // Write JSON to file if path specified
+      if let outputFile = config.sync?.jsonOutputFile {
+        let json = try result.toJSON(pretty: true)
+        try json.write(toFile: outputFile, atomically: true, encoding: .utf8)
+        BushelCloudKit.ConsoleOutput.info("✅ JSON output written to: \(outputFile)")
+      }
+
+      // Always show human-readable summary
       printSuccess(result)
     } catch {
       printError(error)
@@ -107,18 +125,46 @@ enum SyncCommand {
     )
   }
 
-  private static func printSuccess(_ result: SyncEngine.SyncResult) {
+  private static func printSuccess(_ result: SyncEngine.DetailedSyncResult) {
     print("\n" + String(repeating: "=", count: 60))
     print("✅ Sync Summary")
     print(String(repeating: "=", count: 60))
-    print("Restore Images: \(result.restoreImagesCount)")
-    print("Xcode Versions: \(result.xcodeVersionsCount)")
-    print("Swift Versions: \(result.swiftVersionsCount)")
+
+    printTypeResult("RestoreImages", result.restoreImages)
+    printTypeResult("XcodeVersions", result.xcodeVersions)
+    printTypeResult("SwiftVersions", result.swiftVersions)
+
+    let totalCreated = result.restoreImages.created + result.xcodeVersions.created + result.swiftVersions.created
+    let totalUpdated = result.restoreImages.updated + result.xcodeVersions.updated + result.swiftVersions.updated
+    let totalFailed = result.restoreImages.failed + result.xcodeVersions.failed + result.swiftVersions.failed
+
+    print(String(repeating: "-", count: 60))
+    print("TOTAL:")
+    print("  ✨ Created: \(totalCreated)")
+    print("  🔄 Updated: \(totalUpdated)")
+    if totalFailed > 0 {
+      print("  ❌ Failed:  \(totalFailed)")
+    }
     print(String(repeating: "=", count: 60))
     print("\n💡 Next: Use 'bushel-cloud export' to view the synced data")
   }
 
-  private static func printError(_ error: Error) {
+  private static func printTypeResult(_ name: String, _ typeResult: SyncEngine.TypeSyncResult) {
+    print("\n\(name):")
+    print("  ✨ Created: \(typeResult.created)")
+    print("  🔄 Updated: \(typeResult.updated)")
+    if typeResult.failed > 0 {
+      print("  ❌ Failed:  \(typeResult.failed)")
+      if !typeResult.failedRecordNames.isEmpty {
+        print("     Records: \(typeResult.failedRecordNames.prefix(5).joined(separator: ", "))")
+        if typeResult.failedRecordNames.count > 5 {
+          print("     ... and \(typeResult.failedRecordNames.count - 5) more")
+        }
+      }
+    }
+  }
+
+  private static func printError(_ error: any Error) {
     print("\n❌ Sync failed: \(error.localizedDescription)")
     print("\n💡 Troubleshooting:")
     print("   • Verify your API token is valid")

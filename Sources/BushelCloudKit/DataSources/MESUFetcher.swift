@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -40,9 +40,18 @@ import Foundation
 public struct MESUFetcher: DataSourceFetcher, Sendable {
   public typealias Record = RestoreImageRecord?
 
+  // MARK: - Error Types
+
+  internal enum FetchError: Error {
+    case invalidURL
+    case parsingFailed
+  }
+
+  // MARK: - Initializers
+
   public init() {}
 
-  // MARK: - Public API
+  // MARK: - Public Methods
 
   /// Fetch the latest signed restore image from Apple's MESU service
   public func fetch() async throws -> RestoreImageRecord? {
@@ -66,7 +75,8 @@ public struct MESUFetcher: DataSourceFetcher, Sendable {
     }
 
     // Navigate to the firmware data
-    // Structure: MobileDeviceSoftwareVersionsByVersion -> "1" -> MobileDeviceSoftwareVersions -> VirtualMac2,1 -> BuildVersion -> Restore
+    // Structure: MobileDeviceSoftwareVersionsByVersion -> "1" ->
+    // MobileDeviceSoftwareVersions -> VirtualMac2,1 -> BuildVersion -> Restore
     guard let versionsByVersion = plist["MobileDeviceSoftwareVersionsByVersion"] as? [String: Any],
       let version1 = versionsByVersion["1"] as? [String: Any],
       let softwareVersions = version1["MobileDeviceSoftwareVersions"] as? [String: Any],
@@ -110,12 +120,5 @@ public struct MESUFetcher: DataSourceFetcher, Sendable {
 
     // No restore images found in the plist
     return nil
-  }
-
-  // MARK: - Error Types
-
-  enum FetchError: Error {
-    case invalidURL
-    case parsingFailed
   }
 }

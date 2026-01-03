@@ -32,18 +32,18 @@ import Foundation
 @testable import BushelFoundation
 
 /// Mock fetcher for Xcode Releases data source
-struct MockXcodeReleasesFetcher: DataSourceFetcher, Sendable {
-  typealias Record = [XcodeVersionRecord]
+internal struct MockXcodeReleasesFetcher: DataSourceFetcher, Sendable {
+  internal typealias Record = [XcodeVersionRecord]
 
-  let recordsToReturn: [XcodeVersionRecord]
-  let errorToThrow: (any Error)?
+  internal let recordsToReturn: [XcodeVersionRecord]
+  internal let errorToThrow: (any Error)?
 
-  init(recordsToReturn: [XcodeVersionRecord] = [], errorToThrow: (any Error)? = nil) {
+  internal init(recordsToReturn: [XcodeVersionRecord] = [], errorToThrow: (any Error)? = nil) {
     self.recordsToReturn = recordsToReturn
     self.errorToThrow = errorToThrow
   }
 
-  func fetch() async throws -> [XcodeVersionRecord] {
+  internal func fetch() async throws -> [XcodeVersionRecord] {
     if let error = errorToThrow {
       throw error
     }

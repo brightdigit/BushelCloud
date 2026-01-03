@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -58,12 +58,14 @@ internal struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
     // Fetch Last-Modified header from TheAppleWiki API
     let apiURL = Self.wikiAPIURL
 
-    let lastModified: Date?
     #if canImport(FoundationNetworking)
-      // Use FoundationNetworking.URLSession directly on Apple platforms
-      let URLSession = FoundationNetworking.URLSession.self
+      // Use FoundationNetworking.URLSession directly on Linux
+      let lastModified = await FoundationNetworking.URLSession.shared.fetchLastModified(
+        from: apiURL
+      )
+    #else
+      let lastModified = await URLSession.shared.fetchLastModified(from: apiURL)
     #endif
-    lastModified = await URLSession.shared.fetchLastModified(from: apiURL)
 
     let parser = IPSWParser()
 

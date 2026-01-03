@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -30,10 +30,10 @@
 import Foundation
 
 /// Text content with HTML
-struct TextContent: Codable, Sendable {
-  let content: String
-
-  enum CodingKeys: String, CodingKey {
+internal struct TextContent: Codable, Sendable {
+  internal enum CodingKeys: String, CodingKey {
     case content = "*"
   }
+
+  internal let content: String
 }

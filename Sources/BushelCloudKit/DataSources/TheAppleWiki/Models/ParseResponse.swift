@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -30,6 +30,6 @@
 import Foundation
 
 /// Root response from TheAppleWiki parse API
-struct ParseResponse: Codable, Sendable {
-  let parse: ParseContent
+internal struct ParseResponse: Codable, Sendable {
+  internal let parse: ParseContent
 }

@@ -10,27 +10,27 @@ import Testing
 @testable import ConfigKeyKit
 
 @Suite("NamingStyle Tests")
-struct NamingStyleTests {
+internal struct NamingStyleTests {
   @Test("Dot-separated style")
-  func dotSeparatedStyle() {
+  internal func dotSeparatedStyle() {
     let style = StandardNamingStyle.dotSeparated
     #expect(style.transform("cloudkit.container_id") == "cloudkit.container_id")
   }
 
   @Test("Screaming snake case with prefix")
-  func screamingSnakeCaseWithPrefix() {
+  internal func screamingSnakeCaseWithPrefix() {
     let style = StandardNamingStyle.screamingSnakeCase(prefix: "BUSHEL")
     #expect(style.transform("cloudkit.container_id") == "BUSHEL_CLOUDKIT_CONTAINER_ID")
   }
 
   @Test("Screaming snake case without prefix")
-  func screamingSnakeCaseNoPrefix() {
+  internal func screamingSnakeCaseNoPrefix() {
     let style = StandardNamingStyle.screamingSnakeCase(prefix: nil)
     #expect(style.transform("cloudkit.container_id") == "CLOUDKIT_CONTAINER_ID")
   }
 
   @Test("Screaming snake case with nil prefix")
-  func screamingSnakeCaseNilPrefix() {
+  internal func screamingSnakeCaseNilPrefix() {
     let style = StandardNamingStyle.screamingSnakeCase(prefix: nil)
     #expect(style.transform("sync.verbose") == "SYNC_VERBOSE")
   }

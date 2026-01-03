@@ -13,9 +13,9 @@ import Testing
 @testable import BushelCloudKit
 
 @Suite("DataSourceMetadata CloudKit Mapping")
-struct DataSourceMetadataTests {
+internal struct DataSourceMetadataTests {
   @Test("Convert successful fetch to CloudKit fields")
-  func testToCloudKitFieldsSuccess() {
+  internal func testToCloudKitFieldsSuccess() {
     let record = TestFixtures.metadataIPSWSuccess
     let fields = record.toCloudKitFields()
 
@@ -30,7 +30,7 @@ struct DataSourceMetadataTests {
   }
 
   @Test("Convert failed fetch to CloudKit fields")
-  func testToCloudKitFieldsWithError() {
+  internal func testToCloudKitFieldsWithError() {
     let record = TestFixtures.metadataAppleDBError
     let fields = record.toCloudKitFields()
 
@@ -44,7 +44,7 @@ struct DataSourceMetadataTests {
   }
 
   @Test("Roundtrip conversion preserves data")
-  func testRoundtripConversion() {
+  internal func testRoundtripConversion() {
     let original = TestFixtures.metadataIPSWSuccess
     let fields = original.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
@@ -64,7 +64,7 @@ struct DataSourceMetadataTests {
   }
 
   @Test("From RecordInfo with missing required fields returns nil")
-  func testFromRecordInfoMissingFields() {
+  internal func testFromRecordInfoMissingFields() {
     let recordInfo = MockRecordInfo.create(
       recordType: "DataSourceMetadata",
       recordName: "test",
@@ -78,7 +78,7 @@ struct DataSourceMetadataTests {
   }
 
   @Test("RecordName generation format")
-  func testRecordNameFormat() {
+  internal func testRecordNameFormat() {
     #expect(TestFixtures.metadataIPSWSuccess.recordName == "metadata-ipsw.me-RestoreImage")
     #expect(
       TestFixtures.metadataXcodeReleases.recordName == "metadata-xcodereleases.com-XcodeVersion"
@@ -86,7 +86,7 @@ struct DataSourceMetadataTests {
   }
 
   @Test("CloudKit record type is correct")
-  func testCloudKitRecordType() {
+  internal func testCloudKitRecordType() {
     #expect(DataSourceMetadata.cloudKitRecordType == "DataSourceMetadata")
   }
 }
