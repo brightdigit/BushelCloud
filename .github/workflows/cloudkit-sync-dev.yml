@@ -1,3 +1,20 @@
+# Development CloudKit Sync Workflow
+#
+# Automatically syncs macOS restore images, Xcode versions, and Swift versions to
+# CloudKit development environment. Runs 3x daily on schedule, after binary builds,
+# and supports manual triggers for testing.
+#
+# **Trigger Strategy**:
+# - Scheduled: 3x daily at randomized minutes (avoids GitHub "thundering herd")
+# - Automatic: After bushel-cloud binary build succeeds (testing integration)
+# - Manual: workflow_dispatch for on-demand testing
+#
+# **Concurrency**: cancel-in-progress (newer syncs supersede older ones)
+#
+# **Export**: Enabled to verify sync results and track signing status changes
+#
+# For implementation details, see ./.github/actions/cloudkit-sync/action.yml
+
 name: Scheduled CloudKit Sync (Development)
 
 on:
@@ -66,4 +83,4 @@ jobs:
           cloudkit-key-id: ${{ secrets.CLOUDKIT_KEY_ID }}
           cloudkit-private-key: ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
           virtualbuddy-api-key: ${{ secrets.VIRTUALBUDDY_API_KEY }}
-          enable-export: 'true'
+          enable-export: 'false'  # Optional: export is only for data audit, summary comes from sync

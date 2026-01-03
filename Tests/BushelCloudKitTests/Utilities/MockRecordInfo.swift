@@ -55,7 +55,6 @@ public enum MockRecordInfo: Sendable {
   /// Creates a RecordInfo with an error for testing error handling
   ///
   /// - Parameters:
-  ///   - recordType: CloudKit record type (will be set to "Unknown" to mark as error)
   ///   - recordName: CloudKit record name
   ///   - errorCode: Server error code (stored in fields for test verification)
   ///   - reason: Error reason message (stored in fields for test verification)

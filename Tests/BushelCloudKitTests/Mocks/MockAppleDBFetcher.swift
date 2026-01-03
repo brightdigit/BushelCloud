@@ -32,18 +32,18 @@ import Foundation
 @testable import BushelFoundation
 
 /// Mock fetcher for AppleDB data source
-struct MockAppleDBFetcher: DataSourceFetcher, Sendable {
-  typealias Record = [RestoreImageRecord]
+internal struct MockAppleDBFetcher: DataSourceFetcher, Sendable {
+  internal typealias Record = [RestoreImageRecord]
 
-  let recordsToReturn: [RestoreImageRecord]
-  let errorToThrow: (any Error)?
+  internal let recordsToReturn: [RestoreImageRecord]
+  internal let errorToThrow: (any Error)?
 
-  init(recordsToReturn: [RestoreImageRecord] = [], errorToThrow: (any Error)? = nil) {
+  internal init(recordsToReturn: [RestoreImageRecord] = [], errorToThrow: (any Error)? = nil) {
     self.recordsToReturn = recordsToReturn
     self.errorToThrow = errorToThrow
   }
 
-  func fetch() async throws -> [RestoreImageRecord] {
+  internal func fetch() async throws -> [RestoreImageRecord] {
     if let error = errorToThrow {
       throw error
     }

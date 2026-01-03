@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -30,7 +30,7 @@
 import Foundation
 
 /// Response from GitHub API for commits
-struct GitHubCommitsResponse: Codable {
-  let sha: String
-  let commit: GitHubCommit
+internal struct GitHubCommitsResponse: Codable {
+  internal let sha: String
+  internal let commit: GitHubCommit
 }

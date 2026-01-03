@@ -33,23 +33,21 @@ import Testing
 @testable import BushelCloudKit
 @testable import BushelFoundation
 
-// swiftlint:disable file_length type_body_length
-
 // MARK: - Suite 1: RestoreImage Deduplication Tests
 
 @Suite("RestoreImage Deduplication")
-struct RestoreImageDeduplicationTests {
-  let pipeline = DataSourcePipeline()
+internal struct RestoreImageDeduplicationTests {
+  internal let pipeline = DataSourcePipeline()
 
   @Test("Empty array returns empty")
-  func testDeduplicateEmpty() {
+  internal func testDeduplicateEmpty() {
     let result = pipeline.deduplicateRestoreImages([])
     #expect(result.isEmpty)
   }
 
   @Test("Single record returns unchanged")
-  func testDeduplicateSingle() {
-    let input = [TestFixtures.sonoma14_2_1]
+  internal func testDeduplicateSingle() {
+    let input = [TestFixtures.sonoma1421]
     let result = pipeline.deduplicateRestoreImages(input)
 
     #expect(result.count == 1)
@@ -57,27 +55,27 @@ struct RestoreImageDeduplicationTests {
   }
 
   @Test("Different builds all preserved")
-  func testDeduplicateDifferentBuilds() {
+  internal func testDeduplicateDifferentBuilds() {
     let input = [
-      TestFixtures.sonoma14_2_1,
-      TestFixtures.sequoia15_1,
-      TestFixtures.sonoma14_0,
+      TestFixtures.sonoma1421,
+      TestFixtures.sequoia151,
+      TestFixtures.sonoma140,
     ]
     let result = pipeline.deduplicateRestoreImages(input)
 
     #expect(result.count == 3)
     // Should be sorted by releaseDate descending
-    #expect(result[0].buildNumber == "24B83")  // sequoia15_1 (Nov 2024)
-    #expect(result[1].buildNumber == "23C71")  // sonoma14_2_1 (Dec 2023)
-    #expect(result[2].buildNumber == "23A344")  // sonoma14_0 (Sep 2023)
+    #expect(result[0].buildNumber == "24B83")  // sequoia151 (Nov 2024)
+    #expect(result[1].buildNumber == "23C71")  // sonoma1421 (Dec 2023)
+    #expect(result[2].buildNumber == "23A344")  // sonoma140 (Sep 2023)
   }
 
   @Test("Duplicate builds merged")
-  func testDeduplicateDuplicateBuilds() {
+  internal func testDeduplicateDuplicateBuilds() {
     let input = [
-      TestFixtures.sonoma14_2_1,
-      TestFixtures.sonoma14_2_1_mesu,
-      TestFixtures.sonoma14_2_1_appledb,
+      TestFixtures.sonoma1421,
+      TestFixtures.sonoma1421Mesu,
+      TestFixtures.sonoma1421Appledb,
     ]
     let result = pipeline.deduplicateRestoreImages(input)
 
@@ -87,11 +85,11 @@ struct RestoreImageDeduplicationTests {
   }
 
   @Test("Results sorted by release date descending")
-  func testSortingByReleaseDateDescending() {
+  internal func testSortingByReleaseDateDescending() {
     let input = [
-      TestFixtures.sonoma14_0,  // Oldest: Sep 2023
-      TestFixtures.sonoma14_2_1,  // Middle: Dec 2023
-      TestFixtures.sequoia15_1,  // Newest: Nov 2024
+      TestFixtures.sonoma140,  // Oldest: Sep 2023
+      TestFixtures.sonoma1421,  // Middle: Dec 2023
+      TestFixtures.sequoia151,  // Newest: Nov 2024
     ]
     let result = pipeline.deduplicateRestoreImages(input)
 

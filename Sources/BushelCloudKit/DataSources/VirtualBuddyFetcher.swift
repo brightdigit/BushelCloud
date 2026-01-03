@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -37,19 +37,21 @@ import Foundation
 #endif
 
 /// Fetcher for enriching restore images with VirtualBuddy TSS signing status
-struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
-  typealias Record = [RestoreImageRecord]
+internal struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
+  internal typealias Record = [RestoreImageRecord]
 
   /// Base URL components for VirtualBuddy TSS API endpoint
+  // swiftlint:disable:next force_unwrapping
   private static let baseURLComponents = URLComponents(
-    string: "https://tss.virtualbuddy.app/v1/status")!
+    string: "https://tss.virtualbuddy.app/v1/status"
+  )!
 
   private let apiKey: String
   private let decoder: JSONDecoder
   private let urlSession: URLSession
 
   /// Failable initializer that reads API key from environment variable
-  init?() {
+  internal init?() {
     guard let key = ProcessInfo.processInfo.environment["VIRTUALBUDDY_API_KEY"], !key.isEmpty else {
       return nil
     }
@@ -57,19 +59,23 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
   }
 
   /// Explicit initializer with API key
-  init(apiKey: String, decoder: JSONDecoder = JSONDecoder(), urlSession: URLSession = .shared) {
+  internal init(
+    apiKey: String,
+    decoder: JSONDecoder = JSONDecoder(),
+    urlSession: URLSession = .shared
+  ) {
     self.apiKey = apiKey
     self.decoder = decoder
     self.urlSession = urlSession
   }
 
   /// DataSourceFetcher protocol requirement - returns empty for enrichment fetchers
-  func fetch() async throws -> [RestoreImageRecord] {
+  internal func fetch() async throws -> [RestoreImageRecord] {
     []
   }
 
   /// Enrich existing restore images with VirtualBuddy TSS signing status
-  func fetch(existingImages: [RestoreImageRecord]) async throws -> [RestoreImageRecord] {
+  internal func fetch(existingImages: [RestoreImageRecord]) async throws -> [RestoreImageRecord] {
     var enrichedImages: [RestoreImageRecord] = []
 
     // Count images that need VirtualBuddy checking (non-file URLs)
@@ -92,7 +98,8 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
         // Validate build number matches
         guard response.build == image.buildNumber else {
           print(
-            "   ⚠️  VirtualBuddy: \(image.buildNumber) - build mismatch: expected \(image.buildNumber), got \(response.build) (\(processedCount)/\(totalCount))"
+            "   ⚠️  VirtualBuddy: \(image.buildNumber) - build mismatch: "
+              + "expected \(image.buildNumber), got \(response.build) (\(processedCount)/\(totalCount))"
           )
           enrichedImages.append(image)
           continue
@@ -109,7 +116,8 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
         let statusEmoji = response.isSigned ? "✅" : "❌"
         let statusText = response.isSigned ? "signed" : "unsigned"
         print(
-          "   \(statusEmoji) VirtualBuddy: \(image.buildNumber) - \(statusText) (\(processedCount)/\(totalCount))"
+          "   \(statusEmoji) VirtualBuddy: \(image.buildNumber) - "
+            + "\(statusText) (\(processedCount)/\(totalCount))"
         )
 
         enrichedImages.append(enriched)
@@ -168,9 +176,9 @@ struct VirtualBuddyFetcher: DataSourceFetcher, Sendable {
 }
 
 /// Errors that can occur during VirtualBuddy fetching
-enum VirtualBuddyFetcherError: Error {
+internal enum VirtualBuddyFetcherError: Error {
   case invalidURL
-  case networkError(Error)
+  case networkError(any Error)
   case httpError(Int)
-  case decodingError(Error)
+  case decodingError(any Error)
 }

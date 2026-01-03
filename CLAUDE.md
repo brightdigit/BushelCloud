@@ -58,6 +58,27 @@ Optional for VirtualBuddy TSS signing status:
 export VIRTUALBUDDY_API_KEY="your-virtualbuddy-api-key"  # Get from https://tss.virtualbuddy.app/
 ```
 
+### GitHub Actions Workflows
+
+Manually trigger the scheduled CloudKit sync workflow:
+
+```bash
+# Trigger sync workflow on 8-scheduled-job branch
+gh workflow run cloudkit-sync.yml --ref 8-scheduled-job
+
+# Or using the API directly
+gh api repos/brightdigit/BushelCloud/actions/workflows/cloudkit-sync.yml/dispatches -f ref=8-scheduled-job
+
+# Check status of recent workflow runs
+gh run list --workflow=cloudkit-sync.yml --limit 5
+
+# View details of a specific run
+gh run view <run-id>
+
+# Watch logs of a running workflow
+gh run watch <run-id>
+```
+
 ## Architecture
 
 ### Modular Architecture with BushelKit
@@ -635,12 +656,14 @@ The `main` branch requires:
 
 As noted in README.md, this is a **demonstration project** with known limitations:
 
-- No duplicate detection (repeated syncs create duplicate records)
-- No incremental sync (always fetches all data)
+- No incremental sync (always fetches all data from external sources)
 - No conflict resolution for concurrent updates
 - Limited error recovery in batch operations
+- **Export pagination**: Export only retrieves first 200 records per type (see Issue #8)
 
 These are intentional to keep the demo focused on MistKit patterns rather than production robustness.
+
+**Note on Duplicates**: The sync properly uses `.forceReplace` operations with deterministic record names (based on build numbers), so repeated syncs **update** existing records rather than creating duplicates.
 
 ## Additional Documentation
 

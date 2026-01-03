@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -30,12 +30,12 @@
 import Foundation
 
 /// Represents file hashes for verification
-struct AppleDBHashes: Codable {
-  let sha1: String?
-  let sha2256: String?  // JSON key is "sha2-256"
-
-  enum CodingKeys: String, CodingKey {
+internal struct AppleDBHashes: Codable {
+  internal enum CodingKeys: String, CodingKey {
     case sha1
     case sha2256 = "sha2-256"
   }
+
+  internal let sha1: String?
+  internal let sha2256: String?  // JSON key is "sha2-256"
 }

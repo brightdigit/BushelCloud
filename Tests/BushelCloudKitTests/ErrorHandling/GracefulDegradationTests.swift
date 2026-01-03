@@ -30,17 +30,15 @@
 import Foundation
 import Testing
 
-@testable import BushelCloudKit
-
 // MARK: - Graceful Degradation Tests
 
 @Suite("Graceful Degradation Tests")
-struct GracefulDegradationTests {
+internal struct GracefulDegradationTests {
   @Test("Single fetcher failure doesn't block others")
-  func testPartialFetcherFailure() async {
+  internal func testPartialFetcherFailure() async {
     // Simulate one fetcher failing while others succeed
     let ipswFetcher = MockIPSWFetcher(
-      recordsToReturn: [TestFixtures.sonoma14_2_1]
+      recordsToReturn: [TestFixtures.sonoma1421]
     )
     let appleDBFetcher = MockAppleDBFetcher(
       errorToThrow: MockFetcherError.networkError("Network unavailable")
@@ -64,14 +62,14 @@ struct GracefulDegradationTests {
   }
 
   @Test("Empty results handled gracefully")
-  func testEmptyResults() async throws {
+  internal func testEmptyResults() async throws {
     let fetcher = MockIPSWFetcher(recordsToReturn: [])
     let results = try await fetcher.fetch()
     #expect(results.isEmpty)
   }
 
   @Test("Nil results from optional fetcher")
-  func testNilResults() async throws {
+  internal func testNilResults() async throws {
     let fetcher = MockMESUFetcher(recordToReturn: nil)
     let result = try await fetcher.fetch()
     #expect(result == nil)

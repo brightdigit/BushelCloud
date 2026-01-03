@@ -34,21 +34,22 @@ public import Foundation
 #endif
 
 /// Mock URLProtocol for intercepting and simulating HTTP requests in tests
-final class MockURLProtocol: URLProtocol, @unchecked Sendable {
+internal final class MockURLProtocol: URLProtocol, @unchecked Sendable {
   /// Request handler that returns a response and optional data for a given request
-  nonisolated(unsafe) static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data?))?
+  nonisolated(unsafe) internal static var requestHandler:
+    ((URLRequest) throws -> (HTTPURLResponse, Data?))?
 
-  override class func canInit(with request: URLRequest) -> Bool {
+  override internal class func canInit(with request: URLRequest) -> Bool {
     // Handle all requests
     true
   }
 
-  override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+  override internal class func canonicalRequest(for request: URLRequest) -> URLRequest {
     // Return the request as-is
     request
   }
 
-  override func startLoading() {
+  override internal func startLoading() {
     guard let handler = Self.requestHandler else {
       fatalError("MockURLProtocol: Request handler not configured")
     }
@@ -65,7 +66,7 @@ final class MockURLProtocol: URLProtocol, @unchecked Sendable {
     }
   }
 
-  override func stopLoading() {
+  override internal func stopLoading() {
     // Nothing to clean up
   }
 }

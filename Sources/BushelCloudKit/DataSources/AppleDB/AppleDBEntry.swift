@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -30,23 +30,21 @@
 import Foundation
 
 /// Represents a single macOS build entry from AppleDB
-struct AppleDBEntry: Codable {
-  let osStr: String
-  let version: String
-  let build: String?  // Some entries may not have a build number
-  let uniqueBuild: String?
-  let released: String  // ISO date or empty string
-  let beta: Bool?
-  let rc: Bool?
-  let `internal`: Bool?
-  let deviceMap: [String]
-  let signed: SignedStatus
-  let sources: [AppleDBSource]?
-
-  enum CodingKeys: String, CodingKey {
-    case osStr, version, build, uniqueBuild, released
+internal struct AppleDBEntry: Codable {
+  internal enum CodingKeys: String, CodingKey {
+    case version, build, released
     case beta, rc
     case `internal` = "internal"
     case deviceMap, signed, sources
   }
+
+  internal let version: String
+  internal let build: String?  // Some entries may not have a build number
+  internal let released: String  // ISO date or empty string
+  internal let beta: Bool?
+  internal let rc: Bool?
+  internal let `internal`: Bool?
+  internal let deviceMap: [String]
+  internal let signed: SignedStatus
+  internal let sources: [AppleDBSource]?
 }

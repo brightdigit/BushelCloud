@@ -35,10 +35,10 @@ import Testing
 // MARK: - Mock AppleDB Fetcher Tests
 
 @Suite("Mock AppleDB Fetcher Tests")
-struct MockAppleDBFetcherTests {
+internal struct MockAppleDBFetcherTests {
   @Test("Successful fetch returns records")
-  func testSuccessfulFetch() async throws {
-    let expectedRecords = [TestFixtures.sonoma14_2_1_appledb]
+  internal func testSuccessfulFetch() async throws {
+    let expectedRecords = [TestFixtures.sonoma1421Appledb]
     let fetcher = MockAppleDBFetcher(recordsToReturn: expectedRecords)
 
     let result = try await fetcher.fetch()
@@ -48,7 +48,7 @@ struct MockAppleDBFetcherTests {
   }
 
   @Test("Server error throws expected error")
-  func testServerError() async {
+  internal func testServerError() async {
     let expectedError = MockFetcherError.serverError(code: 500)
     let fetcher = MockAppleDBFetcher(errorToThrow: expectedError)
 

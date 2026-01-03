@@ -37,9 +37,9 @@ import Testing
 // MARK: - Mock CloudKit Service Tests
 
 @Suite("Mock CloudKit Service Tests")
-struct MockCloudKitServiceTests {
+internal struct MockCloudKitServiceTests {
   @Test("Query returns empty array initially")
-  func testQueryEmptyInitially() async throws {
+  internal func testQueryEmptyInitially() async throws {
     let service = MockCloudKitService()
 
     let results = try await service.queryRecords(recordType: "RestoreImage")
@@ -48,9 +48,9 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Create operation stores record")
-  func testCreateOperationStoresRecord() async throws {
+  internal func testCreateOperationStoresRecord() async throws {
     let service = MockCloudKitService()
-    let record = TestFixtures.sonoma14_2_1
+    let record = TestFixtures.sonoma1421
 
     let operation = RecordOperation(
       operationType: .create,
@@ -67,12 +67,12 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("ForceReplace operation replaces existing record")
-  func testForceReplaceOperation() async throws {
+  internal func testForceReplaceOperation() async throws {
     let service = MockCloudKitService()
     let recordName = "RestoreImage-23C71"
 
     // Create initial record
-    let initialRecord = TestFixtures.sonoma14_2_1
+    let initialRecord = TestFixtures.sonoma1421
     let createOp = RecordOperation(
       operationType: .create,
       recordType: "RestoreImage",
@@ -118,12 +118,12 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Delete operation removes record")
-  func testDeleteOperation() async throws {
+  internal func testDeleteOperation() async throws {
     let service = MockCloudKitService()
     let recordName = "RestoreImage-23C71"
 
     // Create record
-    let record = TestFixtures.sonoma14_2_1
+    let record = TestFixtures.sonoma1421
     let createOp = RecordOperation(
       operationType: .create,
       recordType: "RestoreImage",
@@ -146,7 +146,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Batch operations process multiple records")
-  func testBatchOperations() async throws {
+  internal func testBatchOperations() async throws {
     let service = MockCloudKitService()
 
     let operations = [
@@ -154,19 +154,19 @@ struct MockCloudKitServiceTests {
         operationType: .create,
         recordType: "RestoreImage",
         recordName: "RestoreImage-23C71",
-        fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+        fields: TestFixtures.sonoma1421.toCloudKitFields()
       ),
       RecordOperation(
         operationType: .create,
         recordType: "RestoreImage",
         recordName: "RestoreImage-24A5264n",
-        fields: TestFixtures.sequoia15_0_beta.toCloudKitFields()
+        fields: TestFixtures.sequoia150Beta.toCloudKitFields()
       ),
       RecordOperation(
         operationType: .create,
         recordType: "XcodeVersion",
         recordName: "XcodeVersion-15C65",
-        fields: TestFixtures.xcode15_1.toCloudKitFields()
+        fields: TestFixtures.xcode151.toCloudKitFields()
       ),
     ]
 
@@ -184,7 +184,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Query error throws expected error")
-  func testQueryError() async {
+  internal func testQueryError() async {
     let service = MockCloudKitService()
     await service.setShouldFailQuery(true)
     await service.setQueryError(MockCloudKitError.networkError)
@@ -200,7 +200,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Modify error throws expected error")
-  func testModifyError() async {
+  internal func testModifyError() async {
     let service = MockCloudKitService()
     await service.setShouldFailModify(true)
     await service.setModifyError(MockCloudKitError.authenticationFailed)
@@ -209,7 +209,7 @@ struct MockCloudKitServiceTests {
       operationType: .create,
       recordType: "RestoreImage",
       recordName: "test",
-      fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+      fields: TestFixtures.sonoma1421.toCloudKitFields()
     )
 
     do {
@@ -223,7 +223,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Operation history tracks all operations")
-  func testOperationHistory() async throws {
+  internal func testOperationHistory() async throws {
     let service = MockCloudKitService()
 
     let batch1 = [
@@ -231,7 +231,7 @@ struct MockCloudKitServiceTests {
         operationType: .create,
         recordType: "RestoreImage",
         recordName: "test1",
-        fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+        fields: TestFixtures.sonoma1421.toCloudKitFields()
       )
     ]
 
@@ -240,7 +240,7 @@ struct MockCloudKitServiceTests {
         operationType: .create,
         recordType: "XcodeVersion",
         recordName: "test2",
-        fields: TestFixtures.xcode15_1.toCloudKitFields()
+        fields: TestFixtures.xcode151.toCloudKitFields()
       )
     ]
 
@@ -254,7 +254,7 @@ struct MockCloudKitServiceTests {
   }
 
   @Test("Clear storage removes all records")
-  func testClearStorage() async throws {
+  internal func testClearStorage() async throws {
     let service = MockCloudKitService()
 
     // Add some records
@@ -262,7 +262,7 @@ struct MockCloudKitServiceTests {
       operationType: .create,
       recordType: "RestoreImage",
       recordName: "test",
-      fields: TestFixtures.sonoma14_2_1.toCloudKitFields()
+      fields: TestFixtures.sonoma1421.toCloudKitFields()
     )
     try await service.executeBatchOperations([operation], recordType: "RestoreImage")
 
@@ -281,19 +281,19 @@ struct MockCloudKitServiceTests {
 // MARK: - Helper Extensions for Actor
 
 extension MockCloudKitService {
-  func setShouldFailQuery(_ value: Bool) {
+  internal func setShouldFailQuery(_ value: Bool) {
     self.shouldFailQuery = value
   }
 
-  func setShouldFailModify(_ value: Bool) {
+  internal func setShouldFailModify(_ value: Bool) {
     self.shouldFailModify = value
   }
 
-  func setQueryError(_ error: (any Error)?) {
+  internal func setQueryError(_ error: (any Error)?) {
     self.queryError = error
   }
 
-  func setModifyError(_ error: (any Error)?) {
+  internal func setModifyError(_ error: (any Error)?) {
     self.modifyError = error
   }
 }

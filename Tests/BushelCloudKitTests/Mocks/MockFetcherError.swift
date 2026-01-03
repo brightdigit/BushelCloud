@@ -29,7 +29,7 @@
 
 import Foundation
 
-enum MockFetcherError: Error, Sendable {
+internal enum MockFetcherError: Error, Sendable {
   case networkError(String)
   case authenticationFailed
   case invalidResponse

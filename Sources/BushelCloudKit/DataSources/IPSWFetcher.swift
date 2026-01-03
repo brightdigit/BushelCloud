@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -39,8 +39,8 @@ import OSVer
 #endif
 
 /// Fetcher for macOS restore images using the IPSWDownloads package
-struct IPSWFetcher: DataSourceFetcher, Sendable {
-  typealias Record = [RestoreImageRecord]
+internal struct IPSWFetcher: DataSourceFetcher, Sendable {
+  internal typealias Record = [RestoreImageRecord]
   /// Static base URL for IPSW API
   private static let ipswBaseURL: URL = {
     guard let url = URL(string: "https://api.ipsw.me/v4/device/VirtualMac2,1?type=ipsw") else {
@@ -50,15 +50,17 @@ struct IPSWFetcher: DataSourceFetcher, Sendable {
   }()
 
   /// Fetch all VirtualMac2,1 restore images from ipsw.me
-  func fetch() async throws -> [RestoreImageRecord] {
+  internal func fetch() async throws -> [RestoreImageRecord] {
     // Fetch Last-Modified header to know when ipsw.me data was updated
     let ipswURL = Self.ipswBaseURL
-    let lastModified: Date?
     #if canImport(FoundationNetworking)
-      // Use FoundationNetworking.URLSession directly on Apple platforms
-      let URLSession = FoundationNetworking.URLSession.self
+      // Use FoundationNetworking.URLSession directly on Linux
+      let lastModified = await FoundationNetworking.URLSession.shared.fetchLastModified(
+        from: ipswURL
+      )
+    #else
+      let lastModified = await URLSession.shared.fetchLastModified(from: ipswURL)
     #endif
-    lastModified = await URLSession.shared.fetchLastModified(from: ipswURL)
 
     // Create IPSWDownloads client with URLSession transport
     let client = IPSWDownloads(

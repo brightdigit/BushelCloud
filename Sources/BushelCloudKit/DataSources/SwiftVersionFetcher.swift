@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -36,8 +36,9 @@ import SwiftSoup
 #endif
 
 /// Fetcher for Swift compiler versions from swiftversion.net
-struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
-  typealias Record = [SwiftVersionRecord]
+internal struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
+  internal typealias Record = [SwiftVersionRecord]
+
   // MARK: - Internal Models
 
   private struct SwiftVersionEntry {
@@ -46,12 +47,20 @@ struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
     let xcodeVersion: String
   }
 
-  // MARK: - Public API
+  internal enum FetchError: Error {
+    case invalidEncoding
+  }
+
+  // MARK: - Type Properties
+
+  // swiftlint:disable:next force_unwrapping
+  private static let swiftVersionURL = URL(string: "https://swiftversion.net")!
+
+  // MARK: - Internal Methods
 
   /// Fetch all Swift versions from swiftversion.net
-  func fetch() async throws -> [SwiftVersionRecord] {
-    let url = URL(string: "https://swiftversion.net")!
-    let (data, _) = try await URLSession.shared.data(from: url)
+  internal func fetch() async throws -> [SwiftVersionRecord] {
+    let (data, _) = try await URLSession.shared.data(from: Self.swiftVersionURL)
     guard let html = String(data: data, encoding: .utf8) else {
       throw FetchError.invalidEncoding
     }
@@ -81,7 +90,8 @@ struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
           date: date,
           swiftVersion: swiftVer,
           xcodeVersion: xcodeVer
-        ))
+        )
+      )
     }
 
     return entries.map { entry in
@@ -94,11 +104,5 @@ struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
         notes: "Bundled with Xcode \(entry.xcodeVersion)"
       )
     }
-  }
-
-  // MARK: - Error Types
-
-  enum FetchError: Error {
-    case invalidEncoding
   }
 }

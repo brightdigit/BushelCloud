@@ -35,10 +35,10 @@ import Testing
 // MARK: - Mock MESU Fetcher Tests
 
 @Suite("Mock MESU Fetcher Tests")
-struct MockMESUFetcherTests {
+internal struct MockMESUFetcherTests {
   @Test("Successful fetch returns single record")
-  func testSuccessfulFetch() async throws {
-    let expectedRecord = TestFixtures.sonoma14_2_1_mesu
+  internal func testSuccessfulFetch() async throws {
+    let expectedRecord = TestFixtures.sonoma1421Mesu
     let fetcher = MockMESUFetcher(recordToReturn: expectedRecord)
 
     let result = try await fetcher.fetch()
@@ -49,7 +49,7 @@ struct MockMESUFetcherTests {
   }
 
   @Test("Empty fetch returns nil")
-  func testEmptyFetch() async throws {
+  internal func testEmptyFetch() async throws {
     let fetcher = MockMESUFetcher(recordToReturn: nil)
 
     let result = try await fetcher.fetch()
@@ -58,7 +58,7 @@ struct MockMESUFetcherTests {
   }
 
   @Test("Invalid response error")
-  func testInvalidResponse() async {
+  internal func testInvalidResponse() async {
     let expectedError = MockFetcherError.invalidResponse
     let fetcher = MockMESUFetcher(errorToThrow: expectedError)
 

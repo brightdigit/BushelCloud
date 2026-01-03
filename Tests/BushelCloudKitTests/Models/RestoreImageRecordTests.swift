@@ -35,10 +35,10 @@ import Testing
 @testable import BushelFoundation
 
 @Suite("RestoreImageRecord CloudKit Mapping")
-struct RestoreImageRecordTests {
+internal struct RestoreImageRecordTests {
   @Test("Convert to CloudKit fields with all data")
-  func testToCloudKitFieldsComplete() {
-    let record = TestFixtures.sonoma14_2_1
+  internal func testToCloudKitFieldsComplete() {
+    let record = TestFixtures.sonoma1421
     let fields = record.toCloudKitFields()
 
     // Required fields
@@ -63,8 +63,8 @@ struct RestoreImageRecordTests {
   }
 
   @Test("Convert beta record to CloudKit fields")
-  func testToCloudKitFieldsBeta() {
-    let record = TestFixtures.sequoia15_0_beta
+  internal func testToCloudKitFieldsBeta() {
+    let record = TestFixtures.sequoia150Beta
     let fields = record.toCloudKitFields()
 
     fields["version"]?.assertStringEquals("15.0 Beta 3")
@@ -75,7 +75,7 @@ struct RestoreImageRecordTests {
   }
 
   @Test("Convert minimal record without optional fields")
-  func testToCloudKitFieldsMinimal() {
+  internal func testToCloudKitFieldsMinimal() {
     let record = TestFixtures.minimalRestoreImage
     let fields = record.toCloudKitFields()
 
@@ -91,8 +91,8 @@ struct RestoreImageRecordTests {
   }
 
   @Test("Roundtrip conversion preserves data")
-  func testRoundtripConversion() {
-    let original = TestFixtures.sonoma14_2_1
+  internal func testRoundtripConversion() {
+    let original = TestFixtures.sonoma1421
     let fields = original.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
       recordType: "RestoreImage",
@@ -116,7 +116,7 @@ struct RestoreImageRecordTests {
   }
 
   @Test("Roundtrip conversion with optional boolean nil")
-  func testRoundtripWithNilOptionalBoolean() {
+  internal func testRoundtripWithNilOptionalBoolean() {
     let original = TestFixtures.minimalRestoreImage
     let fields = original.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
@@ -132,7 +132,7 @@ struct RestoreImageRecordTests {
   }
 
   @Test("From RecordInfo with missing required fields returns nil")
-  func testFromRecordInfoMissingFields() {
+  internal func testFromRecordInfoMissingFields() {
     let recordInfo = MockRecordInfo.create(
       recordType: "RestoreImage",
       recordName: "test",
@@ -148,21 +148,21 @@ struct RestoreImageRecordTests {
   }
 
   @Test("RecordName generation format")
-  func testRecordNameFormat() {
-    let record = TestFixtures.sonoma14_2_1
+  internal func testRecordNameFormat() {
+    let record = TestFixtures.sonoma1421
     #expect(record.recordName == "RestoreImage-23C71")
 
-    let betaRecord = TestFixtures.sequoia15_0_beta
+    let betaRecord = TestFixtures.sequoia150Beta
     #expect(betaRecord.recordName == "RestoreImage-24A5264n")
   }
 
   @Test("CloudKit record type is correct")
-  func testCloudKitRecordType() {
+  internal func testCloudKitRecordType() {
     #expect(RestoreImageRecord.cloudKitRecordType == "RestoreImage")
   }
 
   @Test("Boolean field conversion", arguments: [true, false])
-  func testBooleanConversion(value: Bool) {
+  internal func testBooleanConversion(value: Bool) {
     let record = RestoreImageRecord(
       version: "14.0",
       buildNumber: "23A344",
@@ -182,8 +182,8 @@ struct RestoreImageRecordTests {
   }
 
   @Test("Format for display produces non-empty string")
-  func testFormatForDisplay() {
-    let fields = TestFixtures.sonoma14_2_1.toCloudKitFields()
+  internal func testFormatForDisplay() {
+    let fields = TestFixtures.sonoma1421.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
       recordType: "RestoreImage",
       recordName: "RestoreImage-23C71",

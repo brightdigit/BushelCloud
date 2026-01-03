@@ -32,7 +32,7 @@ import MistKit
 
 // MARK: - Mock CloudKit Errors
 
-enum MockCloudKitError: Error, Sendable {
+internal enum MockCloudKitError: Error, Sendable {
   case authenticationFailed
   case accessDenied
   case quotaExceeded
@@ -45,7 +45,7 @@ enum MockCloudKitError: Error, Sendable {
 // MARK: - Mock CloudKit Service
 
 /// Mock CloudKit service for testing without real CloudKit calls
-actor MockCloudKitService: RecordManaging {
+internal actor MockCloudKitService: RecordManaging {
   // MARK: - Storage
 
   private var storedRecords: [String: [RecordInfo]] = [:]
@@ -53,36 +53,36 @@ actor MockCloudKitService: RecordManaging {
 
   // MARK: - Configuration
 
-  var shouldFailQuery: Bool = false
-  var shouldFailModify: Bool = false
-  var queryError: (any Error)?
-  var modifyError: (any Error)?
+  internal var shouldFailQuery: Bool = false
+  internal var shouldFailModify: Bool = false
+  internal var queryError: (any Error)?
+  internal var modifyError: (any Error)?
 
   // MARK: - Inspection Methods
 
-  func getStoredRecords(ofType recordType: String) -> [RecordInfo] {
+  internal func getStoredRecords(ofType recordType: String) -> [RecordInfo] {
     storedRecords[recordType] ?? []
   }
 
-  func getOperationHistory() -> [[RecordOperation]] {
+  internal func getOperationHistory() -> [[RecordOperation]] {
     operationHistory
   }
 
-  func clearStorage() {
+  internal func clearStorage() {
     storedRecords.removeAll()
     operationHistory.removeAll()
   }
 
   // MARK: - RecordManaging Protocol
 
-  func queryRecords(recordType: String) async throws -> [RecordInfo] {
+  internal func queryRecords(recordType: String) async throws -> [RecordInfo] {
     if shouldFailQuery {
       throw queryError ?? MockCloudKitError.networkError
     }
     return storedRecords[recordType] ?? []
   }
 
-  func executeBatchOperations(
+  internal func executeBatchOperations(
     _ operations: [RecordOperation],
     recordType: String
   ) async throws {
@@ -125,7 +125,9 @@ actor MockCloudKitService: RecordManaging {
   }
 
   private func handleDelete(_ operation: RecordOperation, recordType: String) {
-    guard let recordName = operation.recordName else { return }
+    guard let recordName = operation.recordName else {
+      return
+    }
     storedRecords[recordType]?.removeAll { $0.recordName == recordName }
   }
 
@@ -139,7 +141,9 @@ actor MockCloudKitService: RecordManaging {
   }
 
   private func handleForceUpdate(_ operation: RecordOperation, recordType: String) {
-    guard let recordName = operation.recordName else { return }
+    guard let recordName = operation.recordName else {
+      return
+    }
     let updatedRecordInfo = createRecordInfo(from: operation)
 
     if let index = storedRecords[recordType]?.firstIndex(where: { $0.recordName == recordName }) {

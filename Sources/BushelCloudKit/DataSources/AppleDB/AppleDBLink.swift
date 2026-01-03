@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -30,8 +30,8 @@
 import Foundation
 
 /// Represents a download link for a source
-struct AppleDBLink: Codable {
-  let url: String
-  let preferred: Bool?
-  let active: Bool?
+internal struct AppleDBLink: Codable {
+  internal let url: String
+  internal let preferred: Bool?
+  internal let active: Bool?
 }

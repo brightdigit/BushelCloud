@@ -13,10 +13,10 @@ import Testing
 @testable import BushelFoundation
 
 @Suite("XcodeVersionRecord CloudKit Mapping")
-struct XcodeVersionRecordTests {
+internal struct XcodeVersionRecordTests {
   @Test("Convert to CloudKit fields with all data")
-  func testToCloudKitFieldsComplete() {
-    let record = TestFixtures.xcode15_1
+  internal func testToCloudKitFieldsComplete() {
+    let record = TestFixtures.xcode151
     let fields = record.toCloudKitFields()
 
     fields["version"]?.assertStringEquals("15.1")
@@ -42,8 +42,8 @@ struct XcodeVersionRecordTests {
   }
 
   @Test("Convert beta record to CloudKit fields")
-  func testToCloudKitFieldsBeta() {
-    let record = TestFixtures.xcode16_0_beta
+  internal func testToCloudKitFieldsBeta() {
+    let record = TestFixtures.xcode160Beta
     let fields = record.toCloudKitFields()
 
     fields["version"]?.assertStringEquals("16.0 Beta 1")
@@ -58,8 +58,8 @@ struct XcodeVersionRecordTests {
   }
 
   @Test("Roundtrip conversion preserves data")
-  func testRoundtripConversion() {
-    let original = TestFixtures.xcode15_1
+  internal func testRoundtripConversion() {
+    let original = TestFixtures.xcode151
     let fields = original.toCloudKitFields()
     let recordInfo = MockRecordInfo.create(
       recordType: "XcodeVersion",
@@ -82,7 +82,7 @@ struct XcodeVersionRecordTests {
   }
 
   @Test("From RecordInfo with missing required fields returns nil")
-  func testFromRecordInfoMissingFields() {
+  internal func testFromRecordInfoMissingFields() {
     let recordInfo = MockRecordInfo.create(
       recordType: "XcodeVersion",
       recordName: "test",
@@ -96,18 +96,18 @@ struct XcodeVersionRecordTests {
   }
 
   @Test("RecordName generation format")
-  func testRecordNameFormat() {
-    #expect(TestFixtures.xcode15_1.recordName == "XcodeVersion-15C65")
-    #expect(TestFixtures.xcode16_0_beta.recordName == "XcodeVersion-16A5171c")
+  internal func testRecordNameFormat() {
+    #expect(TestFixtures.xcode151.recordName == "XcodeVersion-15C65")
+    #expect(TestFixtures.xcode160Beta.recordName == "XcodeVersion-16A5171c")
   }
 
   @Test("CloudKit record type is correct")
-  func testCloudKitRecordType() {
+  internal func testCloudKitRecordType() {
     #expect(XcodeVersionRecord.cloudKitRecordType == "XcodeVersion")
   }
 
   @Test("Reference fields are optional")
-  func testOptionalReferences() {
+  internal func testOptionalReferences() {
     let record = TestFixtures.minimalXcode
     let fields = record.toCloudKitFields()
 
