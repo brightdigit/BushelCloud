@@ -1,5 +1,5 @@
 {
-  "originHash" : "1785549c0e09c3369d1b4d4e76e1c5e8ef3c0ba1f45a2a4ddb93d28db18fcc54",
+  "originHash" : "5c3c6784ec1e72e809bd225d6b056d6d74e76f8c4159b991f2fb6c0388e291aa",
   "pins" : [
     {
       "identity" : "bushelkit",
@@ -7,7 +7,7 @@
       "location" : "https://github.com/brightdigit/BushelKit.git",
       "state" : {
         "branch" : "v3.0.0-alpha.2",
-        "revision" : "226ee7aa995f1fdc440b43c4ae04bf7f204b4bbb"
+        "revision" : "43c09294611fc6d169ef894b27f221089cc042c9"
       }
     },
     {
