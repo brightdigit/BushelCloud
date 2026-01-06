@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Update Package.swift to use remote BushelKit branch
         run: |
-          sed -i 's|\.package(path: "\.\./BushelKit")|.package(url: "https://github.com/brightdigit/BushelKit.git", branch: "v3.0.0-alpha.2-bushel-subrepo")|g' Package.swift
+          sed -i 's|\.package(path: "\.\./BushelKit")|.package(url: "https://github.com/brightdigit/BushelKit.git", branch: "subrepo")|g' Package.swift
           rm Package.resolved
       - uses: brightdigit/swift-build@v1.4.2
         with:
