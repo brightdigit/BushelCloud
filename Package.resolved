@@ -58,7 +58,7 @@
     {
       "identity" : "osver",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/brightdigit/OSVer",
+      "location" : "https://github.com/brightdigit/OSVer.git",
       "state" : {
         "revision" : "448f170babc2f6c9897194a4b42719994639325d",
         "version" : "1.0.0"
