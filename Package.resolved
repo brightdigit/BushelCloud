@@ -1,13 +1,13 @@
 {
-  "originHash" : "5bca8100067ab838bfef8615d74ea35988be36264d64e1850e3b82374585922d",
+  "originHash" : "bbd640282f58ad4bccefff3c996439a09c057833d73d19833ba3f89ad42d634b",
   "pins" : [
     {
       "identity" : "bushelkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/brightdigit/BushelKit.git",
       "state" : {
-        "revision" : "e515399c09a3be8b9344c973ef9a297164507fdf",
-        "version" : "3.0.0-alpha.2"
+        "revision" : "1b3e8d82915743574ac9d2aa882d64bf56822a72",
+        "version" : "3.0.0-alpha.3"
       }
     },
     {
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/brightdigit/RadiantKit.git",
       "state" : {
-        "revision" : "c18df553d5eec6230fc8bf91b260a0a30dca5f79",
-        "version" : "1.0.0-beta.4"
+        "revision" : "a65d6721b6b396f0503a3876ddab3f2399b21d4e",
+        "version" : "1.0.0-beta.5"
       }
     },
     {
