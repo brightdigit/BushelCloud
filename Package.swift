@@ -61,20 +61,20 @@ let swiftSettings: [SwiftSetting] = [
   .enableExperimentalFeature("WarnUnsafeReflection"),
 
   // Enhanced compiler checking
-  .unsafeFlags([
-    // Enable concurrency warnings
-    "-warn-concurrency",
-    // Enable actor data race checks
-    "-enable-actor-data-race-checks",
-    // Complete strict concurrency checking
-    "-strict-concurrency=complete",
-    // Enable testing support
-    "-enable-testing",
-    // Warn about functions with >100 lines
-    "-Xfrontend", "-warn-long-function-bodies=100",
-    // Warn about slow type checking expressions
-    "-Xfrontend", "-warn-long-expression-type-checking=100"
-  ])
+  // .unsafeFlags([
+  //   // Enable concurrency warnings
+  //   "-warn-concurrency",
+  //   // Enable actor data race checks
+  //   "-enable-actor-data-race-checks",
+  //   // Complete strict concurrency checking
+  //   "-strict-concurrency=complete",
+  //   // Enable testing support
+  //   "-enable-testing",
+  //   // Warn about functions with >100 lines
+  //   "-Xfrontend", "-warn-long-function-bodies=100",
+  //   // Warn about slow type checking expressions
+  //   "-Xfrontend", "-warn-long-expression-type-checking=100"
+  // ])
 ]
 
 let package = Package(
@@ -93,7 +93,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.3"),
-        .package(path: "../BushelKit"),
+        .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0-alpha.2"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0"),
         .package(
