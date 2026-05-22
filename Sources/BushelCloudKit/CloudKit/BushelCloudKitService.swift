@@ -233,7 +233,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         "Calling MistKit service.modifyRecords() with \(batch.count) RecordOperation objects"
       )
 
-      let results = try await service.modifyRecords(
+      // Annotate the element type explicitly: the Linux Swift compiler otherwise
+      // infers `[RecordInfo]` for this call, breaking the .success/.failure switch
+      // below (see brightdigit/BushelCloud CI on Ubuntu).
+      let results: [RecordResult] = try await service.modifyRecords(
         batch,
         database: .public(.prefers(.serverToServer))
       )
