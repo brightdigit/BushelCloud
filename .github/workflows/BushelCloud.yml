@@ -21,8 +21,6 @@ concurrency:
 
 env:
   PACKAGE_NAME: BushelCloud
-  MISTKIT_BRANCH: v1.0.0-beta.2
-  CONFIGKEYKIT_BRANCH: main
 
 jobs:
   configure:
@@ -85,16 +83,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup MistKit
-        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-        with:
-          branch: ${{ env.MISTKIT_BRANCH }}
-
-      - name: Setup ConfigKeyKit
-        uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
-        with:
-          branch: ${{ env.CONFIGKEYKIT_BRANCH }}
-
       - uses: brightdigit/swift-build@v1
         id: build
         with:
@@ -137,10 +125,6 @@ jobs:
   #           build: 6.3-RELEASE
   #   steps:
   #     - uses: actions/checkout@v6
-  #     - name: Setup MistKit
-  #       uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-  #       with:
-  #         branch: ${{ env.MISTKIT_BRANCH }}
   #     - uses: brightdigit/swift-build@v1
   #       id: build
   #       with:
@@ -178,16 +162,6 @@ jobs:
             download-platform: true
     steps:
       - uses: actions/checkout@v6
-
-      - name: Setup MistKit
-        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-        with:
-          branch: ${{ env.MISTKIT_BRANCH }}
-
-      - name: Setup ConfigKeyKit
-        uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
-        with:
-          branch: ${{ env.CONFIGKEYKIT_BRANCH }}
 
       - name: Build and Test
         id: build
@@ -248,16 +222,6 @@ jobs:
             download-platform: true
     steps:
       - uses: actions/checkout@v6
-
-      - name: Setup MistKit
-        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-        with:
-          branch: ${{ env.MISTKIT_BRANCH }}
-
-      - name: Setup ConfigKeyKit
-        uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
-        with:
-          branch: ${{ env.CONFIGKEYKIT_BRANCH }}
 
       - name: Build and Test
         id: build
