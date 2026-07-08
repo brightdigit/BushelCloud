@@ -1,5 +1,5 @@
 {
-  "originHash" : "19206e85a58e39bd539ec38237e3cc167902ae05697e150f556c029593646dbe",
+  "originHash" : "2c6fa9c387fbf4d534967cefc3e6af77893b695020602c9cfda24249f96f1938",
   "pins" : [
     {
       "identity" : "bushelkit",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "1b3e8d82915743574ac9d2aa882d64bf56822a72",
         "version" : "3.0.0-alpha.3"
+      }
+    },
+    {
+      "identity" : "configkeykit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/ConfigKeyKit.git",
+      "state" : {
+        "revision" : "6949abb4b7f3e50f7f81d668e6c11aa4721e97fd",
+        "version" : "1.0.0-beta.2"
       }
     },
     {
@@ -38,9 +47,18 @@
       }
     },
     {
+      "identity" : "mistkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/MistKit.git",
+      "state" : {
+        "branch" : "v1.0.0-beta.3",
+        "revision" : "5cae86f2027f38f130ed8335ba579851bf21d756"
+      }
+    },
+    {
       "identity" : "osver",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/brightdigit/OSVer",
+      "location" : "https://github.com/brightdigit/OSVer.git",
       "state" : {
         "revision" : "448f170babc2f6c9897194a4b42719994639325d",
         "version" : "1.0.0"
