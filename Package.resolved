@@ -1,13 +1,13 @@
 {
-  "originHash" : "f5ec3a87b220b25d681db7588169b49c19b8a65fc360ca75b06a9cd52542a0c2",
+  "originHash" : "85fcd13e9b1e60648a8dd5afc09fc3180ba19f72765874bfffae6f9b2d5417eb",
   "pins" : [
     {
       "identity" : "bushelkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/brightdigit/BushelKit.git",
       "state" : {
-        "branch" : "v3.0.0-alpha.4",
-        "revision" : "873e2d40235b370ef4452db16cd4f44dfdd4fe86"
+        "branch" : "main",
+        "revision" : "6bfae4b2282d36a76158e79e7f47b497c9809a55"
       }
     },
     {

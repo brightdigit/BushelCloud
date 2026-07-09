@@ -93,7 +93,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/brightdigit/MistKit.git", branch: "v1.0.0-beta.3"),
         .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.2"),
-        .package(url: "https://github.com/brightdigit/BushelKit.git", branch: "v3.0.0-alpha.4"),
+        .package(url: "https://github.com/brightdigit/BushelKit.git", branch: "main"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0"),
         .package(
