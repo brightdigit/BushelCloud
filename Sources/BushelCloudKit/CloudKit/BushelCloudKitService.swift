@@ -260,6 +260,19 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
       totalCreated += batchResult.createdCount
       totalUpdated += batchResult.updatedCount
       totalFailed += batchFailed
+
+      // The counts above deliberately drop MistKit's `unclassified` bucket, so
+      // created + updated + failed can be < totalCount. Log when that happens so
+      // the summary totals don't look like silent data loss while debugging.
+      let batchUnclassified =
+        batchResult.totalCount - batchResult.createdCount - batchResult.updatedCount - batchFailed
+      if batchUnclassified > 0 {
+        Self.logger.debug(
+          "\(batchUnclassified) record(s) succeeded but matched neither the created nor "
+            + "updated classification (MistKit 'unclassified' bucket); excluded from summary totals."
+        )
+      }
+
       for failure in batchResult.failed {
         failedRecordNames.append(failure.identifier)
         Self.logger.debug(
