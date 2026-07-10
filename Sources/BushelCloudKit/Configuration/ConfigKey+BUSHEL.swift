@@ -1,5 +1,5 @@
 //
-//  OperationClassification.swift
+//  ConfigKey+BUSHEL.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -27,38 +27,34 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import ConfigKeyKit
 
-/// Classifies CloudKit operations as creates or updates
-///
-/// Since CloudKit's `.forceReplace` operation doesn't distinguish between
-/// creating new records and updating existing ones, we pre-fetch existing
-/// record names and classify operations before execution.
-public struct OperationClassification: Sendable {
-  /// Record names that will be created (don't exist in CloudKit)
-  public let creates: Set<String>
+// MARK: - BushelCloud-Specific Config Key Helpers
 
-  /// Record names that will be updated (already exist in CloudKit)
-  public let updates: Set<String>
-
-  /// Initialize by comparing proposed records against existing records
-  ///
+extension ConfigKey {
+  /// Convenience initializer for keys with `BUSHEL_` environment-variable prefix.
   /// - Parameters:
-  ///   - proposedRecords: Record names we want to sync
-  ///   - existingRecords: Record names that already exist in CloudKit
-  public init(proposedRecords: [String], existingRecords: Set<String>) {
-    var creates = Set<String>()
-    var updates = Set<String>()
+  ///   - base: Base key string (e.g., "sync.dry_run")
+  ///   - defaultVal: Required default value
+  public init(bushelPrefixed base: String, default defaultVal: Value) {
+    self.init(base, envPrefix: "BUSHEL", default: defaultVal)
+  }
+}
 
-    for recordName in proposedRecords {
-      if existingRecords.contains(recordName) {
-        updates.insert(recordName)
-      } else {
-        creates.insert(recordName)
-      }
-    }
+extension ConfigKey where Value == Bool {
+  /// Convenience initializer for boolean keys with `BUSHEL_` environment-variable prefix.
+  /// - Parameters:
+  ///   - base: Base key string (e.g., "sync.verbose")
+  ///   - defaultVal: Default value (defaults to false)
+  public init(bushelPrefixed base: String, default defaultVal: Bool = false) {
+    self.init(base, envPrefix: "BUSHEL", default: defaultVal)
+  }
+}
 
-    self.creates = creates
-    self.updates = updates
+extension OptionalConfigKey {
+  /// Convenience initializer for optional keys with `BUSHEL_` environment-variable prefix.
+  /// - Parameter base: Base key string (e.g., "sync.min_interval")
+  public init(bushelPrefixed base: String) {
+    self.init(base, envPrefix: "BUSHEL")
   }
 }

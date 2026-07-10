@@ -30,11 +30,11 @@
 public import BushelFoundation
 public import BushelLogging
 public import Foundation
-import Logging
+internal import Logging
 public import MistKit
 
 #if canImport(FelinePineSwift)
-  import FelinePineSwift
+  internal import FelinePineSwift
 #endif
 
 /// CloudKit service wrapper for Bushel demo operations
@@ -82,6 +82,9 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     privateKeyPath: String,
     environment: Environment = .development
   ) throws {
+    // Validate Key ID format before any file IO
+    try KeyIDValidator.validate(keyID)
+
     // Read PEM file from disk
     guard FileManager.default.fileExists(atPath: privateKeyPath) else {
       throw BushelCloudKitError.privateKeyFileNotFound(path: privateKeyPath)
@@ -103,11 +106,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
       pemString: pemString
     )
 
-    self.service = try CloudKitService(
+    self.service = CloudKitService(
       containerIdentifier: containerIdentifier,
       tokenManager: tokenManager,
-      environment: environment,
-      database: .public
+      environment: environment
     )
   }
 
@@ -128,6 +130,9 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     pemString: String,
     environment: Environment = .development
   ) throws {
+    // Validate Key ID format before any cryptographic work
+    try KeyIDValidator.validate(keyID)
+
     // Validate PEM format BEFORE passing to MistKit
     // This provides better error messages than MistKit's internal validation
     try PEMValidator.validate(pemString)
@@ -138,19 +143,21 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
       pemString: pemString
     )
 
-    self.service = try CloudKitService(
+    self.service = CloudKitService(
       containerIdentifier: containerIdentifier,
       tokenManager: tokenManager,
-      environment: environment,
-      database: .public
+      environment: environment
     )
   }
 
   // MARK: - RecordManaging Protocol Requirements
 
-  /// Query all records of a given type
+  /// Query all records of a given type, automatically paginating
   public func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    try await service.queryRecords(recordType: recordType, limit: 200)
+    try await service.queryAllRecords(
+      recordType: recordType,
+      database: .public(.prefers(.serverToServer))
+    )
   }
 
   /// Fetch existing record names for create/update classification
@@ -163,7 +170,11 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   public func fetchExistingRecordNames(recordType: String) async throws -> Set<String> {
     Self.logger.debug("Pre-fetching existing record names for \(recordType)")
 
-    let records = try await queryRecords(recordType: recordType)
+    let records = try await service.queryAllRecords(
+      recordType: recordType,
+      desiredKeys: [],
+      database: .public(.prefers(.serverToServer))
+    )
     let recordNames = Set(records.map(\.recordName))
 
     Self.logger.debug("Found \(recordNames.count) existing \(recordType) records")
@@ -174,12 +185,12 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   ///
   /// This is the protocol-conforming version that doesn't track create vs update.
   /// For detailed tracking, use the overload with `classification` parameter.
-  public func executeBatchOperations(
-    _ operations: [RecordOperation],
-    recordType: String
-  ) async throws {
-    // Create empty classification (no tracking)
-    let classification = OperationClassification(proposedRecords: [], existingRecords: [])
+  public func executeBatchOperations(_ operations: [RecordOperation]) async throws {
+    guard let recordType = operations.first?.recordType else {
+      Self.logger.debug("executeBatchOperations called with no operations; nothing to do")
+      return
+    }
+    let classification = OperationClassification(proposedRecordNames: [], existingRecordNames: [])
     _ = try await executeBatchOperations(
       operations, recordType: recordType, classification: classification
     )
@@ -201,9 +212,12 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     classification: OperationClassification
   ) async throws -> SyncEngine.TypeSyncResult {
     let batchSize = 200
-    let batches = operations.chunked(into: batchSize)
+    let batches = stride(from: 0, to: operations.count, by: batchSize).map {
+      Array(operations[$0..<Swift.min($0 + batchSize, operations.count)])
+    }
 
-    ConsoleOutput.print("Syncing \(operations.count) \(recordType) record(s) in \(batches.count) batch(es)...")
+    ConsoleOutput.print(
+      "Syncing \(operations.count) \(recordType) record(s) in \(batches.count) batch(es)...")
     Self.logger.debug(
       """
       CloudKit batch limit: 200 operations/request. \
@@ -225,32 +239,33 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         "Calling MistKit service.modifyRecords() with \(batch.count) RecordOperation objects"
       )
 
-      let results = try await service.modifyRecords(batch)
-
-      Self.logger.debug(
-        "Received \(results.count) RecordInfo responses from CloudKit"
+      // MistKit partitions the results into created/updated/failed for us based on
+      // the pre-computed classification. Note: it does NOT chunk, so we keep our own
+      // 200-op batching above and hand it one batch at a time.
+      let batchResult = try await service.modifyRecords(
+        batch,
+        classification: classification,
+        database: .public(.prefers(.serverToServer))
       )
 
-      // Track results based on classification
-      for result in results {
-        if result.isError {
-          totalFailed += 1
-          failedRecordNames.append(result.recordName)
-          Self.logger.debug(
-            "Error: recordName=\(result.recordName), reason=\(result.recordType)"
-          )
-        } else {
-          // Classify as create or update based on pre-fetch
-          if classification.creates.contains(result.recordName) {
-            totalCreated += 1
-          } else if classification.updates.contains(result.recordName) {
-            totalUpdated += 1
-          }
-        }
-      }
+      Self.logger.debug(
+        "Received \(batchResult.totalCount) per-record results from CloudKit"
+      )
 
-      let batchSucceeded = results.filter { !$0.isError }.count
-      let batchFailed = results.count - batchSucceeded
+      // Accumulate totals. We intentionally ignore MistKit's `unclassified` bucket
+      // (successes whose record name is in neither set) to preserve the historical
+      // created + updated == succeeded semantics of TypeSyncResult.
+      let batchFailed = batchResult.failedCount
+      let batchSucceeded = batchResult.createdCount + batchResult.updatedCount
+      totalCreated += batchResult.createdCount
+      totalUpdated += batchResult.updatedCount
+      totalFailed += batchFailed
+      for failure in batchResult.failed {
+        failedRecordNames.append(failure.identifier)
+        Self.logger.debug(
+          "Error: recordName=\(failure.identifier), code=\(failure.serverErrorCode.rawValue)"
+        )
+      }
 
       if batchFailed > 0 {
         print("   ⚠️  \(batchFailed) operations failed (see verbose logs for details)")

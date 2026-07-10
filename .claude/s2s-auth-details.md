@@ -49,12 +49,12 @@ struct BushelCloudKitService {
         )
 
         // 4. Initialize CloudKit service
-        self.service = try CloudKitService(
+        self.service = CloudKitService(
             containerIdentifier: containerIdentifier,
             tokenManager: tokenManager,
-            environment: .development,  // or .production
-            database: .public
+            environment: .development  // or .production
         )
+        // Pass database: .public(.prefers(.serverToServer)) on each per-call operation.
     }
 }
 ```
@@ -242,8 +242,8 @@ func syncRecords(_ records: [RestoreImageRecord]) async throws {
         let results = try await service.modifyRecords(batch)
 
         // Check for partial failures
-        let failures = results.filter { $0.recordType == "Unknown" }
-        let successes = results.filter { $0.recordType != "Unknown" }
+        let failures = results.compactMap(\.error)
+        let successes = results.compactMap(\.record)
 
         print("✓ \(successes.count) succeeded, ❌ \(failures.count) failed")
     }
@@ -258,14 +258,13 @@ CloudKit returns **partial success** - some operations may succeed while others 
 let results = try await service.modifyRecords(batch)
 
 for result in results {
-    if result.recordType == "Unknown" {
-        // This is an error response
-        print("❌ Error for \(result.recordName ?? "unknown")")
-        print("   Code: \(result.serverErrorCode ?? "N/A")")
-        print("   Reason: \(result.reason ?? "N/A")")
-    } else {
-        // Successfully created/updated
-        print("✓ Success: \(result.recordName ?? "unknown")")
+    switch result {
+    case .failure(let error):
+        print("❌ Error for \(error.recordName)")
+        print("   Code: \(error.serverErrorCode.rawValue)")
+        print("   Reason: \(error.reason ?? "N/A")")
+    case .success(let record):
+        print("✓ Success: \(record.recordName)")
     }
 }
 ```
@@ -293,10 +292,10 @@ try await uploadXcodeVersions()    // References SwiftVersion and RestoreImage
 **Creating a reference:**
 ```swift
 fields["minimumMacOS"] = .reference(
-    FieldValue.Reference(recordName: "RestoreImage-23C71")
+    Reference(recordName: "RestoreImage-23C71")
 )
 fields["swiftVersion"] = .reference(
-    FieldValue.Reference(recordName: "SwiftVersion-6.0")
+    Reference(recordName: "SwiftVersion-6.0")
 )
 ```
 
@@ -333,10 +332,13 @@ let operation = RecordOperation.create(
 
 let results = try await service.modifyRecords([operation])
 
-if results.first?.recordType == "Unknown" {
-    print("❌ Failed: \(results.first?.reason ?? "unknown")")
-} else {
-    print("✓ Success! Record created: \(results.first?.recordName ?? "")")
+switch results.first {
+case .failure(let error):
+    print("❌ Failed: \(error.reason ?? error.serverErrorCode.rawValue)")
+case .success(let record):
+    print("✓ Success! Record created: \(record.recordName)")
+case nil:
+    print("❌ No result returned")
 }
 ```
 
@@ -371,10 +373,11 @@ let environment: CloudKitEnvironment = {
     #endif
 }()
 
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: containerID,
     tokenManager: tokenManager,
-    environment: environment,
-    database: .public
+    environment: environment
 )
+// Each operation picks its database scope explicitly, e.g.
+// `database: .public(.prefers(.serverToServer))`.
 ```

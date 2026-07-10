@@ -16,13 +16,14 @@ let tokenManager = try ServerToServerAuthManager(
     pemString: pemFileContents
 )
 
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: "iCloud.com.company.App",
     tokenManager: tokenManager,
-    environment: .development,
-    database: .public
+    environment: .development
 )
 ```
+
+The database scope is now chosen per call (see "Batch Operations" below).
 
 Authentication tokens are automatically refreshed by MistKit.
 
@@ -33,7 +34,10 @@ CloudKit limits operations to 200 per request. BushelCloud handles this automati
 ```swift
 let batches = operations.chunked(into: 200)
 for batch in batches {
-    let results = try await service.modifyRecords(batch)
+    let results = try await service.modifyRecords(
+        batch,
+        database: .public(.prefers(.serverToServer))
+    )
     // Handle results...
 }
 ```
@@ -99,7 +103,7 @@ Create relationships using record names:
 
 ```swift
 fields["minimumMacOS"] = .reference(
-    FieldValue.Reference(recordName: "RestoreImage-23C71")
+    Reference(recordName: "RestoreImage-23C71")
 )
 ```
 
@@ -116,10 +120,16 @@ if case .reference(let ref) = fieldValue {
 Check for partial failures in batch operations:
 
 ```swift
-let results = try await service.modifyRecords(operations)
+let results = try await service.modifyRecords(
+    operations,
+    database: .public(.prefers(.serverToServer))
+)
 for result in results {
-    if result.isError {
-        logger.error("Failed: \\(result.serverErrorCode ?? "unknown")")
+    switch result {
+    case .success(let record):
+        logger.debug("Saved: \\(record.recordName)")
+    case .failure(let error):
+        logger.error("Failed \\(error.recordName): \\(error.serverErrorCode.rawValue)")
     }
 }
 ```
@@ -148,6 +158,6 @@ This logs:
 
 1. **Batch wisely**: Stay under 200 operations per request
 2. **Order matters**: Upload dependencies first (SwiftVersion before XcodeVersion)
-3. **Handle partials**: Check `RecordInfo.isError` for each result
+3. **Handle partials**: Switch over each `RecordResult` (`.success` / `.failure`)
 4. **Use references**: Link related records with CloudKit references
 5. **Verbose development**: Use `--verbose` flag during development

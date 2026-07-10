@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 // MARK: - Mock CloudKit Errors
 
@@ -82,18 +82,16 @@ internal actor MockCloudKitService: RecordManaging {
     return storedRecords[recordType] ?? []
   }
 
-  internal func executeBatchOperations(
-    _ operations: [RecordOperation],
-    recordType: String
-  ) async throws {
+  internal func executeBatchOperations(_ operations: [RecordOperation]) async throws {
     operationHistory.append(operations)
 
     if shouldFailModify {
       throw modifyError ?? MockCloudKitError.networkError
     }
 
-    // Process operations
+    // Each operation carries its own record type
     for operation in operations {
+      let recordType = operation.recordType
       switch operation.operationType {
       case .create, .forceReplace:
         handleCreateOrReplace(operation, recordType: recordType)

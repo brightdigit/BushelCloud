@@ -3,7 +3,7 @@
 //  BushelCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
-import Testing
+internal import Foundation
+internal import MistKit
+internal import Testing
 
 @testable import BushelCloudKit
 
@@ -51,7 +51,7 @@ internal struct CloudKitErrorHandlingTests {
     )
 
     do {
-      try await service.executeBatchOperations([operation], recordType: "RestoreImage")
+      try await service.executeBatchOperations([operation])
       Issue.record("Expected quota exceeded error to be thrown")
     } catch let error as MockCloudKitError {
       if case .quotaExceeded = error {
@@ -78,7 +78,7 @@ internal struct CloudKitErrorHandlingTests {
     )
 
     do {
-      try await service.executeBatchOperations([operation], recordType: "XcodeVersion")
+      try await service.executeBatchOperations([operation])
       Issue.record("Expected reference validation error to be thrown")
     } catch let error as MockCloudKitError {
       if case .validatingReferenceError = error {
@@ -105,7 +105,7 @@ internal struct CloudKitErrorHandlingTests {
     )
 
     do {
-      try await service.executeBatchOperations([operation], recordType: "RestoreImage")
+      try await service.executeBatchOperations([operation])
       Issue.record("Expected conflict error to be thrown")
     } catch let error as MockCloudKitError {
       if case .conflict = error {
