@@ -21,6 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install jq
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends jq
+
       - name: Verify Package.swift uses only tagged dependencies
         run: |
           swift package dump-package > package.json
