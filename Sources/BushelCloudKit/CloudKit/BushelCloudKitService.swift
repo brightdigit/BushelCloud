@@ -268,8 +268,7 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         batchResult.totalCount - batchResult.createdCount - batchResult.updatedCount - batchFailed
       if batchUnclassified > 0 {
         Self.logger.debug(
-          "\(batchUnclassified) record(s) succeeded but matched neither the created nor "
-            + "updated classification (MistKit 'unclassified' bucket); excluded from summary totals."
+          "\(batchUnclassified) record(s) in MistKit's 'unclassified' bucket; excluded from totals."
         )
       }
 
