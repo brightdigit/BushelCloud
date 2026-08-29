@@ -74,6 +74,10 @@ jobs:
     name: Build on Ubuntu
     needs: configure
     runs-on: ubuntu-latest
+    # The `||` branch (a plain swift:<version>-<os> image) is unreachable while
+    # the matrix emits only the 6.4 nightly entry, which always sets `image`.
+    # Kept deliberately: it is what a release-toolchain lane would use once
+    # Swift 6.4 ships and can be added back to the matrix.
     container: ${{ matrix.swift.image && format('{0}-{1}', matrix.swift.image, matrix.os) || format('swift:{0}-{1}', matrix.swift.version, matrix.os) }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
