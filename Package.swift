@@ -1,4 +1,4 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 6.4
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 // swiftlint:disable explicit_acl explicit_top_level_acl
@@ -8,7 +8,7 @@ import PackageDescription
 // MARK: - Swift Settings Configuration
 
 let swiftSettings: [SwiftSetting] = [
-  // Swift 6.2 Upcoming Features (not yet enabled by default)
+  // Swift 6.4 Upcoming Features (not yet enabled by default)
   // SE-0335: Introduce existential `any`
   .enableUpcomingFeature("ExistentialAny"),
   // SE-0409: Access-level modifiers on import declarations
@@ -91,7 +91,7 @@ let package = Package(
         .executable(name: "bushel-cloud", targets: ["BushelCloudCLI"])
     ],
     dependencies: [
-        .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-beta.3"),
+        .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-beta.4"),
         .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.2"),
         .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0-alpha.4"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),

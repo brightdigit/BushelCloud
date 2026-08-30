@@ -43,7 +43,7 @@ public import MistKit
 /// 1. Load ECDSA private key from .pem file
 /// 2. Create ServerToServerAuthManager with key ID and PEM string
 /// 3. Initialize CloudKitService with the auth manager
-/// 4. Use service.modifyRecords() and service.queryRecords() for operations
+/// 4. Use service.modifyRecords() and service.queryAllRecords() for operations
 ///
 /// This pattern allows command-line tools and servers to access CloudKit without user authentication.
 public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCollection {
@@ -153,7 +153,7 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   // MARK: - RecordManaging Protocol Requirements
 
   /// Query all records of a given type, automatically paginating
-  public func queryRecords(recordType: String) async throws -> [RecordInfo] {
+  public func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
     try await service.queryAllRecords(
       recordType: recordType,
       database: .public(.prefers(.serverToServer))
@@ -260,6 +260,18 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
       totalCreated += batchResult.createdCount
       totalUpdated += batchResult.updatedCount
       totalFailed += batchFailed
+
+      // The counts above deliberately drop MistKit's `unclassified` bucket, so
+      // created + updated + failed can be < totalCount. Log when that happens so
+      // the summary totals don't look like silent data loss while debugging.
+      let batchUnclassified =
+        batchResult.totalCount - batchResult.createdCount - batchResult.updatedCount - batchFailed
+      if batchUnclassified > 0 {
+        Self.logger.debug(
+          "\(batchUnclassified) record(s) in MistKit's 'unclassified' bucket; excluded from totals."
+        )
+      }
+
       for failure in batchResult.failed {
         failedRecordNames.append(failure.identifier)
         Self.logger.debug(
