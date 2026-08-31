@@ -91,7 +91,7 @@ let package = Package(
         .executable(name: "bushel-cloud", targets: ["BushelCloudCLI"])
     ],
     dependencies: [
-        .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-beta.4"),
+        .package(name: "MistKit", path: "../.."),
         .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.2"),
         .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0-alpha.4"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
