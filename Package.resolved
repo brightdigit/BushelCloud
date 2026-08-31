@@ -47,6 +47,15 @@
       }
     },
     {
+      "identity" : "mistkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/MistKit.git",
+      "state" : {
+        "revision" : "687b5324f7470e007e7aa9aa39b7fe50cd9206cf",
+        "version" : "1.0.0-beta.4"
+      }
+    },
+    {
       "identity" : "osver",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/brightdigit/OSVer.git",
