@@ -88,6 +88,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Update Package.swift to use remote BushelKit branch
+        run: |
+          sed -i 's|\.package(path: "\.\./BushelKit")|.package(url: "https://github.com/brightdigit/BushelKit.git", branch: "subrepo")|g' Package.swift
+          rm -f Package.resolved
+
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
         with:
@@ -177,6 +183,12 @@ jobs:
             download-platform: true
     steps:
       - uses: actions/checkout@v6
+
+      - name: Update Package.swift to use remote BushelKit branch
+        run: |
+          sed -i '' 's|\.package(path: "\.\./BushelKit")|.package(url: "https://github.com/brightdigit/BushelKit.git", branch: "subrepo")|g' Package.swift
+          rm -f Package.resolved
+
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
         with:
@@ -264,6 +276,12 @@ jobs:
             download-platform: true
     steps:
       - uses: actions/checkout@v6
+
+      - name: Update Package.swift to use remote BushelKit branch
+        run: |
+          sed -i '' 's|\.package(path: "\.\./BushelKit")|.package(url: "https://github.com/brightdigit/BushelKit.git", branch: "subrepo")|g' Package.swift
+          rm -f Package.resolved
+
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
         with:
