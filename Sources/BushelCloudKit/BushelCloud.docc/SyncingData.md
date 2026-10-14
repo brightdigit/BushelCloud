@@ -105,6 +105,7 @@ Records are uploaded in dependency order:
 1. SwiftVersion (no dependencies)
 2. RestoreImage (no dependencies)
 3. XcodeVersion (references SwiftVersion and RestoreImage)
+4. SDKVersion (references XcodeVersion; final SDKs upload before the prereleases that reference them)
 ```
 
 This ensures CloudKit references are valid when XcodeVersion records are created.

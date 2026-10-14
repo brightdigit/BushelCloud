@@ -45,13 +45,18 @@ extension SyncEngine {
     public let restoreImages: [RecordInfo]
     public let xcodeVersions: [RecordInfo]
     public let swiftVersions: [RecordInfo]
+    public let sdkVersions: [RecordInfo]
 
     public init(
-      restoreImages: [RecordInfo], xcodeVersions: [RecordInfo], swiftVersions: [RecordInfo]
+      restoreImages: [RecordInfo],
+      xcodeVersions: [RecordInfo],
+      swiftVersions: [RecordInfo],
+      sdkVersions: [RecordInfo] = []
     ) {
       self.restoreImages = restoreImages
       self.xcodeVersions = xcodeVersions
       self.swiftVersions = swiftVersions
+      self.sdkVersions = sdkVersions
     }
   }
 
@@ -93,10 +98,17 @@ extension SyncEngine {
       "Retrieved \(swiftVersions.count) SwiftVersion records"
     )
 
+    ConsoleOutput.print("📥 Fetching SDKVersion records...")
+    let sdkVersions = try await cloudKitService.queryRecords(recordType: "SDKVersion")
+    Self.logger.debug(
+      "Retrieved \(sdkVersions.count) SDKVersion records"
+    )
+
     ConsoleOutput.print("\n✅ Exported:")
     ConsoleOutput.print("   • \(restoreImages.count) restore images")
     ConsoleOutput.print("   • \(xcodeVersions.count) Xcode versions")
     ConsoleOutput.print("   • \(swiftVersions.count) Swift versions")
+    ConsoleOutput.print("   • \(sdkVersions.count) SDK versions")
 
     Self.logger.debug(
       """
@@ -108,7 +120,8 @@ extension SyncEngine {
     return ExportResult(
       restoreImages: restoreImages,
       xcodeVersions: xcodeVersions,
-      swiftVersions: swiftVersions
+      swiftVersions: swiftVersions,
+      sdkVersions: sdkVersions
     )
   }
 }

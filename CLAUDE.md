@@ -162,9 +162,18 @@ RestoreImage (no dependencies)
     | CKReference (minimumMacOS, swiftVersion)
     ↓
 XcodeVersion
+    ↓
+    | CKReference (xcodeVersion, supersededBy → final SDKVersion)
+    ↓
+SDKVersion
 ```
 
-**Upload Order**: SwiftVersion & RestoreImage → XcodeVersion (see `SyncEngine.swift:100`)
+**Upload Order**: SwiftVersion & RestoreImage → XcodeVersion → SDKVersion (final SDKs before prereleases)
+
+`SDKVersion` records are derived from the SDK lists in the xcodereleases.com feed by
+`SDKVersionBuilder` — one record per platform + SDK build. A beta SDK's `supersededBy`
+points at the final SDK for the same platform and version, which lets simulator
+managers flag old beta runtimes that are safe to delete.
 
 ### Data Deduplication
 

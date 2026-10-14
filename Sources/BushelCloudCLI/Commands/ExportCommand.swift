@@ -39,6 +39,7 @@ internal enum ExportCommand {
     let restoreImages: [RecordExport]
     let xcodeVersions: [RecordExport]
     let swiftVersions: [RecordExport]
+    let sdkVersions: [RecordExport]
   }
 
   private struct RecordExport: Codable {
@@ -117,6 +118,7 @@ internal enum ExportCommand {
     var restoreImages = result.restoreImages
     var xcodeVersions = result.xcodeVersions
     var swiftVersions = result.swiftVersions
+    var sdkVersions = result.sdkVersions
 
     // Filter signed-only restore images
     if exportConfig.signedOnly {
@@ -150,12 +152,20 @@ internal enum ExportCommand {
         }
         return true
       }
+
+      sdkVersions = sdkVersions.filter { record in
+        if case .int64(let isPrerelease) = record.fields["isPrerelease"] {
+          return isPrerelease == 0
+        }
+        return true
+      }
     }
 
     return SyncEngine.ExportResult(
       restoreImages: restoreImages,
       xcodeVersions: xcodeVersions,
-      swiftVersions: swiftVersions
+      swiftVersions: swiftVersions,
+      sdkVersions: sdkVersions
     )
   }
 
@@ -165,7 +175,8 @@ internal enum ExportCommand {
     let export = ExportData(
       restoreImages: result.restoreImages.map(RecordExport.init),
       xcodeVersions: result.xcodeVersions.map(RecordExport.init),
-      swiftVersions: result.swiftVersions.map(RecordExport.init)
+      swiftVersions: result.swiftVersions.map(RecordExport.init),
+      sdkVersions: result.sdkVersions.map(RecordExport.init)
     )
 
     let encoder = JSONEncoder()
