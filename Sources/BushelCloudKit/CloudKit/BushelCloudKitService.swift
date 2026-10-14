@@ -56,6 +56,7 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     RestoreImageRecord.self,
     XcodeVersionRecord.self,
     SwiftVersionRecord.self,
+    SDKVersionRecord.self,
     DataSourceMetadata.self
   )
 

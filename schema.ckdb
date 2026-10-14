@@ -51,6 +51,23 @@ RECORD TYPE SwiftVersion (
     GRANT READ TO "_world"
 );
 
+RECORD TYPE SDKVersion (
+    "___recordID"            REFERENCE QUERYABLE,
+    "platform"               STRING QUERYABLE SORTABLE,
+    "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
+    "buildNumber"            STRING QUERYABLE SORTABLE,
+    "isPrerelease"           INT64 QUERYABLE,
+    "prereleaseLabel"        STRING,
+    "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
+    "xcodeVersion"           REFERENCE QUERYABLE,
+    "supersededBy"           REFERENCE QUERYABLE,
+    "supersededAt"           TIMESTAMP QUERYABLE SORTABLE,
+
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
+);
+
 RECORD TYPE DataSourceMetadata (
     "___recordID"            REFERENCE QUERYABLE,
     "sourceName"             STRING QUERYABLE SORTABLE,

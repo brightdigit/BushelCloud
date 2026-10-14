@@ -40,7 +40,7 @@ Key deduplication rules:
 The ``SyncEngine`` uploads records to CloudKit:
 
 1. **Batch Operations**: Records are chunked into 200-operation batches (CloudKit limit)
-2. **Dependency Ordering**: Upload in order: SwiftVersion → RestoreImage → XcodeVersion
+2. **Dependency Ordering**: Upload in order: SwiftVersion → RestoreImage → XcodeVersion → SDKVersion
 3. **Error Handling**: Partial failures are logged with CloudKit error details
 
 ## Record Relationships
@@ -55,9 +55,15 @@ RestoreImage (no dependencies)
     | CKReference (minimumMacOS, swiftVersion)
     |
 XcodeVersion
+    ↑
+    | CKReference (xcodeVersion, supersededBy)
+    |
+SDKVersion
 ```
 
 XcodeVersion records reference both RestoreImage (for minimum macOS) and SwiftVersion (for bundled Swift compiler).
+
+SDKVersion records are built from the SDKs each Xcode release bundles. Each one references the Xcode that introduced it, and a prerelease SDK references the final SDK that supersedes it.
 
 ## CloudKit Integration
 

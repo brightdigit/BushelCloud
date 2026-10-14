@@ -78,13 +78,18 @@ public struct SyncEngine: Sendable {
     public let restoreImages: TypeSyncResult
     public let xcodeVersions: TypeSyncResult
     public let swiftVersions: TypeSyncResult
+    public let sdkVersions: TypeSyncResult
 
     public init(
-      restoreImages: TypeSyncResult, xcodeVersions: TypeSyncResult, swiftVersions: TypeSyncResult
+      restoreImages: TypeSyncResult,
+      xcodeVersions: TypeSyncResult,
+      swiftVersions: TypeSyncResult,
+      sdkVersions: TypeSyncResult = .empty
     ) {
       self.restoreImages = restoreImages
       self.xcodeVersions = xcodeVersions
       self.swiftVersions = swiftVersions
+      self.sdkVersions = sdkVersions
     }
 
     /// Convert to JSON string
@@ -100,6 +105,10 @@ public struct SyncEngine: Sendable {
 
   /// Per-type sync statistics
   public struct TypeSyncResult: Sendable, Codable {
+    public static let empty = TypeSyncResult(
+      created: 0, updated: 0, failed: 0, failedRecordNames: []
+    )
+
     public let created: Int
     public let updated: Int
     public let failed: Int
@@ -218,12 +227,13 @@ public struct SyncEngine: Sendable {
 
     let totalRecords =
       fetchResult.restoreImages.count + fetchResult.xcodeVersions.count
-      + fetchResult.swiftVersions.count
+      + fetchResult.swiftVersions.count + fetchResult.sdkVersions.count
 
     ConsoleOutput.print("\n📊 Data Summary:")
     ConsoleOutput.print("   RestoreImages: \(fetchResult.restoreImages.count)")
     ConsoleOutput.print("   XcodeVersions: \(fetchResult.xcodeVersions.count)")
     ConsoleOutput.print("   SwiftVersions: \(fetchResult.swiftVersions.count)")
+    ConsoleOutput.print("   SDKVersions:   \(fetchResult.sdkVersions.count)")
     ConsoleOutput.print("   ─────────────────────")
     ConsoleOutput.print("   Total: \(totalRecords) records")
 
@@ -249,15 +259,18 @@ public struct SyncEngine: Sendable {
       async let existingXcode = cloudKitService.fetchExistingRecordNames(
         recordType: XcodeVersionRecord.cloudKitRecordType
       )
+      async let existingSDK = cloudKitService.fetchExistingRecordNames(
+        recordType: SDKVersionRecord.cloudKitRecordType
+      )
 
-      let (swiftNames, restoreNames, xcodeNames) = try await (
-        existingSwift, existingRestore, existingXcode
+      let (swiftNames, restoreNames, xcodeNames, sdkNames) = try await (
+        existingSwift, existingRestore, existingXcode, existingSDK
       )
 
       Self.logger.debug(
         """
         Pre-fetch complete: \(swiftNames.count) Swift, \
-        \(restoreNames.count) Restore, \(xcodeNames.count) Xcode
+        \(restoreNames.count) Restore, \(xcodeNames.count) Xcode, \(sdkNames.count) SDK
         """
       )
 
@@ -274,6 +287,10 @@ public struct SyncEngine: Sendable {
         proposedRecordNames: fetchResult.xcodeVersions.map(\.recordName),
         existingRecordNames: xcodeNames
       )
+      let sdkClassification = OperationClassification(
+        proposedRecordNames: fetchResult.sdkVersions.map(\.recordName),
+        existingRecordNames: sdkNames
+      )
 
       Self.logger.debug(
         "Classification complete. Ready to sync in dependency order."
@@ -281,7 +298,8 @@ public struct SyncEngine: Sendable {
 
       // Sync each type with classification tracking (in dependency order)
       // SwiftVersion and RestoreImage first (no dependencies)
-      // XcodeVersion last (references the other two)
+      // XcodeVersion next (references the other two)
+      // SDKVersion last (references XcodeVersion, and final SDKs before prereleases)
       let swiftResult = try await syncRecords(
         fetchResult.swiftVersions,
         classification: swiftClassification
@@ -294,6 +312,10 @@ public struct SyncEngine: Sendable {
         fetchResult.xcodeVersions,
         classification: xcodeClassification
       )
+      let sdkResult = try await syncRecords(
+        fetchResult.sdkVersions,
+        classification: sdkClassification
+      )
 
       print("\n" + String(repeating: "=", count: 60))
       BushelUtilities.ConsoleOutput.success("Sync completed successfully!")
@@ -303,7 +325,8 @@ public struct SyncEngine: Sendable {
       return DetailedSyncResult(
         restoreImages: restoreResult,
         xcodeVersions: xcodeResult,
-        swiftVersions: swiftResult
+        swiftVersions: swiftResult,
+        sdkVersions: sdkResult
       )
     } else {
       print("\n⏭️  Step 2: Skipped (dry run)")
@@ -311,6 +334,7 @@ public struct SyncEngine: Sendable {
       print("   • \(fetchResult.restoreImages.count) restore images")
       print("   • \(fetchResult.xcodeVersions.count) Xcode versions")
       print("   • \(fetchResult.swiftVersions.count) Swift versions")
+      print("   • \(fetchResult.sdkVersions.count) SDK versions")
       Self.logger.debug(
         "Dry run mode: No CloudKit operations performed"
       )
@@ -321,9 +345,10 @@ public struct SyncEngine: Sendable {
 
       // Return empty result for dry run
       return DetailedSyncResult(
-        restoreImages: TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: []),
-        xcodeVersions: TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: []),
-        swiftVersions: TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: [])
+        restoreImages: .empty,
+        xcodeVersions: .empty,
+        swiftVersions: .empty,
+        sdkVersions: .empty
       )
     }
   }

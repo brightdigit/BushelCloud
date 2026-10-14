@@ -133,13 +133,12 @@ internal enum SyncCommand {
     printTypeResult("RestoreImages", result.restoreImages)
     printTypeResult("XcodeVersions", result.xcodeVersions)
     printTypeResult("SwiftVersions", result.swiftVersions)
+    printTypeResult("SDKVersions", result.sdkVersions)
 
-    let totalCreated =
-      result.restoreImages.created + result.xcodeVersions.created + result.swiftVersions.created
-    let totalUpdated =
-      result.restoreImages.updated + result.xcodeVersions.updated + result.swiftVersions.updated
-    let totalFailed =
-      result.restoreImages.failed + result.xcodeVersions.failed + result.swiftVersions.failed
+    let all = [result.restoreImages, result.xcodeVersions, result.swiftVersions, result.sdkVersions]
+    let totalCreated = all.reduce(0) { $0 + $1.created }
+    let totalUpdated = all.reduce(0) { $0 + $1.updated }
+    let totalFailed = all.reduce(0) { $0 + $1.failed }
 
     print(String(repeating: "-", count: 60))
     print("TOTAL:")

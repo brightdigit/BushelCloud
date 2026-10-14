@@ -191,24 +191,37 @@ extension DataSourcePipeline {
     }
   }
 
-  internal func fetchXcodeVersions(options: Options) async throws -> [XcodeVersionRecord] {
+  /// Fetch Xcode versions and derive SDK records from the same xcodereleases.com payload.
+  internal func fetchXcodeVersionsAndSDKs(
+    options: Options
+  ) async throws -> (xcodeVersions: [XcodeVersionRecord], sdkVersions: [SDKVersionRecord]) {
     guard options.includeXcodeVersions else {
-      return []
+      return ([], [])
     }
 
-    let versions = try await fetchWithMetadata(
+    let outputs = try await fetchWithMetadata(
       source: "xcodereleases.com",
       recordType: "XcodeVersion",
       options: options
     ) {
-      try await XcodeReleasesFetcher().fetch()
+      [try await XcodeReleasesFetcher().fetchWithSDKs()]
     }
 
+    let versions = outputs.flatMap(\.xcodeVersions)
     if !versions.isEmpty {
       print("   ✓ xcodereleases.com: \(versions.count) versions")
     }
 
-    return deduplicateXcodeVersions(versions)
+    var sdkVersions: [SDKVersionRecord] = []
+    if options.includeSDKVersions {
+      sdkVersions = SDKVersionBuilder.build(from: outputs.flatMap(\.sdkAppearances))
+      if !sdkVersions.isEmpty {
+        let superseded = sdkVersions.filter { $0.supersededBy != nil }.count
+        print("   ✓ SDKs: \(sdkVersions.count) builds (\(superseded) superseded prereleases)")
+      }
+    }
+
+    return (deduplicateXcodeVersions(versions), sdkVersions)
   }
 
   internal func fetchSwiftVersions(options: Options) async throws -> [SwiftVersionRecord] {

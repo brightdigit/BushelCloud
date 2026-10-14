@@ -175,6 +175,7 @@ if xcrun cktool import-schema \
     echo "  • RestoreImage - macOS restore images for virtualization"
     echo "  • XcodeVersion - Xcode releases with requirements"
     echo "  • SwiftVersion - Swift compiler versions"
+    echo "  • SDKVersion - Platform SDK builds, with beta → release supersession"
     echo "  • DataSourceMetadata - Data source tracking metadata"
     echo ""
     echo "Next steps:"

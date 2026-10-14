@@ -39,6 +39,8 @@ public struct DataSourcePipeline: Sendable {
     public var includeRestoreImages: Bool = true
     public var includeXcodeVersions: Bool = true
     public var includeSwiftVersions: Bool = true
+    /// SDK records come from the Xcode releases feed, so they also need `includeXcodeVersions`.
+    public var includeSDKVersions: Bool = true
     public var includeBetaReleases: Bool = true
     public var includeAppleDB: Bool = true
     public var includeTheAppleWiki: Bool = true
@@ -50,6 +52,7 @@ public struct DataSourcePipeline: Sendable {
       includeRestoreImages: Bool = true,
       includeXcodeVersions: Bool = true,
       includeSwiftVersions: Bool = true,
+      includeSDKVersions: Bool = true,
       includeBetaReleases: Bool = true,
       includeAppleDB: Bool = true,
       includeTheAppleWiki: Bool = true,
@@ -60,6 +63,7 @@ public struct DataSourcePipeline: Sendable {
       self.includeRestoreImages = includeRestoreImages
       self.includeXcodeVersions = includeXcodeVersions
       self.includeSwiftVersions = includeSwiftVersions
+      self.includeSDKVersions = includeSDKVersions
       self.includeBetaReleases = includeBetaReleases
       self.includeAppleDB = includeAppleDB
       self.includeTheAppleWiki = includeTheAppleWiki
@@ -75,15 +79,18 @@ public struct DataSourcePipeline: Sendable {
     public var restoreImages: [RestoreImageRecord]
     public var xcodeVersions: [XcodeVersionRecord]
     public var swiftVersions: [SwiftVersionRecord]
+    public var sdkVersions: [SDKVersionRecord]
 
     public init(
       restoreImages: [RestoreImageRecord],
       xcodeVersions: [XcodeVersionRecord],
-      swiftVersions: [SwiftVersionRecord]
+      swiftVersions: [SwiftVersionRecord],
+      sdkVersions: [SDKVersionRecord] = []
     ) {
       self.restoreImages = restoreImages
       self.xcodeVersions = xcodeVersions
       self.swiftVersions = swiftVersions
+      self.sdkVersions = sdkVersions
     }
   }
 
@@ -106,6 +113,7 @@ public struct DataSourcePipeline: Sendable {
     var restoreImages: [RestoreImageRecord] = []
     var xcodeVersions: [XcodeVersionRecord] = []
     var swiftVersions: [SwiftVersionRecord] = []
+    var sdkVersions: [SDKVersionRecord] = []
 
     do {
       restoreImages = try await fetchRestoreImages(options: options)
@@ -115,9 +123,12 @@ public struct DataSourcePipeline: Sendable {
     }
 
     do {
-      xcodeVersions = try await fetchXcodeVersions(options: options)
+      let xcodeData = try await fetchXcodeVersionsAndSDKs(options: options)
       // Resolve XcodeVersion → RestoreImage references now that we have both datasets
-      xcodeVersions = resolveXcodeVersionReferences(xcodeVersions, restoreImages: restoreImages)
+      xcodeVersions = resolveXcodeVersionReferences(
+        xcodeData.xcodeVersions, restoreImages: restoreImages
+      )
+      sdkVersions = xcodeData.sdkVersions
     } catch {
       print("⚠️  Xcode versions fetch failed: \(error)")
       throw error
@@ -133,7 +144,8 @@ public struct DataSourcePipeline: Sendable {
     return FetchResult(
       restoreImages: restoreImages,
       xcodeVersions: xcodeVersions,
-      swiftVersions: swiftVersions
+      swiftVersions: swiftVersions,
+      sdkVersions: sdkVersions
     )
   }
 
